@@ -11,7 +11,7 @@ export const cellOf = (x: number, z: number) => {
   return cz * CELLS + cx
 }
 export type FieldData = { data: Float32Array; cellStart: Uint32Array }
-export const FIELD_NAMES = ['trunk', 'clump', 'spray', 'palm', 'sapling', 'broadleaf', 'tuft', 'log', 'root', 'vine', 'bankroot', 'floater', 'shaft', 'spFern', 'spFern2', 'spLeather', 'spPalm', 'spFan', 'spBanana', 'spEar', 'spTree', 'spDrift'] as const
+export const FIELD_NAMES = ['trunk', 'clump', 'spray', 'palm', 'sapling', 'broadleaf', 'tuft', 'log', 'root', 'vine', 'bankroot', 'floater', 'shaft', 'spFern', 'spFern2', 'spLeather', 'spPalm', 'spFan', 'spBanana', 'spEar', 'spTree', 'spDrift', 'limb'] as const
 export type FieldName = (typeof FIELD_NAMES)[number]
 
 class Rec {
@@ -52,32 +52,79 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
   }
   const trees: { x: number; y: number; z: number; r: number; h: number; type: number }[] = []
 
+  // A limb: a tapering branch from a point, along a yaw and a pitch (angle from straight up). Returns its tip.
+  const tip = { x: 0, y: 0, z: 0 }
+  const limb = (x: number, y: number, z: number, rad: number, yaw: number, pitch: number, len: number, seed: number) => {
+    R.limb.push(x, y, z, rad, yaw, seed, len, pitch)
+    tip.x = x + Math.sin(pitch) * Math.cos(yaw) * len; tip.y = y + Math.cos(pitch) * len; tip.z = z + Math.sin(pitch) * Math.sin(yaw) * len
+    return tip
+  }
+  const clump = (x: number, y: number, z: number, s: number, flat: number, tint: number) => R.clump.push(x, y, z, s, r() * 6.283, r(), flat, Math.min(1, Math.max(0, tint + r.range(-0.1, 0.1))))
+  // Tree kinds, after the real forest: 0 emergent giant with spreading limbs and a broad flat crown; 1 canopy tree
+  // forking into rising limbs; 2 mid tree; 3 pole; 4 treelet; 5 thin pale candelabra tree with big open leaf sprays;
+  // 7 bare snag. Every kind has its own height, girth, bark tone, branching and leaf colour.
   const addTree = (x: number, z: number, type: number, forceLean = -1, leanDir = 0, scale = 1) => {
     const y = hf.at(x, z)
-    const seed = r()
-    // type: 0 emergent, 1 canopy, 2 mid, 3 pole, 4 treelet
-    const h = (type === 0 ? r.range(32, 42) : type === 1 ? r.range(19, 29) : type === 2 ? r.range(11, 18) : type === 3 ? r.range(6, 11) : r.range(2.8, 5.5)) * scale
-    const rad = (type === 0 ? r.range(0.75, 1.15) : type === 1 ? r.range(0.26, 0.5) : type === 2 ? r.range(0.13, 0.26) : type === 3 ? r.range(0.055, 0.11) : r.range(0.03, 0.055)) * scale
-    const lean = forceLean >= 0 ? forceLean : r() * r() * 0.12
+    const h = (type === 0 ? r.range(34, 46) : type === 1 ? r.range(19, 30) : type === 2 ? r.range(10, 18) : type === 3 ? r.range(6, 12) : type === 5 ? r.range(11, 20) : type === 7 ? r.range(9, 22) : r.range(2.8, 5.5)) * scale
+    const rad = (type === 0 ? r.range(0.85, 1.4) : type === 1 ? r.range(0.24, 0.6) : type === 2 ? r.range(0.11, 0.28) : type === 3 ? r.range(0.05, 0.11) : type === 5 ? r.range(0.09, 0.16) : type === 7 ? r.range(0.15, 0.4) : r.range(0.03, 0.055)) * scale
+    const lean = forceLean >= 0 ? forceLean : type === 5 ? r.range(0.03, 0.2) : r() * r() * 0.16
     const rot = forceLean >= 0 ? leanDir : r() * 6.283
+    // bark tone by kind: giants and candelabra trees are pale, others run from dark to mid
+    const seed = type === 0 ? r.range(0.8, 1) : type === 5 ? r.range(0.88, 1) : type === 7 ? r.range(0.5, 0.75) : r() * r() * 0.75
     R.trunk.push(x, y - 0.3, z, rad, rot, seed, h, lean)
     trees.push({ x, y, z, r: rad, h, type })
     if (rad > 0.13) solids.push(x, z, rad * (type === 0 ? 1.9 : 1.25))
-    // crown: clumps round the top. The trunk leans along (sin rot, cos rot) by lean*h at the top.
-    const tx = x + Math.sin(rot) * lean * h, tz = z + Math.cos(rot) * lean * h
-    const n = type === 0 ? 12 + r.int(3) : type === 1 ? 8 + r.int(3) : type === 2 ? 5 + r.int(2) : type === 3 ? 1 + r.int(2) : 1 + r.int(2)
-    const cs = type === 0 ? r.range(6.5, 9.5) : type === 1 ? r.range(3.8, 6.2) : type === 2 ? r.range(2.4, 3.8) : type === 3 ? r.range(1.3, 2.1) : r.range(0.9, 1.6)
-    const tint = fbm2(x / 90, z / 90, S + 5, 2) * 0.6 + r() * 0.4
+    // point on the leaning trunk at a fraction of its height
+    const at = (f: number) => { tip.x = x + Math.sin(rot) * lean * h * f * f; tip.y = y + h * f; tip.z = z + Math.cos(rot) * lean * h * f * f; return tip }
+    const tint = type === 5 ? r.range(0.72, 0.95) : type === 0 ? r.range(0.25, 0.5) : fbm2(x / 90, z / 90, S + 5, 2) * 0.55 + r() * 0.45
     const a0 = r() * 6.283
-    for (let i = 0; i < n; i++) {
-      const top = i === 0
-      const ang = a0 + (i / Math.max(1, n - 1)) * 6.283 + r.range(-0.3, 0.3)
-      const ring = top ? 0 : cs * (type === 0 ? r.range(0.55, 1.1) : r.range(0.35, 0.75))
-      const s = cs * (top ? 1.05 : r.range(0.65, 1.0))
-      const cy = y + h * (top ? 0.97 : r.range(0.62, 0.93)) - (type === 0 && !top ? 1.5 : 0)
-      ;(type >= 3 ? R.spray : R.clump).push(tx + Math.cos(ang) * ring, cy, tz + Math.sin(ang) * ring, s, r() * 6.283, r(), type === 0 ? r.range(0.45, 0.6) : r.range(0.6, 0.95), Math.min(1, Math.max(0, tint + r.range(-0.12, 0.12))))
+    let crownR = 3
+    if (type === 0) {
+      // great limbs spread nearly level from the top of a bare trunk; flat crowns sit along and above them
+      const n = 6 + r.int(3)
+      crownR = r.range(11, 16)
+      for (let i = 0; i < n; i++) {
+        const f = r.range(0.78, 0.96), b = at(f), bx = b.x, by = b.y, bz = b.z
+        const yaw = a0 + (i / n) * 6.283 + r.range(-0.3, 0.3), len = crownR * r.range(0.7, 1.05)
+        const e = limb(bx, by, bz, rad * 0.42, yaw, r.range(1.0, 1.35), len, seed), ex = e.x, ey = e.y, ez = e.z
+        clump((bx + ex) / 2, (by + ey) / 2 + 1.5, (bz + ez) / 2, r.range(4.5, 6.5), r.range(0.4, 0.55), tint)
+        clump(ex, ey + 1, ez, r.range(5, 7.5), r.range(0.38, 0.5), tint)
+        if (r() < 0.6) { const e2 = limb(ex, ey, ez, rad * 0.2, yaw + r.range(-0.8, 0.8), r.range(0.9, 1.3), len * 0.4, seed); clump(e2.x, e2.y + 0.8, e2.z, r.range(3.5, 5), 0.45, tint) }
+      }
+      const t = at(1); clump(t.x, t.y + 1, t.z, r.range(6, 8), 0.5, tint)
+    } else if (type === 1 || type === 2) {
+      // the trunk forks into rising limbs; leaf masses gather at their ends and fill the middle
+      const n = type === 1 ? 3 + r.int(3) : 2 + r.int(2)
+      const cs = type === 1 ? r.range(3.6, 5.6) : r.range(2.2, 3.4)
+      crownR = cs * 1.7
+      for (let i = 0; i < n; i++) {
+        const f = r.range(0.5, 0.72), b = at(f), bx = b.x, by = b.y, bz = b.z
+        const yaw = a0 + (i / n) * 6.283 + r.range(-0.4, 0.4), len = h * r.range(0.22, 0.4)
+        const e = limb(bx, by, bz, rad * 0.5, yaw, r.range(0.45, 0.95), len, seed), ex = e.x, ey = e.y, ez = e.z
+        clump(ex, ey + cs * 0.15, ez, cs * r.range(0.75, 1.1), r.range(0.6, 0.9), tint)
+        if (type === 1 && r() < 0.7) { const e2 = limb(ex, ey, ez, rad * 0.25, yaw + r.range(-1, 1), r.range(0.5, 1.2), len * 0.5, seed); clump(e2.x, e2.y, e2.z, cs * r.range(0.6, 0.9), r.range(0.6, 0.85), tint) }
+      }
+      const t = at(0.98); clump(t.x, t.y, t.z, cs * 1.05, r.range(0.6, 0.85), tint)
+      if (r() < 0.5) { const m = at(0.8); clump(m.x + r.range(-1.5, 1.5), m.y, m.z + r.range(-1.5, 1.5), cs * 0.9, 0.7, tint) }
+    } else if (type === 5) {
+      // a few bare, upward-curving branches, each ending in one big open spray of pale leaves
+      const n = 3 + r.int(3)
+      for (let i = 0; i < n; i++) {
+        const f = r.range(0.62, 0.92), b = at(f), bx = b.x, by = b.y, bz = b.z
+        const e = limb(bx, by, bz, rad * 0.55, a0 + (i / n) * 6.283 + r.range(-0.3, 0.3), r.range(0.6, 1.0), h * r.range(0.16, 0.28), seed)
+        R.spray.push(e.x, e.y + 0.4, e.z, r.range(2.0, 3.0), r() * 6.283, r(), 1, tint)
+      }
+      const t = at(1); R.spray.push(t.x, t.y + 0.5, t.z, r.range(2.2, 3.2), r() * 6.283, r(), 1, tint)
+      crownR = 3
+    } else if (type === 7) {
+      for (let i = 0; i < 3 + r.int(3); i++) { const b = at(r.range(0.55, 0.95)); limb(b.x, b.y, b.z, rad * 0.4, r() * 6.283, r.range(0.5, 1.2), h * r.range(0.12, 0.25), seed) }
+      crownR = 0
+    } else {
+      const n = 1 + r.int(2), cs = type === 3 ? r.range(1.3, 2.1) : r.range(0.9, 1.6)
+      for (let i = 0; i < n; i++) { const t = at(i === 0 ? 0.97 : r.range(0.75, 0.92)); R.spray.push(t.x + (i ? r.range(-0.8, 0.8) : 0), t.y, t.z + (i ? r.range(-0.8, 0.8) : 0), cs, r() * 6.283, r(), r.range(0.6, 0.95), tint) }
+      crownR = 0
     }
-    if (type <= 2) splat(tx, tz, cs * (type === 0 ? 2.1 : 1.7), 0.8)
+    if (crownR > 2 && type !== 5) { const t = at(1); splat(t.x, t.z, crownR * 1.15, 0.85) }
     return rad
   }
 
@@ -107,10 +154,10 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
         const e = 2
         const gxn = heightFormula(x + e, z) - heightFormula(x - e, z), gzn = heightFormula(x, z + e) - heightFormula(x, z - e)
         const dir = Math.atan2(-gxn, -gzn)
-        addTree(x, z, typeRoll < 0.2 ? 1 : 2, Math.hypot(gxn, gzn) > 0.15 ? r.range(0.12, 0.3) : r() * 0.1, dir, 0.9)
+        addTree(x, z, typeRoll < 0.14 ? 1 : typeRoll < 0.32 ? 2 : 5, Math.hypot(gxn, gzn) > 0.15 ? r.range(0.12, 0.3) : r() * 0.1, dir, 0.9)
         continue
       }
-      const type = typeRoll < 0.04 ? 0 : typeRoll < 0.3 ? 1 : typeRoll < 0.55 ? 2 : typeRoll < 0.8 ? 3 : 4
+      const type = typeRoll < 0.035 ? 0 : typeRoll < 0.3 ? 1 : typeRoll < 0.52 ? 2 : typeRoll < 0.72 ? 3 : typeRoll < 0.86 ? 4 : typeRoll < 0.985 ? 5 : 7
       if (type === 0 && dTrail < 6) { addTree(x, z, 1); continue }
       addTree(x, z, type)
     }
@@ -131,14 +178,17 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
 
   // ---- palms: small groups on higher, lighter ground
   const rp = rng('palms')
-  for (let i = 0; i < 520 * density; i++) {
-    const x = rp.range(-340, 340), z = rp.range(-340, 340)
-    if (fbm2(x / 60, z / 60, S + 71, 2) < 0.52) continue
+  let gx0 = 0, gz0 = 0
+  for (let i = 0; i < 1500 * density; i++) {
+    // palms stand in groves: every sixth one starts a new grove, the rest crowd round it
+    if (i % 6 === 0) { gx0 = rp.range(-340, 340); gz0 = rp.range(-340, 340) }
+    const x = gx0 + rp.range(-7, 7), z = gz0 + rp.range(-7, 7)
+    if (fbm2(gx0 / 60, gz0 / 60, S + 71, 2) < 0.47) continue
     const h = heightFormula(x, z)
     if (h < 7.2 || kind.lake > 0.02 || kind.channel > 0.04 || kind.sand > 0.2 || kind.dry > 0.3 || kind.trail > 0.25) continue
     if (Math.hypot(x - COMMUNITY.x, z - COMMUNITY.z) < 30 || Math.hypot(x - PLACES.giantTrunk.x, z - PLACES.giantTrunk.z) < 9) continue
-    const ph = rp.range(7, 16), seed = rp()
-    R.trunk.push(x, h - 0.3, z, rp.range(0.11, 0.16), rp() * 6.283, seed, ph, rp.range(0.02, 0.14))
+    const ph = rp.range(7, 19), seed = rp.range(0.7, 0.95)
+    R.trunk.push(x, h - 0.3, z, rp.range(0.1, 0.17), rp() * 6.283, seed, ph, rp.range(0.02, 0.24))
     solids.push(x, z, 0.22)
     const rot = R.trunk.a[R.trunk.a.length - 4], lean = R.trunk.a[R.trunk.a.length - 1]
     R.palm.push(x + Math.sin(rot) * lean * ph, h + ph - 0.5, z + Math.cos(rot) * lean * ph, rp.range(3.2, 4.6), rp() * 6.283, seed, rp.range(0.8, 1.1), rp())
@@ -230,6 +280,18 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     const gxn = heightFormula(x + e, z) - heightFormula(x - e, z), gzn = heightFormula(x, z + e) - heightFormula(x, z - e)
     if (roll < 0.06) R.spTree.push(x, h - 0.2, z, rb.range(2, 3.6), Math.atan2(-gzn, -gxn), seed, 1, rb())
     else R.bankroot.push(x, h + 0.25, z, w, Math.atan2(-gxn, -gzn), seed, len, 0)
+  }
+  // ---- the green wall: low dense shrubs along the top of the banks and round the lake, down to the edge
+  const rw = rng('edge-shrubs')
+  for (let i = 0; i < 26000 * density; i++) {
+    const x = rw.range(-lim, lim), z = rw.range(-lim, 262), sz = rw.range(1.6, 3.6), fl = rw.range(0.55, 0.9), tn = rw.range(0.35, 0.95)
+    const h = heightFormula(x, z)
+    const lakeEdge = kind.lake > 0.0 && kind.lake < 0.5 && h > LAKE_LEVEL + 0.3
+    const bankTop = kind.channel > 0.0 && kind.channel < 0.1 && h > 7
+    const riverEdge = kind.bank > 0.25 && h > 5.5 && kind.channel < 0.01
+    if (!(lakeEdge || bankTop || riverEdge) || kind.trail > 0.2 || kind.sand > 0.3) continue
+    if (Math.hypot(x - PLACES.stepsTop.x, z - PLACES.stepsTop.z) < 7 || Math.hypot(x - PLACES.lakeBank.x, z - PLACES.lakeBank.z) < 9) continue
+    R.clump.push(x, h + sz * 0.35, z, sz, rw() * 6.283, rw(), fl, tn)
   }
   // ---- floating plants: candidates all down the slopes; the shader shows only those the water's edge has reached
   const rf = rng('floaters')

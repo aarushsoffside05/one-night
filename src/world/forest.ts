@@ -38,7 +38,7 @@ export const barkColor = (seed: N, groundY: N) => {
   const streak = noise(vec2(pw.x.add(pw.z).mul(0.5), pw.y.mul(0.05))).a
   const blot = noise(vec2(pw.x.sub(pw.z).mul(0.13), pw.y.mul(0.12))).r
   const fine = noise(vec2(pw.x.add(pw.z).mul(1.9), pw.y.mul(0.5))).b
-  let col: N = mix(vec3(0.1, 0.07, 0.05), vec3(0.3, 0.24, 0.17), seed)
+  let col: N = mix(mix(vec3(0.07, 0.045, 0.035), vec3(0.24, 0.15, 0.09), smoothstep(0.0, 0.45, seed)), vec3(0.52, 0.47, 0.38), smoothstep(0.55, 0.95, seed))
   // relief: the bark's ridges catch the light on one side (a cheap emboss of the same strokes)
   const streak2 = noise(vec2(pw.x.add(pw.z).mul(0.5).add(0.012), pw.y.mul(0.05).add(0.004))).a
   const ridge = streak.sub(streak2).mul(9).clamp(-0.5, 0.6)
@@ -70,6 +70,22 @@ function trunkMaterial(far: number) {
   return m
 }
 
+function limbMaterial(far: number) {
+  const m = new PaintedMaterial({ wrap: 0.3 })
+  m.positionNode = Fn(() => {
+    const rad = ia.w, yaw = ib.x, len = ib.z, pitch = ib.w
+    // tilt away from straight up towards local +x, then turn to the yaw; branches curve up a little at the end
+    const t = aux.y
+    const l = vec3(positionLocal.x.mul(rad), positionLocal.y.mul(len), positionLocal.z.mul(rad))
+    const tilted = vec3(l.x.mul(cos(pitch)).add(l.y.mul(sin(pitch))), l.y.mul(cos(pitch)).sub(l.x.mul(sin(pitch))).add(t.mul(t).mul(len).mul(0.12)), l.z)
+    const n0 = vec3(normalLocal.x.mul(cos(pitch)).add(normalLocal.y.mul(sin(pitch))), normalLocal.y.mul(cos(pitch)).sub(normalLocal.x.mul(sin(pitch))), normalLocal.z)
+    normalLocal.assign(rotX(n0, yaw))
+    return rotX(tilted, yaw).mul(shrink(far)).add(ia.xyz)
+  })()
+  m.colorNode = Fn(() => barkColor(ib.y, ia.y.sub(20)))()
+  return m
+}
+
 function clumpMaterial(far: number) {
   const m = new PaintedMaterial({ wrap: 0.22, back: 0.16, pools: false })
   m.side = THREE.DoubleSide
@@ -88,8 +104,9 @@ function clumpMaterial(far: number) {
     const dab = noise(pw.xz.mul(0.31).add(pw.y.mul(0.23))).g
     const dab2 = noise(vec2(pw.x.add(pw.y), pw.z.sub(pw.y)).mul(0.085)).r
     const fleck = noise(vec2(pw.x.add(pw.y.mul(0.7)), pw.z.sub(pw.y.mul(0.7))).mul(1.7)).b
-    let col: N = mix(vec3(0.012, 0.05, 0.022), vec3(0.05, 0.15, 0.025), tint)
-    col = mix(col, vec3(0.14, 0.17, 0.03), smoothstep(0.78, 1.0, tint).mul(0.6))
+    let col: N = mix(vec3(0.01, 0.045, 0.028), vec3(0.045, 0.14, 0.022), smoothstep(0.0, 0.55, tint))
+    col = mix(col, vec3(0.11, 0.17, 0.025), smoothstep(0.5, 0.75, tint))
+    col = mix(col, vec3(0.2, 0.2, 0.04), smoothstep(0.82, 1.0, tint).mul(0.7))
     col = col.mul(dab.mul(0.6).add(0.7)).mul(fleck.mul(0.5).add(0.75))
     // dark, cool undersides; light gathers on the tops and on the sprigs at the edge
     const top = smoothstep(-0.6, 0.7, lh)
@@ -125,7 +142,7 @@ function plantMaterial(far: number, kind: 'sapling' | 'broadleaf' | 'tuft' | 'pa
     let col: N
     if (kind === 'tuft') col = mix(vec3(0.03, 0.075, 0.02), vec3(0.1, 0.15, 0.04), tint)
     else if (kind === 'palm') col = mix(vec3(0.06, 0.17, 0.05), vec3(0.2, 0.33, 0.07), tint.mul(0.6).add(rnd.mul(0.4)))
-    else col = mix(vec3(0.02, 0.085, 0.03), vec3(0.08, 0.19, 0.035), tint.mul(0.55).add(rnd.mul(0.45)))
+    else col = mix(mix(vec3(0.02, 0.085, 0.03), vec3(0.08, 0.19, 0.035), tint.mul(0.55).add(rnd.mul(0.45))), vec3(0.2, 0.3, 0.1), kind === 'spray' ? smoothstep(0.7, 0.95, tint) : float(0))
     // darker at the base, lighter at the tip, a pale midrib
     col = col.mul(mix(float(0.5), float(1.15), smoothstep(0.0, 0.8, t)))
     const rib = smoothstep(0.12, 0.0, abs(aux.y.sub(0.5)))
@@ -214,10 +231,14 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
     { geometry: G.trunkGeometry(6, 4, 0), material: trunkM[1], near: 52, far: 170 },
     { geometry: G.trunkGeometry(4, 2, 0), material: trunkM[2], near: 170, far: 520 },
   ], 60))
+  fields.push(mk('limb' as any, [
+    { geometry: G.limbGeometry(6, 3), material: limbMaterial(9999), near: 0, far: 60, shadow: true },
+    { geometry: G.limbGeometry(4, 1), material: limbMaterial(260), near: 60, far: 260 },
+  ], 60))
   const clumpM = [clumpMaterial(9999), clumpMaterial(9999), clumpMaterial(520)]
   fields.push(mk('clump', [
-    { geometry: G.leafClumpGeometry(170, 0.36, 1, 'clump-a'), material: clumpM[0], near: 0, far: 48 },
-    { geometry: G.leafClumpGeometry(50, 0.6, 0, 'clump-a'), material: clumpM[1], near: 48, far: 150 },
+    { geometry: G.leafClumpGeometry(190, 0.36, 0, 'clump-a'), material: clumpM[0], near: 0, far: 48 },
+    { geometry: G.leafClumpGeometry(70, 0.56, 0, 'clump-a'), material: clumpM[1], near: 48, far: 150 },
     { geometry: G.leafClumpGeometry(20, 0.95, 0, 'clump-a'), material: clumpM[2], near: 150, far: 520 },
   ]))
   fields.push(mk('spray', [

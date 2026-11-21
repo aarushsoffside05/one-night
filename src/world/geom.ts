@@ -69,6 +69,17 @@ export class GB {
   }
 }
 
+// ---- limb: a tapering branch along +Y, unit length, unit radius at its foot, curving a little. aux = (0, t, 0)
+export function limbGeometry(sides: number, rings: number): THREE.BufferGeometry {
+  const g = new GB()
+  for (let j = 0; j <= rings; j++) {
+    const t = j / rings, rr = 1 - 0.62 * t
+    for (let i = 0; i < sides; i++) { const th = (i / sides) * Math.PI * 2; g.v(Math.cos(th) * rr, t, Math.sin(th) * rr, Math.cos(th), 0.2, Math.sin(th), 0, t, 0) }
+  }
+  for (let j = 0; j < rings; j++) for (let i = 0; i < sides; i++) { const a = j * sides + i, b = j * sides + ((i + 1) % sides); g.quad(a, a + sides, b + sides, b) }
+  return g.build()
+}
+
 // ---- trunk: unit height, unit radius at chest. aux = (root flare weight, height 0..1, 1 on limbs)
 export function trunkGeometry(sides: number, rings: number, limbs: number): THREE.BufferGeometry {
   const g = new GB()
@@ -168,7 +179,7 @@ export function leafClumpGeometry(leaves: number, leafSize: number, coreDetail: 
     v.fromBufferAttribute(p, i).normalize()
     const key = `${v.x.toFixed(4)},${v.y.toFixed(4)},${v.z.toFixed(4)}`
     let id = map.get(key)
-    if (id === undefined) { const s = rad(v.x, v.y, v.z) * 0.56; id = g.v(v.x * s, (v.y < 0 ? v.y * 0.7 : v.y) * s, v.z * s, v.x, v.y + 0.2, v.z, 0.5, v.y, 0); map.set(key, id) }
+    if (id === undefined) { const s = rad(v.x, v.y, v.z) * 0.36; id = g.v(v.x * s, (v.y < 0 ? v.y * 0.7 : v.y) * s, v.z * s, v.x, v.y + 0.2, v.z, 0.5, v.y, 0); map.set(key, id) }
     g.idx.push(id)
   }
   // leaves grow in sprays: a twig leaves the mass, and five or six leaves sit along it in pairs, all hanging
