@@ -58,3 +58,10 @@ Playwright and Chromium are the ones already installed on the build machine. The
 - **Dona Socorro's telling** uses the real world with the one water number driven, colour dropped, inside the marked orb frame, then returns to low water.
 - **Walking holds** (light at Caio's or Tomé's feet) need no key: the hold is staying beside him at his pace. Run ahead and his feet go dark, he stops, "Back. My feet."
 - **Scenes are generators** (`src/game/story.ts`, `scenesA.ts`, `scenesB.ts`): a scene reads top to bottom like its plan. `scripts/check-story.mjs` plays all eight with a bot, their way and rushed.
+
+## Scans and people (after A1, A2)
+
+- **Scans are detail, not colour.** Each scan sample is divided by that scan's average colour, so it brings grain, cracks and ridges while the painted colour script stays ours. Eleven scans, 768 px, AO and cavity baked in, 1.3 MB in all. Raw downloads stay outside the repository.
+- **Not used:** the leaf litter, mossy bark and corrugated sheet came as object atlases rather than repeating surfaces.
+- **Size.** The single file is now about 4.2 MB (2.0 MB gzipped): over the brief's 3 MB aim, under its 8 MB ceiling, and Aarush lifted the cap.
+- **People kit rebuild stopped part way** (the helper was stopped from outside). The game uses the newer file because it has every part and reads better than the first one; this is unjudged.
