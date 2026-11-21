@@ -1,6 +1,6 @@
 // Land from a height formula. Pure functions over numbers and typed arrays: runs in the worker
 // (to bake the grid) and on the main thread (to read it). No three.js in here.
-import { CHANNEL, DRYBED, TRAIL, YARDPATH, LAKE, RIVER_Z, COMMUNITY, PLACES, FLOOR_Y, HIGH_Y, YARD_Y, CORE, CELL, distPoly, polyT } from './layout'
+import { CHANNEL, DRYBED, TRAIL, YARDPATH, LAKE, RIVER_Z, COMMUNITY, PLACES, FLOOR_Y, HIGH_Y, YARD_Y, STEPS_TOP_Y, CORE, CELL, distPoly, polyT } from './layout'
 import { fbm2, noise2, seedInt } from './rng'
 
 const ss = (a: number, b: number, x: number) => { const t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t) }
@@ -87,6 +87,17 @@ export function heightFormula(x: number, z: number): number {
   const tr = 1 - ss(0.7, 2.2, dt + (n3 - 0.5) * 0.8)
   kind.trail = Math.max(tr * (1 - lk) * p, high * 0.55 * ss(0.3, 0.6, noise2(x / 6, z / 6, S + 77)))
   h -= tr * 0.12 * p * (1 - lk)
+  // the bank steps are cut into the bank: the land never stands above the treads
+  {
+    const A = PLACES.stepsTop, B = PLACES.landing
+    const dx = B.x - A.x, dz = B.z - A.z, L2 = dx * dx + dz * dz
+    const t = ((x - A.x) * dx + (z - A.z) * dz) / L2
+    if (t > -0.25 && t < 1.15) {
+      const tc = Math.min(Math.max(t, 0), 1)
+      const d = Math.hypot(x - (A.x + dx * tc), z - (A.z + dz * tc))
+      if (d < 3.2) { const cut = STEPS_TOP_Y + (0.5 - STEPS_TOP_Y) * tc - 0.3; h = mix(Math.min(h, cut), h, ss(1.3, 3.2, d)) }
+    }
+  }
   return h
 }
 

@@ -17,6 +17,10 @@ import { Cast } from './cast'
 import { Roam } from './roam'
 import { sound } from '../audio/sound'
 import { envOut } from '../world/env'
+import { Story } from './story'
+import { SCENES_A } from './scenesA'
+import { SCENES_B } from './scenesB'
+import { autoRoll } from '../world/life'
 
 const params = new URLSearchParams(location.search)
 export const DEV = params.get('dev') === '1'
@@ -42,6 +46,7 @@ export class Game {
   player!: Player
   cast!: Cast
   roam!: Roam
+  story!: Story
   private snd = { dt: 0, night: 0, dawn: 0, forest: 0, waterNear: 0, onWater: false, rain: 0, lampNear: 0, speed: 0, wind: 0.4 }
   waterTarget = 0; todTarget = 0.0
   devCam = false // a fixed dev camera or the benchmark flight has the camera
@@ -74,6 +79,7 @@ export class Game {
     this.player.place(PLACES.markedTree.x + 6, PLACES.markedTree.z + 4, -2.2)
     this.cast = new Cast(this.world, this.player)
     this.roam = new Roam(this)
+    this.story = new Story(this, [...SCENES_A, ...SCENES_B])
     installInput(r.domElement)
     this.setCam(0)
     this.applyState()
@@ -128,9 +134,11 @@ export class Game {
       if (phase === 'title') this.titleCamera(dt)
       else if (phase === 'play') {
         this.player.update(dt, waterYOf(this.water))
+        if (ui.get().mode === 'story') this.story.update(dt)
         this.hooks.frame?.(dt)
         this.soundFrame(dt)
-        this.player.updateCamera(dt, this.camera)
+        if (!(ui.get().mode === 'story' && this.story.camOn)) this.player.updateCamera(dt, this.camera)
+        ui.set({ onCanoe: this.player.mode === 'canoe' })
       }
     }
     if (ui.get().mode !== 'story') this.roam.update(dt)
@@ -170,12 +178,14 @@ export class Game {
     sound.update(s)
   }
 
-  startPlay(mode: 'roam' | 'story') {
+  startPlay(mode: 'roam' | 'story', scene = 0) {
     if (ui.get().audioOn) void sound.start()
     sound.setEnabled(ui.get().audioOn)
     this.devCam = false
-    ui.set({ phase: 'play', mode })
-    this.player.place(PLACES.markedTree.x + 6, PLACES.markedTree.z + 4, -2.2)
+    ui.set({ phase: 'play', mode, fade: mode === 'story' ? 1 : 0, ended: false })
+    this.player.frozen = false; this.cast.boyAnim = null; this.cast.rideIn = null; this.cast.onBoard = false
+    if (mode === 'story') { this.story.start(scene) }
+    else { this.story.scene = -1; autoRoll.on = true; this.player.canSwitch = true; U.grey.value = 0; this.roam.enter(); this.waterTarget = this.water = 0; this.todTarget = this.tod = 0.02; this.player.place(PLACES.markedTree.x + 6, PLACES.markedTree.z + 4, -2.2) }
   }
 
   goTo(x: number, z: number, heading: number) {
@@ -274,7 +284,17 @@ export class Game {
       bench: () => g.startBench(),
       // ---- play checks (scripts/check-play.mjs): run game logic without drawing
       step(dt = 1 / 30, n = 1) { for (let i = 0; i < n; i++) { g.frameMs = dt * 1000; g.frame() } },
-      play(mode: 'roam' | 'story') { g.startPlay(mode) },
+      play(mode: 'roam' | 'story', scene = 0) { g.startPlay(mode, scene) },
+      // run one story scene with the bot at the controls; returns its log
+      runScene(i: number, how: 'right' | 'rush' | 'film' = 'right', maxSeconds = 900) {
+        const S = g.story; S.bot = true; S.botHold = how; S.log = []
+        g.startPlay('story', i)
+        let t = 0; const dt = 1 / 30
+        while (S.scene === i && t < maxSeconds && !ui.get().ended) { g.frameMs = dt * 1000; g.frame(); t += dt }
+        const fin = S.scene !== i || ui.get().ended
+        S.bot = false; input.keys.clear()
+        return { finished: fin, seconds: Math.round(t), log: S.log.slice(), at: [Math.round(g.player.x), Math.round(g.player.z)] }
+      },
       // steer the boy (or the canoe) toward a point by holding W and aiming the camera; reports what happened
       go(x: number, z: number, maxSeconds = 60, arrive = 1.2) {
         const p = g.player, dt = 1 / 30

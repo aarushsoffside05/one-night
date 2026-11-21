@@ -929,10 +929,10 @@ def build_head():
     # nose: a soft button bump
     P, n, tu, tv = head_frame(0.0, math.radians(110))
     nrs = []
-    for h, s in ((-0.004, 1.0), (0.009, 0.62)):
-        nrs.append([P + n * h + tu * (0.019 * s * math.sin(2 * PI * k / 6)) + tv * (0.017 * s * math.cos(2 * PI * k / 6) + 0.004 * (1 - s))
+    for h, s in ((-0.006, 1.0), (0.0035, 0.86), (0.008, 0.52)):
+        nrs.append([P + n * h + tu * (0.022 * s * math.sin(2 * PI * k / 6)) + tv * (0.019 * s * math.cos(2 * PI * k / 6) - 0.003 * (1 - s))
                     for k in range(6)])
-    mb.loft(nrs, SKIN, cap1=tuple(P + n * 0.0135 - tv * 0.002))
+    mb.loft(nrs, SKIN, cap1=tuple(P + n * 0.0098 - tv * 0.003))
     # eyes: dark upright ovals, flat so they read as painted / slightly set in
     for sx in (1, -1):
         P, n, tu, tv = head_frame(sx * 0.40, math.radians(96))
@@ -994,8 +994,8 @@ def tuft(mb, base, d, bend, ln, rb, sides=5, col=HAIR, flat=1.0, wide=None):
     tv = d.cross(tu).normalized()
     base = Vector(base)
     r0 = [base + tu * (rb * math.cos(2 * PI * k / sides)) + tv * (rb * flat * math.sin(2 * PI * k / sides)) for k in range(sides)]
-    mid = base + d * (ln * 0.5) + bend * (ln * 0.12)
-    r1 = [mid + tu * (rb * 0.66 * math.cos(2 * PI * k / sides)) + tv * (rb * 0.66 * flat * math.sin(2 * PI * k / sides)) for k in range(sides)]
+    mid = base + d * (ln * 0.58) + bend * (ln * 0.14)
+    r1 = [mid + tu * (rb * 0.80 * math.cos(2 * PI * k / sides)) + tv * (rb * 0.80 * flat * math.sin(2 * PI * k / sides)) for k in range(sides)]
     tip = base + d * ln + bend * (ln * 0.5)
     mb.loft([r0, r1], col, cap1=tuple(tip))
 
@@ -1015,18 +1015,15 @@ def build_hair_short():
     mb = MB()
     #        0   22.5  45  67.5  90  112.5 135 157.5 180
     table = [50, 51, 55, 106, 80, 112, 127, 131, 132]
-    hair_shell(mb, table, lambda az, t: 0.017 - 0.004 * t, n=16, edge=0.9, tuck=0.012)
-    # slightly raised front quiff edge so the hairline has a shape
-    for az, ph, ln in ((-0.32, 40, 0.05), (0.0, 38, 0.055), (0.32, 40, 0.05)):
-        P, n, t = hair_tangent(az, ph, 0.004, (0, 0.25, -1))
-        tuft(mb, P, t * 0.9 + n * 0.28, n * 0.1, ln, 0.03, sides=5, flat=0.5, wide=t.cross(n))
+    hair_shell(mb, table, lambda az, t: 0.016 + 0.006 * math.sin(PI * t) * (0.5 + 0.5 * math.cos(az)) - 0.002 * t,
+               n=16, edge=1.0, tuck=0.012)
     return to_object('hair_short', mb, sharp=55, ref=tuple(HC))
 
 
 def build_hair_tuft():
     """Thick messy mop: deep shell, a fringe over the forehead and chunky overlapping tufts."""
     mb = MB()
-    table = [69, 70, 72, 93, 81, 112, 126, 131, 132]
+    table = [66, 67, 70, 93, 81, 112, 126, 131, 132]
 
     def th(az, t):
         j = int(round(az / (2 * PI) * 16)) % 16
@@ -1037,13 +1034,12 @@ def build_hair_tuft():
     crown = head_dir(math.radians(165), math.radians(28))        # cowlick at the back of the crown
     # (az deg, phi deg, length, base radius, lift along the normal, flatness)
     locks = [
-        (-58, 58, 0.085, 0.040, 0.12, 0.55), (-24, 60, 0.090, 0.042, 0.10, 0.55),      # fringe
-        (10, 61, 0.095, 0.043, 0.12, 0.55), (44, 59, 0.085, 0.040, 0.10, 0.55),
-        (-35, 30, 0.085, 0.042, 0.55, 0.7), (25, 26, 0.090, 0.044, 0.65, 0.7),         # top front
-        (-95, 48, 0.080, 0.040, 0.40, 0.7), (95, 50, 0.080, 0.040, 0.42, 0.7),         # sides
-        (150, 14, 0.085, 0.040, 1.20, 0.8), (-140, 30, 0.075, 0.038, 0.80, 0.8),       # crown spikes
-        (-150, 72, 0.080, 0.042, 0.32, 0.65), (165, 80, 0.080, 0.042, 0.30, 0.65),     # back
-        (120, 66, 0.075, 0.040, 0.36, 0.65),
+        (-58, 54, 0.066, 0.042, 0.16, 0.55), (-24, 55, 0.068, 0.044, 0.16, 0.55),      # fringe
+        (10, 56, 0.072, 0.045, 0.18, 0.55), (44, 55, 0.066, 0.042, 0.16, 0.55),
+        (-35, 30, 0.072, 0.046, 0.45, 0.7), (25, 26, 0.076, 0.048, 0.50, 0.7),         # top front
+        (-95, 48, 0.068, 0.044, 0.34, 0.7), (95, 50, 0.068, 0.044, 0.36, 0.7),         # sides
+        (150, 14, 0.070, 0.046, 0.70, 0.8), (-140, 30, 0.066, 0.044, 0.55, 0.8),       # crown
+        (-150, 72, 0.070, 0.046, 0.30, 0.65), (165, 80, 0.070, 0.046, 0.28, 0.65),     # back
     ]
     for k, (azd, ph, ln, rb, lift, flat) in enumerate(locks):
         P, n, t = hair_tangent(math.radians(azd), ph, 0.012, crown)
@@ -1093,10 +1089,10 @@ def build_hair_long():
     spec = [(0.215, 68, 0.143, 0.150, 0.006, 0.050),
             (0.130, 72, 0.147, 0.152, 0.002, 0.060),
             (0.050, 84, 0.136, 0.140, -0.012, 0.070),
-            (-0.020, 118, 0.112, 0.118, -0.036, 0.062),
-            (-0.105, 126, 0.118, 0.122, -0.040, 0.058),
-            (-0.185, 132, 0.104, 0.118, -0.040, 0.056),
-            (-0.225, 138, 0.074, 0.104, -0.040, 0.050)]
+            (-0.015, 120, 0.100, 0.104, -0.034, 0.056),
+            (-0.100, 124, 0.124, 0.118, -0.036, 0.060),
+            (-0.185, 130, 0.112, 0.116, -0.036, 0.056),
+            (-0.232, 138, 0.074, 0.100, -0.036, 0.048)]
     rings = []
     for y, a0, rx, rz, cz, tk in spec:
         azs = [math.radians(a0 + (360 - 2 * a0) * k / (NA - 1)) for k in range(NA)]
@@ -1126,7 +1122,7 @@ def build_hat_cap():
         az = math.radians(64 * f)
         P = head_surf(az, math.radians(pm(az) - 2.5), 0.020)
         ext = 0.118 * (1 - abs(f) ** 2.4) + 0.006
-        O = Vector((P.x * (1 + 0.55 * ext / 0.118 * (1 - 0.35 * abs(f))), P.y - 0.006 - 0.022 * ext / 0.118 - 0.016 * f * f, P.z + ext))
+        O = Vector((P.x * (1 + 0.55 * ext / 0.118 * (1 - 0.35 * abs(f))), P.y - 0.004 - 0.016 * ext / 0.118 - 0.010 * f * f, P.z + ext))
         t = Vector((0, 0.0065, 0))
         Pi = Vector((P.x * 0.93, P.y - 0.016 * f * f * 0.3, P.z - 0.004))
         rings.append([Pi + t, O + t * 0.55, O - t * 0.55, Pi - t])
@@ -1151,7 +1147,7 @@ def build_hat_straw():
         return 1 + 0.035 * math.sin(3 * 2 * PI * j / n + 1.0) + 0.03 * (rnd(j, 5, 4) - 0.5)
 
     #       y      rx     rz     kind (0 crown, 1 band, 2 brim, 3 under)
-    spec = [(0.372, 0.055, 0.060, 0, 0), (0.360, 0.100, 0.108, 0, 0), (0.318, 0.123, 0.132, 1, 0),
+    spec = [(0.392, 0.060, 0.065, 0, 0), (0.378, 0.103, 0.111, 0, 0), (0.322, 0.123, 0.132, 1, 0),
             (0.284, 0.127, 0.137, 0, 0), (0.262, 0.130, 0.140, 2, 0.0), (0.253, 0.205, 0.215, 2, 0.45),
             (0.250, 0.275, 0.285, 3, 1.0), (0.243, 0.205, 0.215, 3, 0.45), (0.250, 0.126, 0.136, 3, 0.0),
             (0.275, 0.118, 0.128, 3, 0.0)]
@@ -1163,7 +1159,7 @@ def build_hat_straw():
             ring.append((x * w, yy - droop(j, f), cz + (z - cz) * w))
         rings.append(ring)
     kinds = [s[3] for s in spec]
-    mb.loft(rings, CLOTH, cap0=(0, 0.378, cz), facecol=lambda i, j: LIGHT if kinds[i] == 1 else CLOTH, capcol0=CLOTH)
+    mb.loft(rings, CLOTH, cap0=(0, 0.398, cz), facecol=lambda i, j: LIGHT if kinds[i] == 1 else CLOTH, capcol0=CLOTH)
     return to_object('hat_straw', mb, sharp=42, ref=(0, 0.30, cz))
 
 
@@ -1173,11 +1169,12 @@ TORSO = [(-0.080, 0.192, 0.136, 0.006, 2.5),     # shirt hem, flared, hangs belo
          (0.000, 0.181, 0.127, 0.010, 2.5),
          (0.120, 0.174, 0.121, 0.012, 2.5),      # slight belly
          (0.260, 0.170, 0.112, 0.007, 2.5),      # chest 0.34 x 0.22
-         (0.370, 0.172, 0.106, 0.002, 2.5),
-         (0.446, 0.160, 0.094, 0.000, 2.4),      # shoulder line
-         (0.486, 0.118, 0.078, 0.000, 2.2),
-         (0.504, 0.071, 0.069, 0.002, 2.0)]      # collar edge
-SHOULDER_C, SHOULDER_R = (0.176, 0.444, 0.0), 0.069
+         (0.372, 0.174, 0.106, 0.002, 2.5),      # armpit
+         (0.398, 0.236, 0.099, 0.000, 2.6),      # underside of the shoulder cap
+         (0.452, 0.244, 0.093, 0.000, 2.6),      # shoulder cap: swallows the top of the sleeve
+         (0.484, 0.204, 0.085, 0.000, 2.5),
+         (0.4985, 0.128, 0.078, 0.000, 2.3),
+         (0.505, 0.071, 0.069, 0.002, 2.0)]      # collar edge
 
 
 def torso_surf(y, az, off=0.0):
@@ -1193,9 +1190,21 @@ def torso_surf(y, az, off=0.0):
     return Vector(((rx + off) * sgnpow(math.sin(az), e), y, cz + (rz + off) * sgnpow(math.cos(az), e)))
 
 
+def _torso_depth(x, y):
+    """z of the shirt front at lateral position x and height y."""
+    y = max(TORSO[0][0], min(TORSO[-1][0], y))
+    for k in range(len(TORSO) - 1):
+        a, b = TORSO[k], TORSO[k + 1]
+        if a[0] <= y <= b[0]:
+            f = (y - a[0]) / (b[0] - a[0])
+            rx, rz, cz, p = (a[q] + (b[q] - a[q]) * f for q in (1, 2, 3, 4))
+            return cz + rz * max(0.0, 1 - min(1.0, abs(x) / rx) ** p) ** (1 / p)
+    return 0.0
+
+
 def build_torso():
     """Loose T-shirt: flared hem below the waist, slight belly, round shoulders that swallow the sleeve
-    joint, collar edge around the neck opening."""
+    joint (the top rings reach out past the shoulder pivots), collar edge around the neck opening."""
     mb = MB()
     n = 14
     rings = [ring_y(-0.080, 0.178, 0.122, n, cz=0.006, p=2.5)]                # hem underside (crisp edge)
@@ -1204,14 +1213,6 @@ def build_torso():
     last = len(rings) - 1
     mb.loft(rings, CLOTH, cap0=(0, -0.055, 0.006), cap1=(0, 0.488, 0.002),
             facecol=lambda i, j: CLOTH, capcol0=CLOTH, capcol1=SKIN)
-    # shoulder balls: the sleeve (radius 0.062 around the shoulder pivot) turns inside them
-    for sx in (1, -1):
-        c = Vector((SHOULDER_C[0] * sx, SHOULDER_C[1], SHOULDER_C[2]))
-        srs = []
-        for lat in (50, 0, -50):
-            rr, hh = SHOULDER_R * math.cos(math.radians(lat)), SHOULDER_R * math.sin(math.radians(lat))
-            srs.append([(c.x + rr * math.sin(2 * PI * k / 8), c.y + hh, c.z + rr * math.cos(2 * PI * k / 8)) for k in range(8)])
-        mb.loft(srs, CLOTH, cap0=(c.x, c.y + SHOULDER_R, c.z), cap1=(c.x, c.y - SHOULDER_R, c.z))
     return to_object('torso', mb, sharp=50)
 
 
@@ -1225,9 +1226,9 @@ def build_hips_shorts():
 
 
 def build_hips_skirt():
-    """Soft A-line skirt to just below the knee with five broad folds."""
+    """Soft A-line skirt to just below the knee with four broad folds."""
     mb = MB()
-    n = 20
+    n = 16
     #       y      rx     rz     cz     fold
     spec = [(0.032, 0.146, 0.094, 0.004, 0.0), (0.0, 0.170, 0.112, 0.004, 0.0), (-0.090, 0.192, 0.134, 0.0, 0.004),
             (-0.250, 0.222, 0.170, 0.0, 0.012), (-0.420, 0.250, 0.200, 0.0, 0.020), (-0.560, 0.268, 0.220, 0.0, 0.026)]
@@ -1236,7 +1237,7 @@ def build_hips_skirt():
         out = []
         for j in range(n):
             a = 2 * PI * j / n
-            w = fold * math.cos(5 * a + 0.5) + fold * 0.35 * math.cos(3 * a + 2.0)
+            w = fold * math.cos(4 * a + 0.9) + fold * 0.35 * math.cos(3 * a + 2.0)
             out.append(((rx + w - shrink) * math.sin(a), y + 0.25 * w, cz + (rz + w - shrink) * math.cos(a)))
         return out
     rings = [ring(*s) for s in spec]
@@ -1246,17 +1247,19 @@ def build_hips_skirt():
     return to_object('hips_skirt', mb, sharp=50)
 
 
-RS, RU, RE = 0.062, 0.0525, 0.050        # sleeve, upper arm, elbow radii
-RF, RW = 0.0475, 0.0375                  # forearm top, wrist radii
+RS, RU, RE = 0.061, 0.055, 0.052        # sleeve, upper arm, elbow radii
+RF, RW = 0.050, 0.040                  # forearm top, wrist radii
 
 
 def build_upperarm():
     """Upper arm 0.105 thick inside a loose T-shirt sleeve with a crisp hem."""
     mb = MB()
-    rows = dome_rows(0.0, RS, True, CLOTH) + [
-        (0.0, RS, RS, 0, CLOTH), (-0.150, 0.069, 0.070, 0, CLOTH), (-0.150, 0.0535, 0.0535, 0, SKIN),
+    # the top dome is flattened (0.036 high): it turns inside the torso's shoulder cap
+    rows = [(0.036 * math.sin(math.radians(l)), RS * math.cos(math.radians(l)), RS * math.cos(math.radians(l)), 0, CLOTH)
+            for l in (60, 30)] + [
+        (0.0, RS, RS, 0, CLOTH), (-0.160, 0.066, 0.068, 0, CLOTH), (-0.160, RU, RU, 0, SKIN),
         (-0.28, RE, RE, 0, SKIN)] + dome_rows(-0.28, RE, False, SKIN)
-    tube(mb, rows, top=(RS, CLOTH), bot=(-0.28 - RE, SKIN))
+    tube(mb, rows, top=(0.036, CLOTH), bot=(-0.28 - RE, SKIN))
     return to_object('upperarm', mb, sharp=55)
 
 
@@ -1264,7 +1267,7 @@ def build_forearm():
     """Forearm 0.095 -> 0.075 with a mitten hand (0.09 wide, flat toward the body) and a thumb to +Z."""
     mb = MB()
     rows = dome_rows(0.0, RF, True, SKIN) + [
-        (0.0, RF, RF, 0, SKIN), (-0.10, 0.046, 0.047, 0.001, SKIN), (-0.235, 0.034, RW, 0.002, SKIN),
+        (0.0, RF, RF, 0, SKIN), (-0.10, 0.048, 0.049, 0.001, SKIN), (-0.235, 0.036, RW, 0.002, SKIN),
         (-0.268, 0.023, 0.040, 0.003, SKIN), (-0.312, 0.025, 0.045, 0.002, SKIN), (-0.350, 0.020, 0.036, 0.0, SKIN)]
     tube(mb, rows, top=(RF, SKIN), bot=(-0.37, SKIN))
     # thumb
@@ -1281,14 +1284,14 @@ def build_forearm():
     return to_object('forearm', mb, sharp=60)
 
 
-RT, RK = 0.0825, 0.0625                  # thigh top, knee radii (bare leg)
+RT, RK = 0.085, 0.067                  # thigh top, knee radii (bare leg)
 RTS = 0.090                              # shorts / trousers at the hip
 RKT = 0.072                              # trousers at the knee
 
 
 def build_thigh():
     mb = MB()
-    rows = dome_rows(0.0, RT, True, SKIN) + [(0.0, RT, RT, 0, SKIN), (-0.20, 0.075, 0.077, 0.002, SKIN),
+    rows = dome_rows(0.0, RT, True, SKIN) + [(0.0, RT, RT, 0, SKIN), (-0.20, 0.078, 0.080, 0.002, SKIN),
                                              (-0.42, RK, RK, 0, SKIN)] + dome_rows(-0.42, RK, False, SKIN)
     tube(mb, rows, top=(RT, SKIN), bot=(-0.42 - RK, SKIN))
     return to_object('thigh', mb, sharp=60)
@@ -1299,7 +1302,7 @@ def build_thigh_shorts():
     mb = MB()
     rows = dome_rows(0.0, RTS, True, CLOTH, rz=0.092) + [
         (0.0, RTS, 0.092, 0, CLOTH), (-0.16, 0.092, 0.097, 0, CLOTH), (-0.30, 0.098, 0.105, 0.002, CLOTH),
-        (-0.30, 0.069, 0.070, 0.001, SKIN), (-0.42, RK, RK, 0, SKIN)] + dome_rows(-0.42, RK, False, SKIN)
+        (-0.30, 0.073, 0.074, 0.001, SKIN), (-0.42, RK, RK, 0, SKIN)] + dome_rows(-0.42, RK, False, SKIN)
     tube(mb, rows, top=(RTS, CLOTH), bot=(-0.42 - RK, SKIN))
     return to_object('thigh_shorts', mb, sharp=55)
 
@@ -1318,8 +1321,8 @@ SOLE = -0.45
 
 def bare_foot(mb):
     """0.24 long, 0.095 wide: heel, instep, ball and a toe block; flat sole at y = -0.45."""
-    secs = [(-0.058, 0.030, 0.050), (-0.015, 0.036, 0.074), (0.050, 0.039, 0.058), (0.105, 0.0465, 0.037),
-            (0.150, 0.0475, 0.027)]
+    secs = [(-0.058, 0.032, 0.052), (-0.015, 0.038, 0.076), (0.050, 0.041, 0.060), (0.105, 0.047, 0.040),
+            (0.150, 0.0475, 0.030)]
     rings = []
     for z, w, h in secs:
         rings.append([(-0.80 * w, SOLE, z), (0.80 * w, SOLE, z), (w, SOLE + 0.36 * h, z), (0.62 * w, SOLE + 0.90 * h, z),
@@ -1346,8 +1349,8 @@ def shin_rows(col_top=SKIN, r0=RK):
 def build_shin():
     """Lower leg with a calf bulge and a bare foot."""
     mb = MB()
-    rows = shin_rows() + [(-0.13, 0.059, 0.062, -0.008, SKIN), (-0.27, 0.050, 0.051, -0.005, SKIN),
-                          (-0.395, 0.0425, 0.0425, -0.004, SKIN)]
+    rows = shin_rows() + [(-0.14, 0.069, 0.071, -0.010, SKIN), (-0.28, 0.058, 0.059, -0.007, SKIN),
+                          (-0.395, 0.049, 0.049, -0.004, SKIN)]
     tube(mb, rows, top=(RK, SKIN), bot=(-0.43, SKIN))
     bare_foot(mb)
     return to_object('shin', mb, sharp=55)
@@ -1356,25 +1359,37 @@ def build_shin():
 def build_shin_shoe():
     """Lower leg in a chunky trainer: white upper, black sole."""
     mb = MB()
-    rows = shin_rows() + [(-0.13, 0.059, 0.062, -0.008, SKIN), (-0.37, 0.0435, 0.0435, -0.004, SKIN)]
-    tube(mb, rows, top=(RK, SKIN), bot=(-0.41, SKIN))
-    secs = [(-0.086, 0.030, 0.050), (-0.066, 0.045, 0.074), (-0.012, 0.051, 0.082), (0.060, 0.053, 0.060),
-            (0.125, 0.056, 0.042), (0.170, 0.047, 0.032), (0.186, 0.028, 0.018)]
-    shod_foot(mb, secs, 0.026, LIGHT)
+    rows = shin_rows() + [(-0.14, 0.069, 0.071, -0.010, SKIN), (-0.36, 0.051, 0.051, -0.004, SKIN)]
+    tube(mb, rows, top=(RK, SKIN), bot=(-0.40, SKIN))
+    secs = [(-0.090, 0.034, 0.052), (-0.060, 0.052, 0.082), (0.000, 0.056, 0.086), (0.075, 0.058, 0.060),
+            (0.150, 0.059, 0.046), (0.192, 0.036, 0.026)]
+    shod_foot(mb, secs, 0.030, LIGHT)
     return to_object('shin_shoe', mb, sharp=50)
+
+
+BOOT_SHAFT = [(-0.205, 0.073, 0.075, -0.006, HAIR), (-0.405, 0.058, 0.061, -0.003, HAIR)]
+BOOT_SECS = [(-0.088, 0.034, 0.052), (-0.060, 0.052, 0.082), (-0.002, 0.057, 0.094), (0.075, 0.057, 0.064),
+             (0.150, 0.058, 0.048), (0.192, 0.036, 0.026)]
 
 
 def build_shin_boot():
     """Lower leg in a rubber boot to mid-calf: boot is BLUE (tint it), sole black."""
     mb = MB()
     rows = dome_rows(0.0, RK, True, SKIN, lats=(55,)) + [
-        (0.0, RK, RK, 0, SKIN), (-0.13, 0.059, 0.062, -0.008, SKIN), (-0.205, 0.055, 0.057, -0.007, HAIR),
-        (-0.205, 0.071, 0.073, -0.006, HAIR), (-0.30, 0.064, 0.066, -0.005, HAIR), (-0.405, 0.055, 0.058, -0.003, HAIR)]
+        (0.0, RK, RK, 0, SKIN), (-0.14, 0.069, 0.071, -0.010, SKIN), (-0.205, 0.058, 0.060, -0.007, HAIR)] + BOOT_SHAFT
     tube(mb, rows, top=(RK, SKIN), bot=None)
-    secs = [(-0.084, 0.032, 0.050), (-0.060, 0.049, 0.078), (-0.005, 0.054, 0.090), (0.070, 0.054, 0.062),
-            (0.135, 0.056, 0.046), (0.176, 0.044, 0.034), (0.190, 0.026, 0.018)]
-    shod_foot(mb, secs, 0.022, HAIR)
+    shod_foot(mb, BOOT_SECS, 0.022, HAIR)
     return to_object('shin_boot', mb, sharp=50)
+
+
+def build_shin_trousers_boot():
+    """Extra: work trousers (green) tucked into the rubber boot (blue), sole black."""
+    mb = MB()
+    rows = dome_rows(0.0, RKT, True, CLOTH, lats=(55,)) + [
+        (0.0, RKT, RKT, 0, CLOTH), (-0.12, 0.073, 0.076, -0.006, CLOTH), (-0.205, 0.064, 0.066, -0.007, HAIR)] + BOOT_SHAFT
+    tube(mb, rows, top=(RKT, CLOTH), bot=None)
+    shod_foot(mb, BOOT_SECS, 0.022, HAIR)
+    return to_object('shin_trousers_boot', mb, sharp=50)
 
 
 def build_shin_trousers():
@@ -1382,7 +1397,7 @@ def build_shin_trousers():
     mb = MB()
     rows = dome_rows(0.0, RKT, True, CLOTH) + [
         (0.0, RKT, RKT, 0, CLOTH), (-0.16, 0.070, 0.072, -0.005, CLOTH), (-0.375, 0.064, 0.067, -0.003, CLOTH),
-        (-0.375, 0.044, 0.044, -0.004, SKIN), (-0.40, 0.0425, 0.0425, -0.004, SKIN)]
+        (-0.375, 0.050, 0.050, -0.004, SKIN), (-0.40, 0.049, 0.049, -0.004, SKIN)]
     tube(mb, rows, top=(RKT, CLOTH), bot=(-0.43, SKIN))
     bare_foot(mb)
     return to_object('shin_trousers', mb, sharp=55)
@@ -1407,7 +1422,7 @@ def build_backpack():
             w = 0.130 * s * (1 - 0.13 * max(0.0, cy_) ** 2)
             out.append((w * sx_, cy + 0.160 * sy * cy_ - 0.004 * (1 - s), z))
         return out
-    rings = [sec(ZF, 0.86), sec(ZF - 0.03, 1.0), sec(ZB + 0.035, 1.0), sec(ZB + 0.008, 0.90), sec(ZB, 0.62)]
+    rings = [sec(ZF, 0.88), sec(ZF - 0.035, 1.0), sec(ZB + 0.022, 0.98), sec(ZB, 0.70)]
     mb.loft(rings, CLOTH, cap0='ngon', cap1='ngon')
     # front pocket
     def psec(z, s):
@@ -1428,32 +1443,21 @@ def build_backpack():
         yb = Y1 - 0.012 + h
         hrs.append([(x, yb, -0.150), (x, yb + 0.011, -0.158), (x, yb, -0.166)])
     mb.loft(hrs, CLOTH, closed=True)
-    # shoulder straps: padded ribbons hugging the shirt
+    # shoulder straps: padded ribbons hugging the shirt -- up from the pack top, over the shoulder,
+    # down the chest, then round under the arm to the bottom corner of the pack
+    X = 0.094
+
     for sx in (1, -1):
-        path = []                                           # (centre point, outward normal, half width dir)
-        X = 0.094
-        # up the back from the pack top, over the shoulder, down the chest, then round under the arm
-        for y, zside in ((0.405, -1), (0.462, -1)):
-            az = PI - sx * math.asin(min(1.0, X / 0.17) * 0.55)
-            path.append((Vector((sx * X, y, torso_surf(y, PI).z - 0.004)), Vector((0, 0.25, -1)), Vector((1, 0, 0))))
-        path.append((Vector((sx * X, 0.4975, -0.030)), Vector((0, 1, -0.35)), Vector((1, 0, 0))))
-        path.append((Vector((sx * X, 0.4985, 0.034)), Vector((0, 1, 0.35)), Vector((1, 0, 0))))
-        for y, x in ((0.462, X), (0.40, X + 0.004), (0.33, X + 0.012), (0.27, X + 0.026)):
-            zf = max(torso_surf(y, a).z for a in (0.0,))     # front centre depth at this height
-            # depth of the superellipse at this x
-            row = None
-            for k in range(len(TORSO) - 1):
-                if TORSO[k][0] <= y <= TORSO[k + 1][0]:
-                    f = (y - TORSO[k][0]) / (TORSO[k + 1][0] - TORSO[k][0])
-                    row = [TORSO[k][q] + (TORSO[k + 1][q] - TORSO[k][q]) * f for q in (1, 2, 3, 4)]
-            rx, rz, cz, p = row
-            z = cz + rz * max(0.0, 1 - min(1.0, x / rx) ** p) ** (1 / p)
-            path.append((Vector((sx * x, y, z)), Vector((sx * 0.25, 0.12, 1)), Vector((1, 0, 0))))
-        for y, azd in ((0.225, 52), (0.185, 82), (0.160, 118), (0.150, 148)):
+        path = [(Vector((sx * X, 0.415, -0.100)), Vector((0, 0.3, -1)), Vector((1, 0, 0))),
+                (Vector((sx * X, 0.470, -0.074)), Vector((0, 0.6, -1)), Vector((1, 0, 0))),
+                (Vector((sx * X, 0.5005, -0.006)), Vector((0, 1, 0)), Vector((1, 0, 0))),
+                (Vector((sx * X, 0.474, 0.066)), Vector((0, 0.6, 1)), Vector((1, 0, 0)))]
+        for y, x in ((0.40, X + 0.004), (0.31, X + 0.016)):
+            path.append((Vector((sx * x, y, _torso_depth(x, y))), Vector((sx * 0.3, 0.1, 1)), Vector((1, 0, 0))))
+        for y, azd in ((0.235, 52), (0.185, 90), (0.160, 135)):
             az = sx * math.radians(azd)
-            P = torso_surf(y, az)
-            n = Vector((math.sin(az) * 1.2, 0, math.cos(az))).normalized()
-            path.append((P, n, Vector((0, 1, 0)).cross(n).cross(n).normalized() if False else Vector((-math.sin(az) * 0.0, 1, 0))))
+            n = Vector((math.sin(az) * 1.25, 0, math.cos(az)))
+            path.append((torso_surf(y, az), n, Vector((0, 1, 0))))
         rows = [[], [], []]
         for P, n, wdir in path:
             n = n.normalized()
@@ -1468,7 +1472,7 @@ def build_backpack():
 PEOPLE_BUILDERS = [
     build_torso, build_hips_shorts, build_hips_skirt, build_upperarm, build_forearm,
     build_thigh, build_thigh_shorts, build_thigh_trousers, build_shin, build_shin_shoe, build_shin_boot,
-    build_shin_trousers, build_head, build_hair_short, build_hair_long, build_hair_bun, build_hair_tuft,
+    build_shin_trousers, build_shin_trousers_boot, build_head, build_hair_short, build_hair_long, build_hair_bun, build_hair_tuft,
     build_hat_cap, build_hat_straw, build_backpack,
 ]
 

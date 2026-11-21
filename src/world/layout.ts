@@ -7,6 +7,7 @@ export const FLOOR_Y = 8.0 // the forest floor that floods (about 2.6 m under at
 export const HIGH_Y = 10.3 // the knoll behind the yard: the high ground, ankle-deep at top level
 export const YARD_Y = 8.8 // the yard: last year's water stood about 1.8 m over it (over a boy's head)
 export const HOUSE_FLOOR_Y = 11.3 // the stilt house floor sits just above the top level: that is why it has legs
+export const STEPS_TOP_Y = 9.1 // top tread of the bank steps (they are cut into the bank's lip)
 export const PLAY = 300 // playable half-size
 export const CORE = 340 // half-size of the baked height grid
 export const CELL = 2 // height grid spacing

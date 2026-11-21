@@ -46,3 +46,15 @@ Playwright and Chromium are the ones already installed on the build machine. The
 - **A1. He does not like the character models, and the look must get far better** (nearer the underwater garden, the Eos reference photos and the reel). Done so far: crowns rebuilt from real leaves, relief on bark and ground, deeper shade with gold light, drawn leaf litter, the whole sky in the water's reflection, a colour grade, a closer camera; people kit being rebuilt chunkier to match `04-look`.
 - **A2. He overrules the brief's ban on downloaded models and textures and its size cap:** "it's fine as long as it runs on the web"; quality levels low, medium, high are fine. He will download Quixel Megascans assets from Fab himself and upload them. I could not download them: Fab needs a sign-in and I use no logins. Wish list: `2026-11-21-fab-wishlist.md`. Consequences logged there: stand-in species (not Amazon), private repository needed for the raw files, bigger download.
 - Still standing from the brief: no paid things, no logins, no outside AI tools, no reference pictures in the repository.
+
+## Story (step 8)
+
+- **Lines** come from the pack's scene plans (`01-story`), with the brief's wording where they differ: the opening line, Marta as the teacher who paddles (no motor on the school canoe), and "Pirarucu." said by Lia at the lake on the orb's map, not earlier.
+- **Cut because they rest on facts the brief does not clear:** the planted rows on the beach; every far "still shape" or "glint" (caimans); "from the lodge"; the second half of Lia's counting line; "Black water, and white."; "Not at the edges."; "Most of it is the bank you climbed..."; "In May a boat comes in anywhere." (kept: "In October there is this.").
+- **Written by me, because the plans gave no words:** Mãe on the radio ("Davi? Davi, are you there?"); Tomé in scene 6, "Light where I step." (the brief wants every hold's reason said by the person); the six captions of Dona Socorro's telling, each from one cleared fact.
+- **Dropped:** Davi's scene 4 line quoting Nino (Nino never says it) and Tomé's "Ten metres." answer to it. Dona Socorro's year as a second orb view (the brief names only Tomé's).
+- **Kept:** the closing question (it asks for no answer and checks none).
+- **The two authored slips** (filming the trunk in scene 4, letting go of the line in scene 5) happen when the player presses F at the glowing prompt; if the player refuses for some seconds, the scene makes the slip anyway, because the story needs it. In scenes 6 and 7 pressing F cannot break the hold: Lia's hand keeps his.
+- **Dona Socorro's telling** uses the real world with the one water number driven, colour dropped, inside the marked orb frame, then returns to low water.
+- **Walking holds** (light at Caio's or Tomé's feet) need no key: the hold is staying beside him at his pace. Run ahead and his feet go dark, he stops, "Back. My feet."
+- **Scenes are generators** (`src/game/story.ts`, `scenesA.ts`, `scenesB.ts`): a scene reads top to bottom like its plan. `scripts/check-story.mjs` plays all eight with a bot, their way and rushed.

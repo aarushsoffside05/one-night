@@ -26,8 +26,8 @@ export function groundMaterial(): THREE.Material {
     litter = mix(litter, vec3(0.62, 0.52, 0.3), smoothstep(0.74, 0.78, n4.mul(0.6).add(n3.mul(0.4))).mul(0.8))
     litter = mix(litter, vec3(0.06, 0.05, 0.04), smoothstep(0.5, 0.72, n1).mul(0.65))
     // open ground with no canopy grows low green
-    const green = mix(mix(vec3(0.05, 0.1, 0.03), vec3(0.12, 0.18, 0.045), smoothstep(0.4, 0.55, n2)), vec3(0.2, 0.2, 0.06), smoothstep(0.62, 0.68, n3).mul(0.6))
-    litter = mix(green, litter, smoothstep(0.05, 0.4, cov.add(n1.mul(0.2))))
+    const green = mix(mix(vec3(0.035, 0.06, 0.02), vec3(0.075, 0.105, 0.03), smoothstep(0.4, 0.55, n2)), vec3(0.13, 0.1, 0.045), smoothstep(0.55, 0.68, n3).mul(0.8))
+    litter = mix(mix(green, litter, 0.35), litter, smoothstep(0.05, 0.4, cov.add(n1.mul(0.2))))
     // bare bank mud, in strata left by the falling river
     const strata = smoothstep(0.35, 0.65, noise(vec2(pw.x.add(pw.z).mul(0.02), pw.y.mul(0.16))).a)
     const mud = mix(vec3(0.16, 0.1, 0.06), vec3(0.36, 0.23, 0.13), strata.mul(0.55).add(n2.mul(0.45))).mul(st.mul(0.4).add(0.8))
@@ -53,7 +53,7 @@ export function groundMaterial(): THREE.Material {
     col = mix(col, vec3(0.34, 0.29, 0.2), smoothstep(0.3, -1.5, pw.y))
     // relief: leaves, clods and cracks catch the low sun on one side
     const off = U.sunDir.xz.mul(0.035)
-    const emb = n2.sub(noise(pw.xz.mul(0.19).add(off.mul(0.19))).g).mul(5).add(n3.sub(noise(pw.xz.mul(0.83).add(off.mul(0.83))).b).mul(2.2)).clamp(-0.45, 0.6)
+    const emb = n2.sub(noise(pw.xz.mul(0.19).add(off.mul(0.19))).g).mul(3.2).add(n3.sub(noise(pw.xz.mul(0.83).add(off.mul(0.83))).b).mul(1.5)).clamp(-0.4, 0.5)
     col = col.mul(emb.mul(U.day.mul(0.7).add(0.3)).add(1))
     // the wet band above the waterline, and darker still below it
     const hw = pw.y.sub(waterHere())

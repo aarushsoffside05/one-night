@@ -296,7 +296,7 @@ def main():
         o = []
         # man: straw hat, work shirt, trousers, rubber boots
         o += figure(kit, m, (-2.05, 0, 0), hairs=('hair_short', 'hat_straw'), shirt='#8a8f6a', bottom='#5a5142',
-                    thigh='thigh_trousers', shin='shin_boot', boot='#2f3a33', skin='#8f5c3c', hat_col='#c8ab63')
+                    thigh='thigh_trousers', shin='shin_trousers_boot', boot='#2f3a33', skin='#8f5c3c', hat_col='#c8ab63')
         # young man: cap, shorts, bare feet
         o += figure(kit, m, (-1.25, 0, 0), scale=1.02, hairs=('hair_short', 'hat_cap'), shirt='#b5392c', bottom='#2c2d33',
                     hat_col='#d9cfae', skin='#a66c45', pose=dict(STAND, armL=(8, 20, 12)))
@@ -321,12 +321,12 @@ def main():
         for k, hs in enumerate((('hair_tuft',), ('hair_short',), ('hair_long',), ('hair_bun',), ('hair_short', 'hat_cap'),
                                 ('hair_short', 'hat_straw'), ())):
             tn = dict(skin=hexc('#a9714a'), cloth=hexc('#c9a24a'), hair=hexc('#1c1410'), light=hexc('#7a3b2a'))
-            m = T((0.52 * k, 0, 0))
+            m = T((0.40 * k, 0, 0))
             o.append(inst(kit['head'], m, mat, tn))
             for h in hs:
                 o.append(inst(kit[h], m, mat, tn))
         return o
-    run('heads', heads, dict(front=(0, 0.05, 1), q3=(0.8, 0.2, 1), back=(-0.5, 0.25, -1)), res=(1700, 420))
+    run('heads', heads, dict(front=(0, 0.05, 1), q3=(0.8, 0.2, 1), back=(-0.5, 0.25, -1)), res=(1900, 470))
 
     # ---- joints at their limits: elbow / knee 120, shoulder / hip 150
     def bend():

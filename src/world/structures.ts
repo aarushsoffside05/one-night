@@ -8,7 +8,7 @@ import { GB } from './geom'
 import { PaintedMaterial } from './shade'
 import { barkColor } from './forest'
 import { Heightfield } from './terrain'
-import { PLACES, HOUSE_FLOOR_Y, WATER_RANGE } from './layout'
+import { PLACES, HOUSE_FLOOR_Y, WATER_RANGE, STEPS_TOP_Y } from './layout'
 import { addPlatform, addBlocker } from './platforms'
 import { rng } from './rng'
 import { U } from './uniforms'
@@ -99,7 +99,7 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
   // ---------- the bank steps and the landing
   {
     const A = PLACES.stepsTop, B = PLACES.landing
-    const ya = hf.at(A.x, A.z) + 0.05, yb = 0.5
+    const ya = STEPS_TOP_Y, yb = 0.5
     const dx = B.x - A.x, dz = B.z - A.z, len = Math.hypot(dx, dz), rot = Math.atan2(dz, dx)
     const n = Math.round(Math.hypot(len, ya - yb) / 0.42)
     const px = -dz / len, pz = dx / len

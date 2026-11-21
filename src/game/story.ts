@@ -136,7 +136,7 @@ export class Story {
       } else {
         ui.set({ prompt: null, hold: Math.round((work / o.need) * 50) / 50 })
         if (filming) { this.endHold(); sound.chime('fail'); this.log.push('hold: filmed'); return 'filmed' }
-        if (!holding || !close) { away += dt; if (away > (o.grace ?? 0.35)) { this.endHold(); sound.chime('fail'); this.log.push('hold: broke'); return 'broke' } } else away = 0
+        if (!holding || !close) { away += dt; if (away > (o.grace ?? 0.35)) { this.endHold(); sound.chime('fail'); this.log.push('hold: broke'); if (this.bot) this.botHold = 'right'; return 'broke' } } else away = 0
         work += dt
         if (work >= o.need) { this.endHold(); sound.chime('done'); this.log.push('hold: done'); return 'done' }
       }

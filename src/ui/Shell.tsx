@@ -26,6 +26,7 @@ function Title() {
           <button onClick={() => go('story')}><b>Story</b><span>Eight scenes, one night. About 25 minutes.</span></button>
           <button onClick={() => go('roam')}><b>Roam</b><span>The open forest. Raise the water. Change the hour.</span></button>
         </div>
+        <div className="title-scenes">Start at a scene: {['The Mouth', 'The House on Legs', 'The House That Floats', 'The Trail Before Light', 'The Shut Lake', 'Again', 'One Channel', 'Where the River Will Be'].map((n, i) => <button key={i} title={n} onClick={() => getGame()?.startPlay('story', i)}>{i + 1}</button>)}</div>
         <label className="title-sound"><input type="checkbox" checked={audioOn} onChange={(e) => ui.set({ audioOn: e.target.checked })} /> Sound (forest sounds only; every spoken line is written on screen)</label>
         <p className="title-small">Internal build. Not to be shown to children or published as finished until a reader from the reserve's own communities has seen it.</p>
         {backend !== 'webgpu' && <p className="title-small">Running in the plainer WebGL 2 mode on this browser.</p>}
