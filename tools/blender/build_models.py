@@ -1049,9 +1049,9 @@ def build_hips_shorts():
 def build_hips_skirt():
     mb = MB()
     n = 12
-    spec = [(0.016, 0.100, 0.064), (-0.02, 0.134, 0.088), (-0.14, 0.168, 0.112), (-0.35, 0.212, 0.152),
+    spec = [(0.016, 0.104, 0.066), (-0.02, 0.143, 0.092), (-0.14, 0.180, 0.120), (-0.35, 0.214, 0.154),
             (-0.55, 0.250, 0.185), (-0.55, 0.236, 0.171), (-0.30, 0.185, 0.125)]
-    rings = [ring_y(y, rx, rz, n, p=2.2) for y, rx, rz in spec]
+    rings = [ring_y(y, rx, rz, n, p=2.5) for y, rx, rz in spec]
     mb.loft(rings, CLOTH, cap0=(0, 0.026, 0), cap1=(0, -0.26, 0))
     return to_object('hips_skirt', mb, sharp=60)
 

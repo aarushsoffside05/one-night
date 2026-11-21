@@ -16,6 +16,11 @@ export class Cast {
   lampHolder: string | null = null // who carries the hand lamp
   boyAnim: Anim | null = null // story override of the boy's pose
   boyHidden = false
+  orbPower = 1
+  swell = 0
+  onBoard = false // scene 1: he paddles his surfboard, not a canoe
+  rideIn: Boat | null = null // carried in someone else's boat
+  rideZ = 0.9
   constructor(public world: World, public player: Player) {
     this.playerBoat = world.props.addBoat('canoe', 0, 0, 0, 1)
     world.figures.show('davi', 0, 0, 0, 0)
@@ -32,10 +37,15 @@ export class Cast {
     const boy = figures.get('davi')
     const b = this.playerBoat
     boy.active = !this.boyHidden
-    if (p.mode === 'canoe') {
-      b.visible = true; b.float = false
+    if (this.rideIn) {
+      b.visible = false
+      this.seat(boy, this.rideIn, this.rideZ, this.boyAnim ?? 'ride')
+      p.x = boy.x; p.z = boy.z; p.y = boy.y
+    } else if (p.mode === 'canoe') {
+      b.visible = !this.onBoard; b.float = false
       b.x = p.canoe.x; b.z = p.canoe.z; b.heading = p.canoe.heading; b.y = p.canoe.y + Math.sin(clock * 1.2) * 0.012; b.roll = p.canoe.roll
-      this.seat(boy, b, -1.25, this.boyAnim ?? 'paddle', p.paddleSide)
+      this.seat(boy, b, this.onBoard ? 0 : -1.25, this.boyAnim ?? 'paddle', p.paddleSide)
+      if (this.onBoard) { boy.y += 0.1; props.board.visible = true; props.board.position.set(b.x, b.y + 0.02, b.z); props.board.rotation.set(0, Math.PI - b.heading, b.roll, 'YXZ') }
       boy.phase = p.paddlePhase * Math.PI * 2 - 1.2
       if (p.stroke < 0.02 && p.speed < 0.1 && !this.boyAnim) boy.phase = -1.2
     } else {
@@ -50,7 +60,7 @@ export class Cast {
     props.update(clock, (x, z) => p.waterAt(x, z), (x, z) => this.world.hf.at(x, z))
     // paddle through the boy's hands when he is in the canoe
     props.paddles[0].visible = false
-    if (p.mode === 'canoe' && boy.active && !this.boyAnim) {
+    if (p.mode === 'canoe' && boy.active && !this.boyAnim && !this.onBoard && !this.rideIn) {
       const side = p.paddleSide > 0 ? 0 : 1
       figures.handPos('davi', 1 - side, v1); figures.handPos('davi', side, v2)
       v2.y -= 0.12
@@ -61,7 +71,10 @@ export class Cast {
     const night = envOut.lamp
     props.orb.visible = boy.active && this.orbOn
     props.orb.position.set(v1.x, v1.y + 0.02, v1.z)
-    U.orb.value.set(p.x, p.y + 1.1, p.z, this.orbOn && boy.active ? 0.5 + night * 3.2 : 0)
+    U.orb.value.set(p.x + Math.sin(p.heading) * 0.8, p.y + 0.9, p.z - Math.cos(p.heading) * 0.8, this.orbOn && boy.active ? (0.5 + night * 3.2) * this.orbPower : 0)
+    // the raft dips a little under a footstep
+    const dip = p.onRaft ? -0.05 - 0.012 * Math.sin(clock * 2.1) : 0
+    U.raft.value.y += (dip + this.swell - U.raft.value.y) * Math.min(1, dt * 5); p.raftDip = U.raft.value.y
     // the hand lamp, if someone carries it
     if (this.lampHolder) {
       figures.handPos(this.lampHolder, 1, v1)

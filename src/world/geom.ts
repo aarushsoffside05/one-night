@@ -154,6 +154,46 @@ export function clumpGeometry(detail: number, seed: string, fringe = 0, fringeSi
   return g.build()
 }
 
+// ---- leafy crown clump: a dark inner mass wrapped in many real leaves (two triangles each, no cut-outs).
+// The leaves give a broken, leafy edge and catch the light one by one; the core stops the eye seeing through.
+// aux = (per-leaf random, local height -1..1, 1 on leaves / 0 on the core)
+export function leafClumpGeometry(leaves: number, leafSize: number, coreDetail: number, seed: string): THREE.BufferGeometry {
+  const g = new GB(), r = rng(seed)
+  const bumps: number[][] = []
+  for (let i = 0; i < 9; i++) { const v = new THREE.Vector3(r.range(-1, 1), r.range(-0.3, 1), r.range(-1, 1)).normalize(); bumps.push([v.x, v.y, v.z, r.range(0.18, 0.42)]) }
+  const rad = (x: number, y: number, z: number) => { let s = 0.82; for (const b of bumps) { const d = x * b[0] + y * b[1] + z * b[2]; if (d > 0.55) s += b[3] * Math.pow((d - 0.55) / 0.45, 0.8) } return s }
+  const ico = new THREE.IcosahedronGeometry(1, coreDetail), p = ico.attributes.position
+  const map = new Map<string, number>(), v = new THREE.Vector3()
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i).normalize()
+    const key = `${v.x.toFixed(4)},${v.y.toFixed(4)},${v.z.toFixed(4)}`
+    let id = map.get(key)
+    if (id === undefined) { const s = rad(v.x, v.y, v.z) * 0.8; id = g.v(v.x * s, (v.y < 0 ? v.y * 0.7 : v.y) * s, v.z * s, v.x, v.y + 0.2, v.z, 0.5, v.y, 0); map.set(key, id) }
+    g.idx.push(id)
+  }
+  const d = new THREE.Vector3(), t1 = new THREE.Vector3(), t2 = new THREE.Vector3(), n = new THREE.Vector3()
+  for (let i = 0; i < leaves; i++) {
+    // more leaves on top and round the sides than underneath
+    d.set(r.range(-1, 1), r.range(-0.75, 1), r.range(-1, 1)); if (d.y < -0.2 && r() < 0.55) d.y = -d.y; d.normalize()
+    const s = rad(d.x, d.y, d.z) * r.range(0.86, 1.08)
+    const px = d.x * s, py = (d.y < 0 ? d.y * 0.7 : d.y) * s, pz = d.z * s
+    // the leaf lies near the surface, pointing outwards and drooping, turned at random
+    t1.set(r.range(-1, 1), r.range(-1, 1), r.range(-1, 1)).cross(d).normalize()
+    t2.crossVectors(d, t1).normalize()
+    const len = leafSize * r.range(0.8, 1.2), wid = len * r.range(0.42, 0.58), tilt = r.range(0.25, 0.7), droop = r.range(0.15, 0.55)
+    const ax = t1.x * Math.cos(tilt) + d.x * Math.sin(tilt), ay = t1.y * Math.cos(tilt) + d.y * Math.sin(tilt) - droop, az = t1.z * Math.cos(tilt) + d.z * Math.sin(tilt)
+    n.set(d.x, d.y + 0.35, d.z).normalize()
+    n.x = n.x * 0.72 + (t2.y * az - t2.z * ay) * 0.28 * 0; n.normalize()
+    const rnd = r()
+    const a = g.v(px - ax * len * 0.15, py - ay * len * 0.15, pz - az * len * 0.15, n.x, n.y, n.z, rnd, d.y, 1)
+    const b = g.v(px + ax * len * 0.42 + t2.x * wid, py + ay * len * 0.42 + t2.y * wid, pz + az * len * 0.42 + t2.z * wid, n.x + t2.x * 0.3, n.y + t2.y * 0.3, n.z + t2.z * 0.3, rnd, d.y, 1)
+    const c = g.v(px + ax * len, py + ay * len, pz + az * len, n.x + ax * 0.25, n.y + ay * 0.25, n.z + az * 0.25, rnd, d.y, 1.6)
+    const e = g.v(px + ax * len * 0.42 - t2.x * wid, py + ay * len * 0.42 - t2.y * wid, pz + az * len * 0.42 - t2.z * wid, n.x - t2.x * 0.3, n.y - t2.y * 0.3, n.z - t2.z * 0.3, rnd, d.y, 1)
+    g.quad(a, b, c, e)
+  }
+  return g.build()
+}
+
 export function saplingGeometry(): THREE.BufferGeometry {
   const g = new GB(), r = rng('sapling-shape')
   g.tube([[0, 0, 0], [0.02, 0.5, 0.01], [0, 1, 0]], [0.022, 0.016, 0.008], 3, 0, 0.3)

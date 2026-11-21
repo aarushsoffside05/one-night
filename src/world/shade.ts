@@ -1,7 +1,7 @@
 // The shared painted look: one lighting model, one generated noise texture, haze, lamps, light pools.
 // Every lit surface in the world uses PaintedMaterial, so light, haze and night behave the same everywhere.
 import * as THREE from 'three/webgpu'
-import { Fn, positionWorld, normalWorld, normalView, cameraPosition, positionView, diffuseColor, texture, vec2, vec3, vec4, float, mix, smoothstep, max, dot, exp, clamp, output } from './tsl'
+import { Fn, positionWorld, normalWorld, normalView, cameraPosition, positionView, diffuseColor, texture, vec2, vec3, vec4, float, mix, smoothstep, max, dot, exp, clamp, output, screenUV } from './tsl'
 import { U } from './uniforms'
 import { rng } from './rng'
 import { CORE } from './layout'
@@ -103,6 +103,18 @@ export class PaintedMaterial extends THREE.MeshLambertNodeMaterial {
   setupLightingModel() { return new PaintedLighting(this.paint) as any }
 }
 
+// ---- the grade: a little more contrast and colour, a soft darkening to the corners. Applied to everything
+// (through the haze node, and by the sky and water themselves), so the picture holds together.
+export const grade = (c: any) => {
+  const l = dot(c, vec3(0.3, 0.55, 0.15))
+  const sat = mix(vec3(l, l, l), c, 1.14)
+  const con = sat.mul(sat.mul(0.22).add(0.86))
+  const d = screenUV.sub(0.5).length()
+  const g2 = con.mul(smoothstep(0.95, 0.35, d).mul(0.3).add(0.7))
+  const lg = dot(g2, vec3(0.3, 0.55, 0.15))
+  return mix(g2, vec3(lg.mul(1.05), lg, lg.mul(0.9)), U.grey)
+}
+
 // ---- haze: thickens with distance, thins with height, warms when looking into the sun
 export function makeFog() {
   const colorNode = Fn(() => {
@@ -118,5 +130,7 @@ export function makeFog() {
     const f = exp(dist.mul(U.fogDen.mul(hgt.mul(0.75).add(0.25)).add(low)).negate()).oneMinus()
     return f.mul(U.fogMax)
   })()
-  return Fn(() => vec4(mix(output.rgb, colorNode, factor), output.a))()
+  return Fn(() => {
+    return vec4(grade(mix(output.rgb, colorNode, factor)), output.a)
+  })()
 }

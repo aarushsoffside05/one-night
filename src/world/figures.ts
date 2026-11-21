@@ -7,7 +7,7 @@ import { PaintedMaterial } from './shade'
 import { mergeGeos } from './glb'
 
 // Joint numbers of the kit for the 1.70 m reference figure (from tools/blender/README.md).
-export const J = { shoulderX: 0.18, shoulderY: 0.45, neckY: 0.5, hipX: 0.09, hipY: -0.14, upperArm: 0.28, forearm: 0.37, thigh: 0.42, shin: 0.45, waist: 1.01 }
+export const J = { shoulderX: 0.18, shoulderY: 0.45, neckY: 0.5, hipX: 0.09, hipY: -0.07, upperArm: 0.28, forearm: 0.37, thigh: 0.42, shin: 0.45, waist: 0.94 }
 
 export type CharDef = { id: string; name: string; height: number; child: number; skin: number[]; shirt: number[]; bottom: number[]; hair: number[]; hairPart: string; hat?: string; hatCol?: number[]; skirt?: boolean }
 const SKIN_A = [0.62, 0.4, 0.27], SKIN_B = [0.5, 0.31, 0.2], SKIN_C = [0.7, 0.48, 0.34]
@@ -84,8 +84,9 @@ export class Figures {
       if (def.hat) part(def.hat, 2, def.hatCol!, def.hatCol!)
       part('upperarm', 3, def.shirt, def.hair); part('forearm', 4, def.shirt, def.hair)
       part('upperarm', 5, def.shirt, def.hair, true); part('forearm', 6, def.shirt, def.hair, true)
-      part('thigh', 7, def.bottom, def.hair); part('shin', 8, def.bottom, def.hair)
-      part('thigh', 9, def.bottom, def.hair, true); part('shin', 10, def.bottom, def.hair, true)
+      const th = def.skirt || !kit.thigh_shorts ? 'thigh' : 'thigh_shorts'
+      part(th, 7, def.bottom, def.hair); part('shin', 8, def.bottom, def.hair)
+      part(th, 9, def.bottom, def.hair, true); part('shin', 10, def.bottom, def.hair, true)
       this.figs.push({ def, active: false, x: 0, y: -50, z: 0, heading: 0, anim: 'idle', phase: ci * 1.7, speed: 0, side: 1, look: 0, pose: new Float32Array(NP), target: new Float32Array(NP), tx: 0, tz: 0, moving: false, arrive: 0, k: def.height / 1.72 })
     })
     const geo = mergeGeos(geos)

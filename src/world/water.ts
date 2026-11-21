@@ -4,7 +4,8 @@
 import * as THREE from 'three/webgpu'
 import { Fn, positionWorld, positionView, cameraPosition, texture, vec2, vec3, vec4, float, mix, smoothstep, max, dot, pow, exp, normalize, reflect, viewportDepthTexture, perspectiveDepthToViewZ, cameraNear, cameraFar, screenUV, clamp, sin } from './tsl'
 import { U } from './uniforms'
-import { noise, TEX, worldUV, lampLight } from './shade'
+import { noise, TEX, worldUV, lampLight, grade } from './shade'
+import { skyColor } from './sky'
 
 export function waterMaterial(useSceneDepth: boolean): THREE.Material {
   const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false })
@@ -41,9 +42,9 @@ export function waterMaterial(useSceneDepth: boolean): THREE.Material {
     const R = reflect(view, n)
     const Rs = reflect(view, normalize(vec3(r1.sub(0.5).mul(0.1).mul(U.ripple), 1, r1.sub(0.5).mul(0.06).mul(U.ripple))))
     const ry = max(R.y, 0.02)
-    let refl: any = mix(U.skyHor, U.skyTop, pow(clamp(ry, 0, 1), 0.42))
+    // the whole sky, clouds and sun path included, along the reflected ray; plus the glitter of the sun itself
     const sd = max(dot(R, U.sunDir), 0)
-    refl = refl.add(U.skyGlow.mul(pow(sd, 10).mul(0.35))).add(U.discCol.mul(pow(sd, 420)).mul(1.2))
+    let refl: any = skyColor(vec3(R.x, ry, R.z).normalize(), false).add(U.discCol.mul(pow(sd, 260)).mul(0.9))
     const hit = pw.xz.add(Rs.xz.div(max(Rs.y, 0.03)).mul(15))
     const landH = texture(TEX.height, hit.add(340).div(680)).r
     const cov = texture(TEX.cover, hit.add(340).div(680)).r

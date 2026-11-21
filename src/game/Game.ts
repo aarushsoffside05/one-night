@@ -5,7 +5,7 @@ import CookWorker from '../world/cook.worker?worker&inline'
 import type { CookMsg, CookResult } from '../world/cook.worker'
 import { buildWorld, type World } from '../world/build'
 import { U } from '../world/uniforms'
-import { WORLD_SEED } from '../world/rng'
+import { WORLD_SEED, setSeed } from '../world/rng'
 import { waterYOf } from '../world/layout'
 import { ui, type BenchResult } from './store'
 import { pickTier, QualityController, TIERS, type Tier } from './quality'
@@ -14,9 +14,13 @@ import { Player } from './player'
 import { input, installInput, pollInput, endFrameInput } from './input'
 import { PLACES } from '../world/layout'
 import { Cast } from './cast'
+import { Roam } from './roam'
+import { sound } from '../audio/sound'
+import { envOut } from '../world/env'
 
 const params = new URLSearchParams(location.search)
 export const DEV = params.get('dev') === '1'
+if (params.get('seed')) setSeed(params.get('seed')!)
 
 export class Game {
   world!: World
@@ -29,7 +33,7 @@ export class Game {
   frozen = false // pictures: animation clock held
   ready = false
   private lastRaf = 0; private lastRender = 0; private rafEma = 16.7; private flip = false
-  private frameMs = 16.7
+  frameMs = 16.7
   private statAcc = 0; private statN = 0; private statWorst = 0
   private bench: { t: number; times: Float32Array; n: number; draws: number; tris: number; per: string[]; li: number; ln: number; lacc: number; lworst: number } | null = null
   private freeCam: { i: number } | null = DEV ? { i: 0 } : null
@@ -37,6 +41,8 @@ export class Game {
   focus = new THREE.Vector3()
   player!: Player
   cast!: Cast
+  roam!: Roam
+  private snd = { dt: 0, night: 0, dawn: 0, forest: 0, waterNear: 0, onWater: false, rain: 0, lampNear: 0, speed: 0, wind: 0.4 }
   waterTarget = 0; todTarget = 0.0
   devCam = false // a fixed dev camera or the benchmark flight has the camera
   titleT = 0
@@ -67,6 +73,7 @@ export class Game {
     this.player = new Player(this.world)
     this.player.place(PLACES.markedTree.x + 6, PLACES.markedTree.z + 4, -2.2)
     this.cast = new Cast(this.world, this.player)
+    this.roam = new Roam(this)
     installInput(r.domElement)
     this.setCam(0)
     this.applyState()
@@ -122,9 +129,11 @@ export class Game {
       else if (phase === 'play') {
         this.player.update(dt, waterYOf(this.water))
         this.hooks.frame?.(dt)
+        this.soundFrame(dt)
         this.player.updateCamera(dt, this.camera)
       }
     }
+    if (ui.get().mode !== 'story') this.roam.update(dt)
     this.applyState()
     if (phase === 'play' && !this.devCam && !this.bench) this.focus.set(this.player.x, this.player.y, this.player.z)
     else this.focus.copy(this.camera.position)
@@ -148,7 +157,22 @@ export class Game {
     this.camera.lookAt(-30 + Math.sin(t * 0.04) * 4, 5.5, z - 60)
   }
 
+  private soundFrame(dt: number) {
+    const p = this.player, s = this.snd
+    if (p.stepped) sound.footstep(p.surface)
+    if (p.strokeNow) { sound.paddle(0.6); const c = p.canoe; this.world.life.ring(c.x + Math.cos(c.heading) * 0.6 * p.paddleSide, c.z + Math.sin(c.heading) * 0.6 * p.paddleSide, 0.5, p.waterAt(c.x, c.z) > waterYOf(this.water) + 0.01) }
+    const depth = p.depthAt(p.x, p.z)
+    s.dt = dt; s.night = Math.min(1, envOut.lamp); s.dawn = Math.max(0, 1 - Math.abs(this.tod - 0.8) / 0.12)
+    s.forest = Math.min(1, Math.max(0, (this.world.hf.at(p.x, p.z) - 5) / 3)) * (p.mode === 'canoe' && this.water < 0.5 ? 0.4 : 1)
+    s.waterNear = p.mode === 'canoe' ? 1 : Math.min(1, Math.max(0, 1 - (-depth) / 6)); s.onWater = p.mode === 'canoe'
+    const L = U.lamp0.value; s.lampNear = L.w > 0.2 ? Math.max(0, 1 - Math.hypot(p.x - L.x, p.z - L.z) / 12) : 0
+    s.speed = p.speed
+    sound.update(s)
+  }
+
   startPlay(mode: 'roam' | 'story') {
+    if (ui.get().audioOn) void sound.start()
+    sound.setEnabled(ui.get().audioOn)
     this.devCam = false
     ui.set({ phase: 'play', mode })
     this.player.place(PLACES.markedTree.x + 6, PLACES.markedTree.z + 4, -2.2)
@@ -242,12 +266,39 @@ export class Game {
         if (o.frozen !== undefined) g.frozen = o.frozen
         if (o.clock !== undefined) g.clock = o.clock
         if (o.cam !== undefined) g.setCam(o.cam)
-        if (o.view) { g.camera.position.set(o.view[0], o.view[1], o.view[2]); g.camera.up.set(0, 1, 0); if (o.view[0] === o.view[3] && o.view[2] === o.view[5]) g.camera.up.set(0, 0, -1); g.camera.lookAt(o.view[3], o.view[4], o.view[5]); g.camera.up.set(0, 1, 0) }
+        if (o.view) { g.devCam = true; g.camera.position.set(o.view[0], o.view[1], o.view[2]); g.camera.up.set(0, 1, 0); if (o.view[0] === o.view[3] && o.view[2] === o.view[5]) g.camera.up.set(0, 0, -1); g.camera.lookAt(o.view[3], o.view[4], o.view[5]); g.camera.up.set(0, 1, 0) }
       },
       // render one frame now and read it back (page screenshots of a WebGPU canvas come out blank headless)
       cap(q = 0.85) { g.renderer.info.reset(); advance(performance.now()); return g.renderer.domElement.toDataURL('image/jpeg', q) },
       info() { const i = g.renderer.info.render; return { draws: i.drawCalls, tris: i.triangles, counts: g.world.counts(), scale: g.quality.scale } },
       bench: () => g.startBench(),
+      // ---- play checks (scripts/check-play.mjs): run game logic without drawing
+      step(dt = 1 / 30, n = 1) { for (let i = 0; i < n; i++) { g.frameMs = dt * 1000; g.frame() } },
+      play(mode: 'roam' | 'story') { g.startPlay(mode) },
+      // steer the boy (or the canoe) toward a point by holding W and aiming the camera; reports what happened
+      go(x: number, z: number, maxSeconds = 60, arrive = 1.2) {
+        const p = g.player, dt = 1 / 30
+        let t = 0, worstFall = 0, stuck = 0, lastX = p.x, lastZ = p.z, lastT = 0
+        input.keys.add('w')
+        while (t < maxSeconds) {
+          const want = Math.atan2(x - p.x, -(z - p.z))
+          p.camYaw = want
+          if (p.mode === 'canoe') { let d = want - p.canoe.heading; d = Math.atan2(Math.sin(d), Math.cos(d)); input.keys.delete('a'); input.keys.delete('d'); if (d > 0.15) input.keys.add('d'); else if (d < -0.15) input.keys.add('a') }
+          g.frameMs = dt * 1000; g.frame(); t += dt
+          const ground = Math.max(g.world.hf.at(p.x, p.z), p.mode === 'canoe' ? p.waterAt(p.x, p.z) : -99)
+          worstFall = Math.max(worstFall, ground - p.y)
+          if (Math.hypot(x - p.x, z - p.z) < arrive) break
+          if (t - lastT > 4) { if (Math.hypot(p.x - lastX, p.z - lastZ) < 0.5) { stuck = 1; break } lastX = p.x; lastZ = p.z; lastT = t }
+        }
+        input.keys.delete('w'); input.keys.delete('a'); input.keys.delete('d')
+        return { reached: Math.hypot(x - p.x, z - p.z) < arrive + 0.01, stuck, seconds: +t.toFixed(1), x: +p.x.toFixed(1), y: +p.y.toFixed(2), z: +p.z.toFixed(1), mode: p.mode, belowGround: +worstFall.toFixed(2) }
+      },
+      worldHash() {
+        let h = 2166136261 >>> 0
+        const eat = (a: ArrayLike<number>) => { for (let i = 0; i < a.length; i += 7) { h ^= Math.round(a[i] * 1000) | 0; h = Math.imul(h, 16777619) } }
+        eat(g.world.hf.h); eat(g.world.solids)
+        return (h >>> 0).toString(16) + ':' + g.world.counts().trees
+      },
     }
     if (!DEV) return
     window.addEventListener('keydown', (e) => {

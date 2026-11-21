@@ -41,7 +41,7 @@ export function groundMaterial(): THREE.Material {
     let sand: any = mix(vec3(0.5, 0.41, 0.27), vec3(0.74, 0.65, 0.46), smoothstep(0.3, 0.7, rip.mul(0.35).add(n1.mul(0.65))))
     sand = mix(sand, vec3(0.4, 0.32, 0.21), drift2.mul(0.5))
     sand = mix(sand, vec3(0.3, 0.25, 0.18), smoothstep(0.7, 0.76, n3.mul(0.5).add(n4.mul(0.5))).mul(0.7))
-    const earth = mix(vec3(0.2, 0.12, 0.07), vec3(0.36, 0.23, 0.13), smoothstep(0.35, 0.6, n2.mul(0.6).add(n3.mul(0.4))))
+    const earth = mix(vec3(0.15, 0.1, 0.06), vec3(0.27, 0.19, 0.115), smoothstep(0.35, 0.6, n2.mul(0.6).add(n3.mul(0.4))))
 
     const steep = smoothstep(0.86, 0.62, normalWorld.y)
     let col: any = mix(litter, mud, max(k.b, steep))
@@ -51,11 +51,18 @@ export function groundMaterial(): THREE.Material {
     col = mix(col, earth, k.g)
     // river and lake beds
     col = mix(col, vec3(0.34, 0.29, 0.2), smoothstep(0.3, -1.5, pw.y))
+    // relief: leaves, clods and cracks catch the low sun on one side
+    const off = U.sunDir.xz.mul(0.035)
+    const emb = n2.sub(noise(pw.xz.mul(0.19).add(off.mul(0.19))).g).mul(5).add(n3.sub(noise(pw.xz.mul(0.83).add(off.mul(0.83))).b).mul(2.2)).clamp(-0.45, 0.6)
+    col = col.mul(emb.mul(U.day.mul(0.7).add(0.3)).add(1))
     // the wet band above the waterline, and darker still below it
     const hw = pw.y.sub(waterHere())
     const wet = smoothstep(1.0, 0.04, hw.add(n2.mul(0.3)))
     col = mix(col, col.mul(vec3(0.5, 0.46, 0.4)), wet)
-    return col
+    // the story's marker: a soft pale ring on the ground
+    const md = pw.xz.sub(U.marker.xz).length()
+    const ringM = smoothstep(0.25, 0.0, abs(md.sub(1.1).sub(sin(U.time.mul(2)).mul(0.08)))).mul(U.marker.w)
+    return col.add(vec3(0.5, 0.42, 0.22).mul(ringM))
   })()
   return m
 }

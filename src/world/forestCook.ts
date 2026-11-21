@@ -181,7 +181,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
   for (let z = -lim; z < lim; z += us) for (let x = -lim; x < lim; x += us) {
     const px = x + ru.range(0, us), pz = z + ru.range(0, us), roll = ru(), s = ru.range(0.7, 1.5), rot = ru() * 6.283, seed = ru()
     const n = fbm2(px / 18, pz / 18, S + 9, 2)
-    if (roll > (0.2 + 0.75 * smooth(0.38, 0.66, n)) * density) continue
+    if (roll > (0.06 + 0.55 * smooth(0.45, 0.7, n)) * density) continue
     const h = heightFormula(px, pz)
     if (h < 6.9 || kind.lake > 0.02 || kind.channel > 0.12 || kind.sand > 0.2 || kind.trail > 0.25 || kind.dry > 0.55) continue
     if (kind.high > 0.5 && n < 0.6) continue

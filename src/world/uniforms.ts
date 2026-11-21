@@ -37,6 +37,8 @@ export const U = {
   raft: uniform(new Vector4(0, 0, 0, 0)), // floating house: x,z tilt and y dip when someone steps on (xyz), spare
   fishRoll: uniform(new Vector3(0, 0.3, 0.5)), // the giant fish: progress, bend, tail wag
   boatLake: uniform(0), // 1 while the boats being drawn sit on the lake (wet band height)
+  marker: uniform(new Vector4(0, -100, 0, 0)), // a soft ring of light on the ground where the story asks him to go
+  grey: uniform(0), // the told story: the world's colour drops away
   ripple: uniform(1), // water surface roughness (still lake at dawn = low) // low ground mist before dawn
 
   lampCol: uniform(new Color(1, 0.62, 0.28)),

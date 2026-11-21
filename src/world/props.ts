@@ -34,7 +34,7 @@ export class Props {
     this.kit = parseGlb(b64ToBytes(peopleUrl))
     this.fishGeo = parseGlb(b64ToBytes(fishUrl)).fish
     // skiff and its outboard become one mesh
-    if (this.geo.skiff && this.geo.outboard) { const o = this.geo.outboard.clone(); o.translate(0, 0.42, -3.05); this.geo.skiff = mergeGeos([this.geo.skiff, o]) }
+    if (this.geo.skiff && this.geo.outboard) { const o = this.geo.outboard.clone(); o.translate(0, 0.42, -3.085); this.geo.skiff = mergeGeos([this.geo.skiff, o]) }
     const m = new PaintedMaterial({ wrap: 0.45, pools: true })
     m.colorNode = Fn(() => {
       const vc = attribute('color', 'vec3')
@@ -55,7 +55,7 @@ export class Props {
     // the orb: a small glowing device
     const om = new THREE.MeshBasicNodeMaterial({ fog: false })
     om.colorNode = Fn(() => U.orbCol.mul(mix(float(0.5), float(2.2), U.orb.w.div(3).clamp())).add(vec3(0.05, 0.08, 0.1)))()
-    this.orb = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 8), om); this.orb.visible = false; group.add(this.orb)
+    this.orb = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 6), om); this.orb.visible = false; group.add(this.orb)
     // two lines (rope): 12 points each, rebuilt when their ends move
     const mkLine = () => {
       const g = new THREE.BufferGeometry(), n = 13 * 3

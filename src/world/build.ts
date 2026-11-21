@@ -97,10 +97,12 @@ export function buildWorld(c: CookResult, scene: THREE.Scene, renderer: THREE.We
     const sc = sun.shadow.camera
     sc.left = -46; sc.right = 46; sc.top = 46; sc.bottom = -46; sc.near = 1; sc.far = 400
     sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.06
+    sun.shadow.autoUpdate = false // redrawn every other frame, or at once when its centre jumps
   }
   scene.add(sun, sun.target)
 
-  const snap = new THREE.Vector3()
+  const snap = new THREE.Vector3(), lastSnap = new THREE.Vector3()
+  let shadowTick = 0
   return {
     hf, group, sun, forest, solids, structures, life, props, figures,
     update(dt, camera, tod, focus) {
@@ -119,6 +121,7 @@ export function buildWorld(c: CookResult, scene: THREE.Scene, renderer: THREE.We
       U.lamp1.value.set(L1.x, L1.y, L1.z, envOut.lamp * 4.0 * (1.9 - fl))
       // shadow follows the focus point, snapped so it does not shimmer
       snap.set(Math.round(focus.x / 2) * 2, focus.y, Math.round(focus.z / 2) * 2)
+      if (T.shadows) { shadowTick++; if ((shadowTick & 1) === 0 || snap.x !== lastSnap.x || snap.z !== lastSnap.z) sun.shadow.needsUpdate = true; lastSnap.copy(snap) }
       sun.target.position.copy(snap)
       sun.position.copy(snap).addScaledVector(U.sunDir.value, 180)
       camera.updateMatrixWorld()

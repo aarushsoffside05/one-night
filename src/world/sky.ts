@@ -2,41 +2,41 @@
 import * as THREE from 'three/webgpu'
 import { Fn, positionWorld, positionLocal, cameraPosition, vec2, vec3, float, mix, smoothstep, max, dot, pow, attribute, clamp } from './tsl'
 import { U } from './uniforms'
-import { noise, PaintedMaterial } from './shade'
+import { noise, PaintedMaterial, grade } from './shade'
 import { heightFormula } from './terrain'
 import { rng, noise2, seedInt } from './rng'
 
-export function makeSky(): THREE.Mesh {
-  const m = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide, depthWrite: false, fog: false })
-  m.colorNode = Fn(() => {
-    const dir = positionLocal.normalize()
-    const y = dir.y
-    const t = clamp(y, 0, 1)
-    const col = mix(U.skyHor, U.skyTop, pow(t, 0.42)).toVar()
-    const sd = max(dot(dir, U.sunDir), 0)
-    // glow round the sun, wide and tight
-    col.addAssign(U.skyGlow.mul(pow(sd, 6).mul(0.35).add(pow(sd, 48).mul(0.5))).mul(smoothstep(-0.1, 0.1, y)))
-    // painted clouds: soft banks with a brushed edge, lit on the sun side; a flat layer seen in perspective
-    const cuv = dir.xz.div(y.add(0.3)).mul(0.42)
-    const drift = vec2(U.time.mul(0.0012), U.time.mul(0.0004))
-    const big = noise(cuv.mul(0.5).add(drift)).r
-    const mid = noise(cuv.mul(1.3).sub(drift.mul(1.7))).g
-    const brush = noise(cuv.mul(vec2(1.1, 2.6)).add(drift.mul(2))).a
-    const dens = big.mul(0.62).add(mid.mul(0.28)).add(brush.mul(0.16))
-    const c = smoothstep(0.56, 0.74, dens).mul(smoothstep(0.03, 0.2, y)).mul(0.9)
-    const lit = smoothstep(0.5, 0.95, dens.add(pow(sd, 3).mul(0.2)))
-    col.assign(mix(col, mix(U.cloudShade, U.cloudCol, lit), c))
-    // stars
+// The sky as a function of direction: used by the dome, and by the water for what it reflects.
+export const skyColor = (dir: any, stars: boolean) => {
+  const y = dir.y
+  const t = clamp(y, 0, 1)
+  const col = mix(U.skyHor, U.skyTop, pow(t, 0.42)).toVar()
+  const sd = max(dot(dir, U.sunDir), 0)
+  col.addAssign(U.skyGlow.mul(pow(sd, 6).mul(0.35).add(pow(sd, 48).mul(0.5))).mul(smoothstep(-0.1, 0.1, y)))
+  // painted clouds: soft banks with a brushed edge, lit on the sun side; a flat layer seen in perspective
+  const cuv = dir.xz.div(y.abs().add(0.3)).mul(0.42)
+  const drift = vec2(U.time.mul(0.0012), U.time.mul(0.0004))
+  const big = noise(cuv.mul(0.5).add(drift)).r
+  const mid = noise(cuv.mul(1.3).sub(drift.mul(1.7))).g
+  const brush = noise(cuv.mul(vec2(1.1, 2.6)).add(drift.mul(2))).a
+  const dens = big.mul(0.62).add(mid.mul(0.28)).add(brush.mul(0.16))
+  const c = smoothstep(0.56, 0.74, dens).mul(smoothstep(0.03, 0.2, y)).mul(0.9)
+  const lit = smoothstep(0.5, 0.95, dens.add(pow(sd, 3).mul(0.2)))
+  col.assign(mix(col, mix(U.cloudShade, U.cloudCol, lit), c))
+  if (stars) {
     const suv = dir.xz.div(y.abs().add(0.35)).mul(9)
     const st = noise(suv).b.mul(noise(suv.mul(2.7).add(0.37)).b)
     col.addAssign(vec3(0.9, 0.95, 1).mul(smoothstep(0.46, 0.6, st)).mul(1.6).mul(U.stars).mul(smoothstep(0.0, 0.25, y)).mul(c.oneMinus()))
-    // the disc itself
-    col.addAssign(U.discCol.mul(smoothstep(0.99935, 0.99965, sd)).mul(c.mul(0.7).oneMinus()))
-    // below the horizon: haze colour so the far rings melt into it
-    const hazeBand = smoothstep(0.16, -0.02, y)
-    const hz = mix(U.fogCol, U.fogSun, pow(sd, 3))
-    return mix(col, hz, hazeBand.mul(0.85))
-  })()
+  }
+  col.addAssign(U.discCol.mul(smoothstep(0.99935, 0.99965, sd)).mul(c.mul(0.7).oneMinus()))
+  const hazeBand = smoothstep(0.16, -0.02, y)
+  const hz = mix(U.fogCol, U.fogSun, pow(sd, 3))
+  return mix(col, hz, hazeBand.mul(0.85))
+}
+
+export function makeSky(): THREE.Mesh {
+  const m = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide, depthWrite: false, fog: false })
+  m.colorNode = Fn(() => grade(skyColor(positionLocal.normalize(), true)))()
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(3000, 32, 16), m)
   mesh.frustumCulled = false
   mesh.renderOrder = -10
@@ -90,7 +90,7 @@ export function makeFarRings(): THREE.Mesh {
     const blot = noise(vec2(positionWorld.x.add(positionWorld.z).mul(0.006), positionWorld.y.mul(0.03))).r
     const base = mix(vec3(0.05, 0.11, 0.05), vec3(0.16, 0.26, 0.09), k.z.mul(0.6).add(blot.mul(0.5)))
     const lit = base.mul(U.sunCol.mul(U.sunI).mul(k.z.mul(0.5).add(0.15)).add(U.amb.mul(0.9)))
-    return lit.mul(k.y)
+    return grade(lit.mul(k.y))
   })()
   const mesh = new THREE.Mesh(g, m)
   mesh.frustumCulled = false

@@ -1,0 +1,49 @@
+backend webgpu, level high
+01 beach to mouth                low water, late afternoon  draws   23  tris  1318257
+01 beach to mouth                high water, morning        draws   22  tris  1318209
+01 beach to mouth                night by lamp              draws   23  tris  1318257
+01 beach to mouth                sunrise                    draws   23  tris  1318257
+02 river mouth                   low water, late afternoon  draws   24  tris  1554931
+02 river mouth                   high water, morning        draws   23  tris  1554883
+02 river mouth                   night by lamp              draws   24  tris  1554931
+02 river mouth                   sunrise                    draws   24  tris  1554931
+03 channel under banks           low water, late afternoon  draws   24  tris  2274273
+03 channel under banks           high water, morning        draws   23  tris  2274225
+03 channel under banks           night by lamp              draws   24  tris  2274273
+03 channel under banks           sunrise                    draws   24  tris  2274273
+04 landing and floating house    low water, late afternoon  draws   24  tris  2381389
+04 landing and floating house    high water, morning        draws   23  tris  2381341
+04 landing and floating house    night by lamp              draws   24  tris  2381389
+04 landing and floating house    sunrise                    draws   24  tris  2381389
+05 bank steps from top           low water, late afternoon  draws   23  tris  1800769
+05 bank steps from top           high water, morning        draws   23  tris  1810277
+05 bank steps from top           night by lamp              draws   23  tris  1800769
+05 bank steps from top           sunrise                    draws   23  tris  1800769
+06 yard and house on legs        low water, late afternoon  draws   23  tris  2006703
+06 yard and house on legs        high water, morning        draws   23  tris  2006703
+06 yard and house on legs        night by lamp              draws   23  tris  2006703
+06 yard and house on legs        sunrise                    draws   23  tris  2006703
+07 marked tree                   low water, late afternoon  draws   23  tris  1622239
+07 marked tree                   high water, morning        draws   23  tris  1622239
+07 marked tree                   night by lamp              draws   23  tris  1622239
+07 marked tree                   sunrise                    draws   23  tris  1622239
+08 trail                         low water, late afternoon  draws   23  tris  2657465
+08 trail                         high water, morning        draws   22  tris  2648625
+08 trail                         night by lamp              draws   23  tris  2657465
+08 trail                         sunrise                    draws   23  tris  2657465
+09 dry bed crossing              low water, late afternoon  draws   23  tris  2473863
+09 dry bed crossing              high water, morning        draws   22  tris  2473815
+09 dry bed crossing              night by lamp              draws   23  tris  2473863
+09 dry bed crossing              sunrise                    draws   23  tris  2473863
+10 giant trunk                   low water, late afternoon  draws   23  tris  2425110
+10 giant trunk                   high water, morning        draws   22  tris  2425062
+10 giant trunk                   night by lamp              draws   23  tris  2425110
+10 giant trunk                   sunrise                    draws   23  tris  2425110
+11 lake high bank east           low water, late afternoon  draws   22  tris  1928901
+11 lake high bank east           high water, morning        draws   21  tris  1928853
+11 lake high bank east           night by lamp              draws   22  tris  1928901
+11 lake high bank east           sunrise                    draws   22  tris  1928901
+12 deep forest                   low water, late afternoon  draws   23  tris  2062762
+12 deep forest                   high water, morning        draws   22  tris  2062714
+12 deep forest                   night by lamp              draws   23  tris  2062762
+12 deep forest                   sunrise                    draws   23  tris  2062762
