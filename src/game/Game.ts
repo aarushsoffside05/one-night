@@ -178,12 +178,13 @@ export class Game {
     const g = this
     ;(window as any).__ON = {
       ready: true, backend: this.backend, tier: this.tier, cams: CAMS.map((c) => c.name), game: this,
-      set(o: { water?: number; tod?: number; cam?: number; frozen?: boolean; clock?: number }) {
+      set(o: { water?: number; tod?: number; cam?: number; frozen?: boolean; clock?: number; view?: number[] }) {
         if (o.water !== undefined) g.water = o.water
         if (o.tod !== undefined) g.tod = o.tod
         if (o.frozen !== undefined) g.frozen = o.frozen
         if (o.clock !== undefined) g.clock = o.clock
         if (o.cam !== undefined) g.setCam(o.cam)
+        if (o.view) { g.camera.position.set(o.view[0], o.view[1], o.view[2]); g.camera.up.set(0, 1, 0); if (o.view[0] === o.view[3] && o.view[2] === o.view[5]) g.camera.up.set(0, 0, -1); g.camera.lookAt(o.view[3], o.view[4], o.view[5]); g.camera.up.set(0, 1, 0) }
       },
       // render one frame now and read it back (page screenshots of a WebGPU canvas come out blank headless)
       cap(q = 0.85) { g.renderer.info.reset(); advance(performance.now()); return g.renderer.domElement.toDataURL('image/jpeg', q) },

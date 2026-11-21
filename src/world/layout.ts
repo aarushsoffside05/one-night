@@ -11,11 +11,28 @@ export const CELL = 2 // height grid spacing
 
 export type P2 = readonly [number, number]
 // Main low-water channel, mouth (south, on the open river) to upstream (north).
-export const CHANNEL: P2[] = [[-38, 330], [-40, 262], [-46, 215], [-52, 172], [-30, 120], [-34, 78], [-50, 38], [-78, -22], [-70, -70], [-48, -118], [-58, -170], [-78, -225], [-66, -290], [-60, -360]]
+const CHANNEL_RAW: P2[] = [[-38, 330], [-40, 262], [-46, 215], [-52, 172], [-30, 120], [-34, 78], [-50, 38], [-78, -22], [-70, -70], [-48, -118], [-58, -170], [-78, -225], [-66, -290], [-60, -360]]
 // The lake's only way out: a channel bed that is dry ground in October.
-export const DRYBED: P2[] = [[178, -84], [158, -58], [130, -40], [96, -31], [60, -36], [22, -52], [-14, -62], [-52, -72]]
+const DRYBED_RAW: P2[] = [[178, -84], [158, -58], [130, -40], [96, -31], [60, -36], [22, -52], [-14, -62], [-52, -72]]
 // The trail: yard -> forest -> dry bed crossing -> giant trunk -> lake's high bank.
-export const TRAIL: P2[] = [[30, 30], [52, 14], [74, -6], [92, -30], [100, -48], [112, -74], [116, -100], [121, -122]]
+const TRAIL_RAW: P2[] = [[30, 30], [52, 14], [74, -6], [92, -30], [100, -48], [112, -74], [116, -100], [121, -122]]
+// Smooth a hand-placed polyline (Catmull-Rom) so channels and trails bend instead of kinking.
+function smooth(p: P2[], sub: number): P2[] {
+  const out: P2[] = []
+  for (let i = 0; i < p.length - 1; i++) {
+    const p0 = p[Math.max(i - 1, 0)], p1 = p[i], p2 = p[i + 1], p3 = p[Math.min(i + 2, p.length - 1)]
+    for (let k = 0; k < sub; k++) {
+      const t = k / sub, t2 = t * t, t3 = t2 * t
+      const f = (a: number, b: number, c: number, d: number) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3)
+      out.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])])
+    }
+  }
+  out.push(p[p.length - 1])
+  return out
+}
+export const CHANNEL = smooth(CHANNEL_RAW, 4)
+export const DRYBED = smooth(DRYBED_RAW, 4)
+export const TRAIL = smooth(TRAIL_RAW, 3)
 // Path from the yard to the top of the bank steps.
 export const YARDPATH: P2[] = [[30, 30], [10, 42], [-8, 50]]
 

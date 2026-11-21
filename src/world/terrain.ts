@@ -54,7 +54,7 @@ export function heightFormula(x: number, z: number): number {
   // the open river to the south, the beach at the mouth
   const shoreZ = RIVER_Z + 9 * Math.sin(x / 85 + 0.6) + 5 * Math.sin(x / 31)
   const dr = z - shoreZ // > 0 is river
-  const beachness = ss(190, 70, Math.hypot(x - PLACES.beach.x, (z - PLACES.beach.z) * 0.6)) * ss(-6, -22, x - CHANNEL[2][0] + 0)
+  const beachness = ss(190, 70, Math.hypot(x - PLACES.beach.x, (z - PLACES.beach.z) * 0.6)) * ss(-6, -22, x + 46)
   // steep scarp where there is no beach, long sand slope where there is
   const scarp = ss(-16, 2, dr)
   const sandSlope = ss(-78, 6, dr)
