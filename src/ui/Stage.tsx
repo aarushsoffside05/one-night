@@ -42,7 +42,7 @@ export function Stage() {
   return (
     <Canvas
       frameloop="never"
-      dpr={1}
+      dpr={params.shot ? 1 : Math.min(2, window.devicePixelRatio || 1)}
       camera={{ fov: 42, near: 0.3, far: 2600, position: [60, 20, -60] }}
       style={{ position: 'fixed', inset: 0 }}
       gl={async (props: any) => {

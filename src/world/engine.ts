@@ -16,6 +16,13 @@ import { makeSky, makeFarRings, makeClouds } from './sky';
 import { applyTimeOfDay } from './timeofday';
 import { FIXED_CAMS } from './cameras';
 import { makePost, type Post } from './post';
+import { Cover, makeLandMaps } from './cover';
+import { People, type Look } from './people';
+import { Player, bindInput, type Solid } from './player';
+import { buildCanoe } from './props';
+import { Quality, markLoading } from './quality';
+import { Bench } from './bench';
+import { bus } from '../state';
 import * as L from './layout';
 
 export interface Cooked { terrain: TerrainCook; treeKit: KitMesh[][]; forest: ForestCook; }
@@ -33,8 +40,28 @@ export class Engine {
   hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
   focus = new THREE.Vector3(60, 10, -80);       // what the shadow box and detail centre on
   detail: ForestDetail = { lod0: 58, lod1: 170, max: 520, density: 1 };
+  applyQuality() {
+    const q = this.quality, d = q.def, k = q.detail;
+    this.detail.lod0 = d.lod0; this.detail.lod1 = d.lod1 * (0.6 + 0.4 * k); this.detail.max = d.max * k; this.detail.density = d.density * k;
+    if (this.cover) this.cover.density.value = d.cover * k;
+    sim.renderScale = q.scale; this.post?.setScale(q.scale);
+    const shadows = d.shadow > 0;
+    this.sun.shadow.intensity = shadows ? 1 : 0; this.sunShadowOn = shadows;
+  }
+  sunShadowOn = true;
   post!: Post;
-  fullPost = !params.off.includes('post');
+  cover!: Cover;
+  people!: People;
+  player!: Player;
+  solids: Solid[] = [];
+  lampSpot = new THREE.SpotLight(0xffc27a, 0, 26, 0.95, 0.6, 1.4);
+  lampGlow = new THREE.PointLight(0xffb866, 0, 9, 1.6);
+  useFixedCam = false;
+  quality = new Quality();
+  bench!: Bench;
+  lastFrameAt = 0;
+  fps = 60;
+  titleAngle = 0;
   frameNo = 0;
   counts = { calls: 0, tris: 0 };
 
@@ -43,7 +70,8 @@ export class Engine {
   groundAt(x: number, z: number): number { return this.cooked ? sampleGrid(this.cooked.terrain.grid, x, z) : 0; }
 
   async start() {
-    setUI({ mode: 'loading', backend: sim.backend });
+    markLoading(true);
+    setUI({ loading: { stage: 'Waking up', f: 0 }, backend: sim.backend });
     const r = this.renderer;
     r.info.autoReset = false;
     r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFShadowMap;
@@ -63,11 +91,26 @@ export class Engine {
     if (params.water !== null) sim.water = sim.waterTarget = params.water;
     if (params.tod !== null) sim.tod = sim.todTarget = params.tod;
     if (params.cam) this.setFixedCam(params.cam);
+    const pp = new URLSearchParams(location.search).get('p');
+    if (pp) { const [x, z, yaw] = pp.split(',').map(Number); this.player.place(x, z, yaw || 0); }
     this.updateEnv(0);
     setUI({ loading: { stage: 'Warming the light', f: 0.6 } });
+    this.cover.update(r, this.camera); // run every compute pass once before play
+    this.quality.onChange = () => this.applyQuality();
+    this.quality.set(params.level ?? 'auto');
+    this.bench = new Bench((x, z) => this.groundAt(x, z), () => this.counts, () => ({ postPasses: this.post.passes(this.quality.def.post), trees: this.cooked?.forest.count, coverInstances: this.cover.instances, coverOnGPU: this.cover.useCompute }));
+    bus.on('quality', (l) => this.quality.set(l));
+    bus.on('bench', () => { this.useFixedCam = false; this.bench.start(); });
+    bus.on('mode', (m) => { sim.mode = m; this.useFixedCam = false; setUI({ mode: m }); });
     await r.compileAsync(this.scene, this.camera);
+    // draw every pipeline once so nothing compiles mid-play
+    const warm = new THREE.RenderTarget(64, 64);
+    r.setRenderTarget(warm); for (const k of ['lite', 'mid', 'full'] as const) this.post.render(k); r.setRenderTarget(null); warm.dispose();
+    this.applyQuality();
+    markLoading(false);
     sim.ready = true; (window as any).__ready = true;
-    setUI({ mode: 'roam' });
+    setUI({ loading: { stage: 'Ready', f: 1 } });
+    if (params.shot || params.auto) { sim.mode = (params.auto as any) || 'roam'; setUI({ mode: sim.mode }); }
   }
 
   build(c: Cooked) {
@@ -80,6 +123,8 @@ export class Engine {
     this.forest = new Forest(c.forest, c.treeKit, this.worldMat);
     scene.add(this.forest.group);
     scene.add(makeFarRings(WORLD_SEED, this.worldMat));
+    this.cover = new Cover(this.tex, makeLandMaps(c.terrain.grid, c.terrain.zone), sim.backend === 'webgpu' && !params.off.includes('compute'));
+    if (!params.off.includes('cover')) scene.add(this.cover.group);
     this.water = makeWater(); scene.add(this.water);
     this.sky = makeSky(); scene.add(this.sky);
     this.clouds = makeClouds(WORLD_SEED); scene.add(this.clouds);
@@ -91,12 +136,26 @@ export class Engine {
     scene.background = null;
     // free the cook's scratch arrays that were uploaded
     (c.terrain as any).mesh = null;
-    this.post = makePost(this.renderer, scene, this.camera);
+    // people and the kid
+    this.people = new People(this.tex); scene.add(this.people.group);
+    const kidLook: Look = { height: 1.5, skin: 'skinB', hair: 'hair', shirt: 'shirtYellow', shorts: 'shortsDark', shoe: 'shoe', sleeves: true, longLegs: false, pack: 'paintTeal' };
+    const kid = this.people.add(kidLook);
+    const canoe = new THREE.Mesh(makeKitGeometry(buildCanoe()), this.worldMat);
+    canoe.castShadow = true; canoe.receiveShadow = true; canoe.name = 'canoe'; scene.add(canoe);
+    this.player = new Player(kid, canoe, { groundAt: (x, z) => this.groundAt(x, z), forest: c.forest, solids: this.solids });
+    this.player.place(L.BANK_TOP[0] + 8, L.BANK_TOP[1] + 12, 2.0);
+    bindInput(this.renderer.domElement);
+    // the lamp: one spot light with a shadow, plus a small glow without one
+    this.lampSpot.castShadow = true; this.lampSpot.shadow.mapSize.set(1024, 1024); this.lampSpot.shadow.camera.near = 0.3; this.lampSpot.shadow.camera.far = 26;
+    this.lampSpot.shadow.bias = -0.002; this.lampSpot.shadow.normalBias = 0.05;
+    scene.add(this.lampSpot); scene.add(this.lampSpot.target); scene.add(this.lampGlow);
+    this.post = makePost(this.renderer, scene, this.camera, this.sun, !params.off.includes('rays'));
   }
 
   setFixedCam(name: string) {
     const fc = FIXED_CAMS.find((c) => c.name === name);
     if (!fc) return;
+    this.useFixedCam = true;
     const wy = sim.water * L.FLOOD_RANGE;
     const base = Math.max(this.groundAt(fc.x, fc.z), wy), lbase = Math.max(this.groundAt(fc.lx, fc.lz), wy);
     this.camera.position.set(fc.x, base + fc.up, fc.z);
@@ -124,18 +183,50 @@ export class Engine {
     this.sun.target.position.set(sx, f.y + 6, sz);
     this.sun.position.set(sx + sd.x * 130, f.y + 6 + sd.y * 130, sz + sd.z * 130);
     this.sun.target.updateMatrixWorld();
+    this.sun.shadow.autoUpdate = this.sunShadowOn && this.sun.intensity > 0.02;
     const cp = this.camera.position;
     U.camSnap.value.set(Math.round(cp.x / 2) * 2, 0, Math.round(cp.z / 2) * 2);
     this.sky.position.copy(cp); this.clouds.position.set(cp.x, 0, cp.z);
   }
 
+  updateLamp() {
+    const night = U.night.value as number, on = Math.max(0, (night - 0.25) / 0.5) * sim.lamp;
+    const f = this.player.fig, p = this.player;
+    const lp = this.lampGlow.position;
+    if (p.mode === 'canoe') lp.set(p.pos.x + Math.sin(p.yaw) * 1.7, p.pos.y + 0.55, p.pos.z + Math.cos(p.yaw) * 1.7);
+    else if (f.holdsLamp) lp.copy(f.lampWorld); else lp.set(p.pos.x, p.pos.y + 1.0, p.pos.z);
+    this.lampGlow.intensity = 14 * Math.min(1, on);
+    this.lampSpot.position.set(lp.x, lp.y + 0.5, lp.z);
+    this.lampSpot.target.position.set(lp.x + Math.sin(p.yaw) * 6, lp.y - 1.6, lp.z + Math.cos(p.yaw) * 6);
+    this.lampSpot.target.updateMatrixWorld();
+    this.lampSpot.intensity = 260 * Math.min(1, on);
+    // the lamp's shadow pass is only drawn when the lamp is lit
+    this.lampSpot.shadow.autoUpdate = on > 0.01;
+  }
   offscreen: THREE.RenderTarget | null = null;
   frame(dt: number) {
     if (!this.cooked || !sim.ready) return;
     const r = this.renderer;
     if (!sim.paused && !params.shot) sim.time += dt;
+    const now = performance.now(), frameMs = this.lastFrameAt ? now - this.lastFrameAt : 16.7; this.lastFrameAt = now;
+    this.quality.tick(frameMs); this.fps += (1000 / Math.max(1, frameMs) - this.fps) * 0.05;
+    if (this.bench.update(Math.min(0.1, frameMs / 1000), frameMs, this.camera, this.focus)) { /* the flight owns the camera */ }
+    else if (sim.mode === 'title' && !this.useFixedCam) {
+      // a slow turn above the community while the title is up
+      this.titleAngle += dt * 0.03;
+      const a = this.titleAngle + 2.6, cx = L.COMMUNITY[0] - 30, cz = L.COMMUNITY[1];
+      this.camera.position.set(cx + Math.cos(a) * 70, 30, cz + Math.sin(a) * 70); this.camera.lookAt(cx, 9, cz);
+      this.focus.set(cx, 10, cz);
+    } else if (!this.useFixedCam) {
+      this.player.update(dt, this.camera);
+      this.focus.copy(this.player.pos);
+    }
+    this.camera.updateMatrixWorld();
+    this.people.update(sim.time);
+    this.updateLamp();
     this.updateEnv(dt);
     this.forest.update(this.camera, this.focus, this.detail, U.shadowR.value as number);
+    if (!params.off.includes('cover')) this.cover.update(r, this.camera);
     r.info.reset();
     if (params.shot) {
       // Headless software WebGPU dies when the canvas texture is acquired, so with ?shot=1
@@ -155,7 +246,8 @@ export class Engine {
   grab: ((url: string) => void) | null = null;
   grabFrame(): Promise<string> { return new Promise((r) => { this.grab = r; }); }
   // test/capture helper: set state, let a few frames settle, grab a picture
-  async shot(o: { cam?: string; water?: number; tod?: number; time?: number }): Promise<string> {
+  async shot(o: { cam?: string; water?: number; tod?: number; time?: number; p?: [number, number, number] }): Promise<string> {
+    if (o.p) { this.useFixedCam = false; this.player.place(o.p[0], o.p[1], o.p[2]); }
     if (o.water !== undefined) sim.water = sim.waterTarget = o.water;
     if (o.tod !== undefined) sim.tod = sim.todTarget = o.tod;
     if (o.time !== undefined) sim.time = o.time;
@@ -164,7 +256,7 @@ export class Engine {
     await new Promise<void>((res) => { const tick = () => (this.frameNo >= start + 3 ? res() : setTimeout(tick, 30)); tick(); });
     return this.grabFrame();
   }
-  renderWorld() { this.post.render(this.fullPost); }
+  renderWorld() { this.post.render(params.off.includes('post') ? 'lite' : this.quality.def.post); }
   async readFrame(): Promise<string> {
     const r = this.renderer, rt = this.offscreen!;
     const w = rt.width, h = rt.height;

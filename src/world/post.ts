@@ -5,6 +5,7 @@ import * as THREE from 'three/webgpu';
 import * as T from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { fxaa } from 'three/addons/tsl/display/FXAANode.js';
+import { godrays } from 'three/addons/tsl/display/GodraysNode.js';
 import { U } from './uniforms';
 
 const t: any = T;
@@ -16,9 +17,11 @@ export const P = {
   lift: t.uniform(new THREE.Color(0, 0, 0)),
   tint: t.uniform(new THREE.Color(1, 1, 1)),
   vignette: t.uniform(0.22),
+  rays: t.uniform(0.5),
 };
 
-export interface Post { full: THREE.RenderPipeline; lite: THREE.RenderPipeline; passFull: any; passLite: any; setScale(s: number): void; render(full: boolean): void; passes(full: boolean): number; }
+export type PostKind = 'lite' | 'mid' | 'full';
+export interface Post { setScale(s: number): void; render(kind: PostKind): void; passes(kind: PostKind): number; }
 
 function grade(c: any) {
   // colour grade made by code: tint, contrast around mid grey, saturation, a soft vignette
@@ -31,20 +34,30 @@ function grade(c: any) {
   return col.mul(vig).mul(U.fade);
 }
 
-export function makePost(renderer: THREE.WebGPURenderer, scene: THREE.Scene, camera: THREE.Camera): Post {
-  const full = new THREE.RenderPipeline(renderer), lite = new THREE.RenderPipeline(renderer);
-  const passFull = t.pass(scene, camera, { samples: 0 });
-  const colF = passFull.getTextureNode('output');
-  const bl = bloom(colF, 1, 0.55, 0.92);
-  const hdr = grade(colF.add(bl.mul(P.bloomStrength)));
-  (full as any).outputColorTransform = false;
-  full.outputNode = fxaa(t.renderOutput(hdr, THREE.ACESFilmicToneMapping, THREE.SRGBColorSpace));
+export function makePost(renderer: THREE.WebGPURenderer, scene: THREE.Scene, camera: THREE.Camera, sun: THREE.DirectionalLight, withRays: boolean): Post {
+  const build = (rays: boolean) => {
+    const pipe = new THREE.RenderPipeline(renderer);
+    const sp = t.pass(scene, camera, { samples: 0 });
+    const col = sp.getTextureNode('output');
+    const bl = bloom(col, 1, 0.55, 0.92);
+    let lit = col.rgb.add(bl.rgb.mul(P.bloomStrength));
+    if (rays) {
+      // light shafts: the sun's shadow map marched at half resolution
+      const gr: any = godrays(sp.getTextureNode('depth'), camera as any, sun as any);
+      gr.raymarchSteps.value = 28; gr.density.value = 0.55; gr.maxDensity.value = 0.6; gr.distanceAttenuation.value = 1.2;
+      lit = lit.add(U.fogSunCol.mul(gr.getTextureNode().r).mul(P.rays));
+    }
+    (pipe as any).outputColorTransform = false;
+    pipe.outputNode = fxaa(t.renderOutput(grade(lit), THREE.ACESFilmicToneMapping, THREE.SRGBColorSpace));
+    return { pipe, sp };
+  };
+  const full = build(withRays), mid = build(false);
+  const lite = new THREE.RenderPipeline(renderer);
   const passLite = t.pass(scene, camera, { samples: 0 });
-  lite.outputNode = location.search.includes('nograde') ? passLite.getTextureNode('output') : grade(passLite.getTextureNode('output'));
+  lite.outputNode = grade(passLite.getTextureNode('output'));
   return {
-    full, lite, passFull, passLite,
-    setScale(s: number) { passFull.setResolutionScale(s); passLite.setResolutionScale(s); },
-    render(f: boolean) { (f ? full : lite).render(); },
-    passes(f: boolean) { return f ? 9 : 1; }, // full-screen passes, reported apart from the draw budget
+    setScale(s: number) { full.sp.setResolutionScale(s); mid.sp.setResolutionScale(s); passLite.setResolutionScale(s); },
+    render(k: PostKind) { (k === 'full' ? full.pipe : k === 'mid' ? mid.pipe : lite).render(); },
+    passes(k: PostKind) { return k === 'full' ? (withRays ? 11 : 9) : k === 'mid' ? 9 : 1; }, // full-screen passes, reported apart from the draw budget
   };
 }

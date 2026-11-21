@@ -53,7 +53,7 @@ export function makeAtlasData(): Float32Array {
   }
   SWATCH_NAMES.forEach((k, i) => {
     const [r, g, b] = hexToLinear(SWATCHES[k]);
-    d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b; d[i * 4 + 3] = i >= EMISSIVE_FROM && k !== 'black' ? 1 : 0;
+    d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b; d[i * 4 + 3] = k === 'lampGlow' || k === 'deviceGlow' || k === 'windowGlow' ? 1 : 0;
   });
   return d;
 }
