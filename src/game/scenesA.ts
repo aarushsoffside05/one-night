@@ -86,7 +86,7 @@ function* s1(S: Story): Step {
   yield* S.wait(S.bot ? 0.1 : 2.2)
   // he slides his board in and follows: a minute too far
   S.g.cast.onBoard = true
-  S.placeBoy(-70, 247, 1.4, 'canoe'); S.p.frozen = false
+  S.placeBoy(-56, 252, 0.3, 'canoe'); S.p.frozen = false
   S.setTime(0.17)
   S.hint('Paddle after the canoe: W to paddle, A and D to turn')
   while (S.p.z > 156) { if (S.bot) S.botSteer(chan(Math.max(0.16, 0.2 + (215 - S.p.z) / 690 + 0.03)).x, chan(0.2 + (215 - S.p.z) / 690 + 0.03).z); const dt = yield; S.g.cast.boyAnim = input.film ? 'film' : null; ui.set({ filmGlow: input.film }); void dt }

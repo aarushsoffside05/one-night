@@ -186,6 +186,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     if (fbm2(gx0 / 60, gz0 / 60, S + 71, 2) < 0.47) continue
     const h = heightFormula(x, z)
     if (h < 7.2 || kind.lake > 0.02 || kind.channel > 0.04 || kind.sand > 0.2 || kind.dry > 0.3 || kind.trail > 0.25) continue
+    if (Math.min(distPoly(x, z, TRAIL), distPoly(x, z, YARDPATH)) < 4.5) continue
     if (Math.hypot(x - COMMUNITY.x, z - COMMUNITY.z) < 30 || Math.hypot(x - PLACES.giantTrunk.x, z - PLACES.giantTrunk.z) < 9) continue
     const ph = rp.range(7, 19), seed = rp.range(0.7, 0.95)
     R.trunk.push(x, h - 0.3, z, rp.range(0.1, 0.17), rp() * 6.283, seed, ph, rp.range(0.02, 0.24))
