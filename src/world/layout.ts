@@ -52,7 +52,7 @@ export const PLACES = {
   floatHouse: { x: -31, z: 70, rot: 1.45 },
   giantTrunk: { x: 121, z: -66 },
   lakeBank: { x: 122, z: -124 },
-  fishRoll: { x: 131, z: -127 },
+  fishRoll: { x: 134.5, z: -131.5 },
   beach: { x: -110, z: 214 },
   mouth: { x: -44, z: 232 },
 }

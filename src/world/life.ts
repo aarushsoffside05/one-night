@@ -256,9 +256,9 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
       const a = age()
       const d = length(uv().sub(0.5)).mul(2)
       // two or three concentric bands, thinning as they spread
-      const bands = smoothstep(0.13, 0.0, abs(d.sub(0.92))).add(smoothstep(0.1, 0.0, abs(d.sub(0.62))).mul(0.6)).add(smoothstep(0.08, 0.0, abs(d.sub(0.34))).mul(0.35))
+      const bands = smoothstep(0.2, 0.0, abs(d.sub(0.9))).add(smoothstep(0.1, 0.0, abs(d.sub(0.62))).mul(0.6)).add(smoothstep(0.08, 0.0, abs(d.sub(0.34))).mul(0.35))
       const fade = smoothstep(ib.y, 0.0, a)
-      const al = bands.mul(fade).mul(0.5)
+      const al = bands.mul(fade).mul(0.85)
       return vec4(mix(U.skyHor, vec3(1, 1, 1), 0.3).mul(U.amb.add(U.sunCol.mul(U.sunI).mul(0.3)).add(0.05)), al)
     })()
     m.colorNode = body.rgb; m.opacityNode = body.a
@@ -288,11 +288,11 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
   })()
   fishMat.colorNode = Fn(() => {
     // the modelled fish carries its painted colour; add a wet shine along the back
-    return attribute('color', 'vec3').add(U.skyHor.mul(0.2).mul(smoothstep(0.08, 0.2, positionLocal.y)))
+    return attribute('color', 'vec3').mul(0.45).add(U.skyHor.mul(0.28).mul(smoothstep(0.1, 0.19, positionLocal.y)))
   })()
   const fishMesh = new THREE.Mesh(fishGeo, fishMat)
   fishMesh.visible = false
-  fishMesh.scale.setScalar(1.15)
+  fishMesh.scale.setScalar(1.35)
   add(fishMesh)
   const fish = { active: false, t: 0, x: 0, z: 0, heading: 0 }
   const fishRoll = (x: number, z: number, heading: number) => { fish.active = true; fish.t = 0; fish.x = x; fish.z = z; fish.heading = heading; ring(x, z, 2.6, true) }
@@ -327,9 +327,10 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
         const wy = Math.max(LAKE_LEVEL, U.water.value)
         const fwd = (u - 0.5) * 1.9
         fishMesh.visible = true
-        fishMesh.position.set(fish.x + Math.sin(fish.heading) * fwd, wy - 0.42 + up * 0.36, fish.z + Math.cos(fish.heading) * fwd)
-        fishMesh.rotation.set(-0.5 + u * 1.25, fish.heading, 0, 'YXZ')
-        U.fishRoll.value.set(u, 0.28 + 0.2 * up, u > 0.55 ? 1.6 : 0.5)
+        // never a hero shot: the body stays in the water; only the broad back, then the tail, breaks the surface
+        fishMesh.position.set(fish.x + Math.sin(fish.heading) * fwd, wy - 0.38 + up * 0.25, fish.z + Math.cos(fish.heading) * fwd)
+        fishMesh.rotation.set(-0.1 + u * 0.3, fish.heading, 0, 'YXZ')
+        U.fishRoll.value.set(u, 0.12 + 0.1 * up, u > 0.55 ? 1.6 : 0.5)
         if (fish.t - dt < T * 0.62 && fish.t >= T * 0.62) ring(fishMesh.position.x - Math.sin(fish.heading) * 1.0, fishMesh.position.z - Math.cos(fish.heading) * 1.0, 1.7, true)
       }
     },
