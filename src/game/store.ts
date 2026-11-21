@@ -36,12 +36,14 @@ export type UI = {
   letterbox: boolean
   chapter: string | null
   tier: string
+  places: number // bit per place the boy has been to: the orb's map only draws those
+  toast: string | null
 }
 const state: UI = {
   phase: 'loading', loadStage: 'Starting', loadPct: 0, mode: null, backend: '?', dev: false, error: null,
   bench: null, benchRunning: false, devText: '', water: 0, tod: 0.1, caption: null, prompt: null, hint: null,
   filmGlow: false, hold: -1, onCanoe: false, orbView: false, sceneTitle: null, fade: 0, mapStage: -1, ended: false,
-  audioOn: true, pictures: -1, paused: false, letterbox: false, chapter: null, tier: '',
+  audioOn: true, pictures: -1, paused: false, letterbox: false, chapter: null, tier: '', places: 0, toast: null,
 }
 let snap = { ...state }
 const subs = new Set<() => void>()

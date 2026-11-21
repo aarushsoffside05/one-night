@@ -163,6 +163,7 @@ export class Game {
         if (ui.get().mode === 'story' && dt > 0) { this.story.update(dt); const st = this.story; ui.set({ letterbox: st.camOn, chapter: st.scene >= 0 ? `Scene ${st.scene + 1} of 8 · ${st.scenes[st.scene].title}` : null }) }
         this.hooks.frame?.(dt)
         this.soundFrame(dt)
+        this.placesFrame(dt)
         if (!(ui.get().mode === 'story' && this.story.camOn)) this.player.updateCamera(dt, this.camera)
         ui.set({ onCanoe: this.player.mode === 'canoe' })
       }
@@ -189,6 +190,18 @@ export class Game {
     const x = -46 + Math.sin(t * 0.05) * 5, z = 176 - t * 0.35 % 40
     this.camera.position.set(x, 2.2 + Math.sin(t * 0.21) * 0.15, z)
     this.camera.lookAt(-30 + Math.sin(t * 0.04) * 4, 5.5, z - 60)
+  }
+
+  // the orb's map adds a place only when he has been there
+  private placeT = 0; private toastT = 0
+  private placesFrame(dt: number) {
+    this.placeT += dt
+    if (this.toastT > 0 && (this.toastT -= dt) <= 0) ui.set({ toast: null })
+    if (this.placeT < 0.5) return
+    this.placeT = 0
+    const p = this.player, P = [[-110, 214], [-44, 232], [-45, 120], [20, 45], [-31, 70], [92, -30], [122, -124]]
+    let bits = ui.get().places
+    for (let i = 0; i < P.length; i++) if (!(bits & (1 << i)) && Math.hypot(p.x - P[i][0], p.z - P[i][1]) < 20) { bits |= 1 << i; ui.set({ places: bits, toast: 'The orb\'s map has a new place' }); this.toastT = 3.5; sound.chime('orb') }
   }
 
   private soundFrame(dt: number) {

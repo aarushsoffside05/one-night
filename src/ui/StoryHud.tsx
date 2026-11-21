@@ -4,18 +4,21 @@ import { getGame } from '../App'
 // Words on screen for the story: captions (every spoken line), the hold prompt, the film prompt, the orb.
 // The orb's map: shapes only, no words, no numbers. It steps back each time he points.
 function OrbMap({ stage }: { stage: number }) {
+  const pl = useUI((s) => s.places), has = (i: number) => (pl & (1 << i)) !== 0
   const mark = <circle r="5" fill="#ffd27a" stroke="#fff" strokeWidth="1.5" />
   return (
     <div className="orbmap">
       <svg viewBox="0 0 400 300">
         <rect width="400" height="300" rx="18" fill="#0f2b33" />
         {stage === 0 && (<g fill="none" strokeLinecap="round">
-          <path d="M40 270 H360" stroke="#6fb6c9" strokeWidth="16" />
-          <path d="M170 262 C150 220 190 190 172 150 C160 120 130 100 150 60 C158 44 150 30 154 16" stroke="#6fb6c9" strokeWidth="7" />
-          <path d="M196 170 C230 150 250 120 268 96" stroke="#d8c48a" strokeWidth="3" strokeDasharray="2 7" />
-          <path d="M300 62 C326 50 350 66 344 90 C338 112 300 114 288 96 C280 82 286 68 300 62 Z" fill="#6fb6c9" stroke="none" />
-          <rect x="190" y="160" width="10" height="10" fill="#e8b96a" /><rect x="176" y="178" width="8" height="7" fill="#e8b96a" />
-          <g transform="translate(316 86)">{mark}</g>
+          {(has(0) || has(1)) && <path d="M40 270 H360" stroke="#6fb6c9" strokeWidth="16" />}
+          {has(0) && <path d="M60 256 C90 246 120 250 150 258" stroke="#e6d6a4" strokeWidth="6" />}
+          {(has(1) || has(2)) && <path d="M170 262 C150 220 190 190 172 150" stroke="#6fb6c9" strokeWidth="7" />}
+          {has(2) && <path d="M172 150 C160 120 130 100 150 60 C158 44 150 30 154 16" stroke="#6fb6c9" strokeWidth="7" />}
+          {has(5) && <path d="M196 170 C230 150 250 120 268 96" stroke="#d8c48a" strokeWidth="3" strokeDasharray="2 7" />}
+          {has(6) && <path d="M300 62 C326 50 350 66 344 90 C338 112 300 114 288 96 C280 82 286 68 300 62 Z" fill="#6fb6c9" stroke="none" />}
+          {has(3) && <rect x="190" y="160" width="10" height="10" fill="#e8b96a" />}{has(4) && <rect x="176" y="178" width="8" height="7" fill="#e8b96a" />}
+          {has(6) && <g transform="translate(316 86)">{mark}</g>}
         </g>)}
         {stage === 1 && (<g fill="none" strokeLinecap="round">
           <path d="M20 250 C120 230 200 262 380 236" stroke="#6fb6c9" strokeWidth="12" />
@@ -57,12 +60,13 @@ export function StoryHud() {
   const caption = useUI((s) => s.caption), prompt = useUI((s) => s.prompt), hint = useUI((s) => s.hint)
   const film = useUI((s) => s.filmGlow), hold = useUI((s) => s.hold), title = useUI((s) => s.sceneTitle)
   const orb = useUI((s) => s.orbView), map = useUI((s) => s.mapStage), ended = useUI((s) => s.ended)
-  const chapter = useUI((s) => s.chapter), letterbox = useUI((s) => s.letterbox)
+  const chapter = useUI((s) => s.chapter), letterbox = useUI((s) => s.letterbox), toast = useUI((s) => s.toast)
   return (
     <div className={'story' + (letterbox ? ' cine' : '')}>
       <div className="bar-top" /><div className="bar-bottom" />
       {chapter && !letterbox && <div className="chapter"><span className="orb-dot" />{chapter}</div>}
       {hint && <div className="objective"><span className="objective-mark" />{hint}</div>}
+      {toast && <div className="toast"><span className="orb-dot" />{toast}</div>}
       {title && <div className="scene-title"><span>{title}</span></div>}
       {orb && <div className="orb-frame"><span>A way of seeing, lent to him: where the river stands in a flood</span></div>}
       {film && <div className="film"><Key k="F" /> film</div>}

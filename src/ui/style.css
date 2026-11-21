@@ -95,3 +95,5 @@ canvas { display: block; }
 .orbmap { animation: capin2 0.3s ease-out; }
 @keyframes capin2 { from { opacity: 0; transform: scale(0.96); } }
 @media (prefers-reduced-motion: reduce) { .story *, .shell * { animation: none !important; transition: none !important; } }
+
+.toast { position: absolute; right: 64px; top: 16px; display: flex; align-items: center; gap: 9px; padding: 8px 14px; background: var(--glass); backdrop-filter: blur(6px); border-radius: 999px; font: 600 13px ui-sans-serif, system-ui; color: var(--paper); animation: slidein 0.35s ease-out; }
