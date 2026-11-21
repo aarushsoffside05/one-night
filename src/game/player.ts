@@ -18,7 +18,7 @@ export class Player {
   mode: Mode = 'foot'
   walkPhase = 0; paddlePhase = 0; paddleSide = 1; stroke = 0
   canoe = { x: 0, y: 0, z: 0, heading: 0, vx: 0, vz: 0, spin: 0, roll: 0, visible: true }
-  camYaw = 0; camPitch = 0.32; camDist = 4.6; private camDistNow = 4.6
+  camYaw = 0; camPitch = 0.26; camDist = 3.7; private camDistNow = 3.7
   frozen = false // story scenes can take the controls away
   autoCam = true
   stepped = false; strokeNow = false; surface: 'earth' | 'wood' | 'mud' | 'water' | 'sand' = 'earth'

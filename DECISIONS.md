@@ -40,3 +40,9 @@ Playwright and Chromium are the ones already installed on the build machine. The
 - **Blender.** `pip install bpy` worked (bpy 5.3.0, Python 3.13) well inside 30 minutes, so the hero pieces (canoes, surfboard, skiff, outboard, giant fish, people kit) are modelled by script in `tools/blender/` and exported as small vertex-colour glTF.
 - **People are one skinned mesh.** All figures are merged into a single mesh whose parts are each bound rigidly to one bone, animated by code. That is one draw in the main pass and one in the shadow pass for everybody, instead of one draw per part type.
 - **Pictures are taken from the built site** (`vite preview` on port 4173), not the dev server, so editing code cannot reload the page in the middle of a capture.
+
+## 21 Nov, from Aarush (his words, mid-run)
+
+- **A1. He does not like the character models, and the look must get far better** (nearer the underwater garden, the Eos reference photos and the reel). Done so far: crowns rebuilt from real leaves, relief on bark and ground, deeper shade with gold light, drawn leaf litter, the whole sky in the water's reflection, a colour grade, a closer camera; people kit being rebuilt chunkier to match `04-look`.
+- **A2. He overrules the brief's ban on downloaded models and textures and its size cap:** "it's fine as long as it runs on the web"; quality levels low, medium, high are fine. He will download Quixel Megascans assets from Fab himself and upload them. I could not download them: Fab needs a sign-in and I use no logins. Wish list: `2026-11-21-fab-wishlist.md`. Consequences logged there: stand-in species (not Amazon), private repository needed for the raw files, bigger download.
+- Still standing from the brief: no paid things, no logins, no outside AI tools, no reference pictures in the repository.

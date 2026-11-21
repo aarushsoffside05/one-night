@@ -2,8 +2,15 @@
 
     python tools/blender/preview.py OUT_DIR [shot-name-filter ...]
 
-Imports the three .glb files exactly as shipped, assembles test figures from the people kit with the
-joint numbers from build_models.RIG, swaps the mask colours for plausible ones, and renders stills.
+Imports the three .glb files exactly as shipped, assembles posed test figures from the people kit with
+the joint numbers from build_models.RIG, swaps the mask colours for plausible ones, and renders stills
+on a neutral ground with one warm key light.
+
+People shots:  boy_{front,q3,back,sil}      the boy standing / mid-stride / seated paddling
+               lineup_{front,q3,back,sil}   six family members
+               heads_{front,q3,back}        every hair / hat on the head
+               bend_{side,q3}               joints at their limits (gap check)
+               kit_q3                       raw mask-coloured parts
 """
 import math
 import os
@@ -18,6 +25,7 @@ from build_models import RIG, OUT_DIR, hexc  # noqa: E402
 
 C = Matrix(((1, 0, 0, 0), (0, 0, -1, 0), (0, 1, 0, 0), (0, 0, 0, 1)))   # glTF -> Blender
 CI = C.inverted()
+BG = (0.62, 0.66, 0.68, 1)
 
 
 def g2b(v):
@@ -29,7 +37,7 @@ def setup():
     sc = bpy.context.scene
     sc.render.engine = 'CYCLES'
     sc.cycles.device = 'CPU'
-    sc.cycles.samples = 20
+    sc.cycles.samples = 24
     sc.cycles.use_denoising = False
     sc.cycles.max_bounces = 2
     sc.render.resolution_x, sc.render.resolution_y = 720, 540
@@ -38,13 +46,13 @@ def setup():
     w = bpy.data.worlds.new('w')
     w.use_nodes = True
     bg = w.node_tree.nodes['Background']
-    bg.inputs[0].default_value = (0.75, 0.80, 0.85, 1)
-    bg.inputs[1].default_value = 0.9
+    bg.inputs[0].default_value = BG
+    bg.inputs[1].default_value = 0.55
     sc.world = w
-    sun = bpy.data.objects.new('sun', bpy.data.lights.new('sun', 'SUN'))
-    sun.data.energy = 3.0
-    sun.data.angle = 0.2
-    sun.rotation_euler = (math.radians(50), 0, math.radians(35))
+    sun = bpy.data.objects.new('sun', bpy.data.lights.new('sun', 'SUN'))     # the one warm key light
+    sun.data.energy = 3.4
+    sun.data.color = (1.0, 0.88, 0.72)
+    sun.data.angle = 0.12
     sc.collection.objects.link(sun)
     cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam'))
     cam.data.lens = 70
@@ -53,7 +61,7 @@ def setup():
     return sc, cam, sun
 
 
-def vcol_material(name='vcol', flat=None):
+def vcol_material(name='vcol', flat=None, colour=None):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -65,8 +73,11 @@ def vcol_material(name='vcol', flat=None):
         nt.links.new(em.outputs[0], out.inputs[0])
         return m
     bsdf = nt.nodes.new('ShaderNodeBsdfDiffuse')
-    vc = nt.nodes.new('ShaderNodeVertexColor')
-    nt.links.new(vc.outputs[0], bsdf.inputs[0])
+    if colour is not None:
+        bsdf.inputs[0].default_value = (*colour, 1)
+    else:
+        vc = nt.nodes.new('ShaderNodeVertexColor')
+        nt.links.new(vc.outputs[0], bsdf.inputs[0])
     nt.links.new(bsdf.outputs[0], out.inputs[0])
     return m
 
@@ -108,37 +119,66 @@ def T(v):
     return Matrix.Translation(Vector(v))
 
 
-def RZ(deg):
-    return Matrix.Rotation(math.radians(deg), 4, 'Z')
-
-
 def RX(deg):
     return Matrix.Rotation(math.radians(deg), 4, 'X')
 
 
-def figure(kit, mat, base, scale=1.0, skin='#8a5a3c', shirt='#3f7fbf', bottom='#2f3440', hair='#17130f',
-           hips='hips_shorts', thigh='thigh', hairs=('hair_short',), hat_col='#c9a24a', arm_out=10, arm_fwd=0, leg=0):
-    """Standing figure. Returns list of objects."""
+def RY(deg):
+    return Matrix.Rotation(math.radians(deg), 4, 'Y')
+
+
+def RZ(deg):
+    return Matrix.Rotation(math.radians(deg), 4, 'Z')
+
+
+MIRROR = Matrix.Scale(-1, 4, Vector((1, 0, 0)))
+
+# pose: degrees.  arm = (forward swing, elbow bend, out to the side) per side (L = +X, R = -X),
+# leg = (hip flexion forward, knee bend), lean = torso forward, dy = root drop (m, before scaling)
+STAND = dict(armL=(4, 12, 11), armR=(-3, 10, 11), legL=(0, 0), legR=(0, 0), lean=0, dy=0.0)
+WALK = dict(armL=(35, 30, 9), armR=(-28, 14, 9), legL=(-14, 45), legR=(30, 6), lean=3, dy=-0.02)
+PADDLE = dict(armL=(60, 40, 6), armR=(60, 40, 6), legL=(85, 75), legR=(85, 75), lean=15, dy=-0.385)
+
+
+def figure(kit, mat, base, scale=1.0, head=1.0, heading=0.0, pose=STAND, skin='#a9714a', shirt='#3f7fbf',
+           bottom='#2f3440', hair='#1c1410', hips='hips_shorts', thigh='thigh_shorts', shin='shin',
+           hairs=('hair_short',), hat_col='#c9a24a', band='#7a3b2a', boot='#3a4a3c', pack=None, seat=False):
+    """Posed figure assembled exactly like the game does it (the -X side is the +X part mirrored)."""
     S = Matrix.Scale(scale, 4)
-    root = T(base) @ S @ T((0, RIG['waist_y'], 0))
-    tn = dict(skin=hexc(skin), hair=hexc(hair))
+    root = T(base) @ RY(heading) @ S @ T((0, RIG['waist_y'] + pose['dy'], 0))
+    tn = dict(skin=hexc(skin), hair=hexc(hair), light=hexc('#e9e4d6'))
     top = dict(tn, cloth=hexc(shirt))
     bot = dict(tn, cloth=hexc(bottom))
-    hatt = dict(tn, cloth=hexc(hat_col), light=hexc('#7a3b2a'))
-    objs = [inst(kit['torso'], root, mat, top), inst(kit[hips], root, mat, bot)]
-    head = root @ T(RIG['neck'])
-    objs.append(inst(kit['head'], head, mat, top))
+    leg = dict(bot, hair=hexc(boot))                       # blue on shin_boot is the boot colour
+    hatt = dict(tn, cloth=hexc(hat_col), light=hexc(band))
+    objs = [inst(kit[hips], root, mat, bot)]
+    torso = root @ RX(pose['lean'])
+    objs.append(inst(kit['torso'], torso, mat, top))
+    if pack:
+        objs.append(inst(kit['backpack'], torso, mat, dict(tn, cloth=hexc(pack))))
+    hm = torso @ T(RIG['neck']) @ RX(-pose['lean'] * 0.6) @ Matrix.Scale(head, 4)
+    objs.append(inst(kit['head'], hm, mat, top))
     for h in hairs:
-        objs.append(inst(kit[h], head, mat, hatt if h.startswith('hat') else top))
-    for sx in (1, -1):
+        objs.append(inst(kit[h], hm, mat, hatt if h.startswith('hat') else top))
+    for sx, side in ((1, 'L'), (-1, 'R')):
+        M = MIRROR if sx < 0 else Matrix.Identity(4)
+        fwd, elbow, out = pose['arm' + side]
         sh = RIG['shoulder']
-        ua = root @ T((sh[0] * sx, sh[1], sh[2])) @ RZ(arm_out * sx) @ RX(-arm_fwd * sx)
-        objs.append(inst(kit['upperarm'], ua, mat, top))
-        objs.append(inst(kit['forearm'], ua @ T((0, RIG['elbow_y'], 0)) @ RX(-arm_fwd * 0.6), mat, top))
+        ua = torso @ T((sh[0] * sx, sh[1], sh[2])) @ RZ(out * sx) @ RX(-fwd)
+        objs.append(inst(kit['upperarm'], ua @ M, mat, top))
+        objs.append(inst(kit['forearm'], ua @ T((0, RIG['elbow_y'], 0)) @ RX(-elbow) @ M, mat, top))
+        flex, knee = pose['leg' + side]
         hp = RIG['hip']
-        th = root @ T((hp[0] * sx, hp[1], hp[2])) @ RX(-leg * sx)
-        objs.append(inst(kit[thigh], th, mat, bot))
-        objs.append(inst(kit['shin'], th @ T((0, RIG['knee_y'], 0)) @ RX(leg * sx * 0.8 if leg * sx > 0 else 0), mat, bot))
+        th = root @ T((hp[0] * sx, hp[1], hp[2])) @ RX(-flex)
+        objs.append(inst(kit[thigh], th @ M, mat, bot))
+        objs.append(inst(kit[shin], th @ T((0, RIG['knee_y'], 0)) @ RX(knee) @ M, mat, leg))
+    if seat:                                                # a plank to sit on (preview only)
+        bpy.ops.mesh.primitive_cube_add(size=1)
+        box = bpy.context.active_object
+        y1 = (RIG['waist_y'] + pose['dy'] - 0.185) * scale
+        box.matrix_world = C @ T(base) @ RY(heading) @ T((0, y1 / 2, -0.03 * scale)) @ Matrix.Diagonal((0.62 * scale, y1, 0.30 * scale, 1)) @ CI
+        box.data.materials.append(seat)
+        objs.append(box)
     return objs
 
 
@@ -154,8 +194,9 @@ def bbox(objs):
     return lo, hi
 
 
-def shoot(sc, cam, objs, path, view, zoom=1.0, res=None):
-    """view: direction from target to camera in glTF coords."""
+def shoot(sc, cam, sun, objs, path, view, zoom=1.0, res=None):
+    """view: direction from target to camera in glTF coords.  The key light comes from the upper left
+    of the camera."""
     lo, hi = bbox(objs)
     ctr = (lo + hi) / 2
     d = g2b(view).normalized()
@@ -175,6 +216,10 @@ def shoot(sc, cam, objs, path, view, zoom=1.0, res=None):
     cam.location = ctr + d * dist
     cam.rotation_euler = q.to_euler()
     cam.data.clip_end = 500
+    flat = Vector((d.x, d.y, 0)).normalized() if abs(d.z) < 0.95 else Vector((0, -1, 0))
+    side = Vector((0, 0, 1)).cross(flat)
+    to_light = (flat * 0.75 - side * 0.65 + Vector((0, 0, 0.95))).normalized()
+    sun.rotation_euler = to_light.to_track_quat('Z', 'Y').to_euler()
     sc.render.filepath = path
     bpy.ops.render.render(write_still=True)
     print('wrote', path, flush=True)
@@ -188,65 +233,118 @@ def main():
     sc, cam, sun = setup()
     mat = vcol_material()
     black = vcol_material('black', flat=(0, 0, 0))
+    wood = vcol_material('seat', colour=(0.30, 0.21, 0.14))
     boats = load(os.path.join(OUT_DIR, 'boats.glb'))
     fish = load(os.path.join(OUT_DIR, 'fish.glb'))
     kit = load(os.path.join(OUT_DIR, 'people.glb'))
     I = Matrix.Identity(4)
+    bgnode = sc.world.node_tree.nodes['Background']
+
+    bpy.ops.mesh.primitive_plane_add(size=400)
+    ground = bpy.context.active_object
+    ground.data.materials.append(vcol_material('ground', colour=(0.42, 0.40, 0.36)))
+    ground.hide_render = True
 
     def want(n):
         return not filt or any(f in n or n in f for f in filt)
 
-    def run(name, make, views, **kw):
+    def run(name, make, views, floor=None, **kw):
         if not want(name):
             return
         objs = make()
+        if floor is not None:
+            ground.hide_render = False
+            ground.location = (0, 0, floor)
         for vn, v in views.items():
             if not want(name + '_' + vn):
                 continue
-            shoot(sc, cam, objs, os.path.join(out, '%s_%s.png' % (name, vn)), v, **kw)
+            shoot(sc, cam, sun, objs, os.path.join(out, '%s_%s.png' % (name, vn)), v, **kw)
+        ground.hide_render = True
         for o in objs:
             bpy.data.objects.remove(o)
 
-    P = dict(front=(0, 0.05, 1), side=(1, 0.05, 0), q3=(0.7, 0.25, 1), back=(-0.5, 0.2, -1))
-    run('figure', lambda: figure(kit, mat, (0, 0, 0)), P, res=(480, 720))
-    if want('figure_silhouette'):
-        objs = figure(kit, black, (0, 0, 0)) + figure(kit, black, (0.9, 0, 0), arm_fwd=35, leg=25) + \
-            figure(kit, black, (1.9, 0, 0), hips='hips_skirt', hairs=('hair_long',), scale=0.9)
-        sc.world.node_tree.nodes['Background'].inputs[0].default_value = (1, 1, 1, 1)
-        shoot(sc, cam, objs, os.path.join(out, 'figure_silhouette.png'), (0.25, 0.05, 1), res=(720, 540))
-        sc.world.node_tree.nodes['Background'].inputs[0].default_value = (0.75, 0.80, 0.85, 1)
+    def silhouette(name, make, view, **kw):
+        if not want(name + '_sil'):
+            return
+        objs = make(black)
+        bgnode.inputs[0].default_value = (1, 1, 1, 1)
+        bgnode.inputs[1].default_value = 1.0
+        shoot(sc, cam, sun, objs, os.path.join(out, name + '_sil.png'), view, **kw)
+        bgnode.inputs[0].default_value = BG
+        bgnode.inputs[1].default_value = 0.55
         for o in objs:
             bpy.data.objects.remove(o)
 
-    def lineup():
-        o = []
-        o += figure(kit, mat, (-2.0, 0, 0), hairs=('hair_short',))
-        o += figure(kit, mat, (-1.2, 0, 0), scale=0.93, hips='hips_skirt', hairs=('hair_long',), shirt='#d8a13a', bottom='#b0483a', skin='#9a6846')
-        o += figure(kit, mat, (-0.4, 0, 0), scale=0.9, hips='hips_skirt', hairs=('hair_bun',), shirt='#7a5a8a', bottom='#4a4458', hair='#b9b6b0', skin='#7d5238')
-        o += figure(kit, mat, (0.35, 0, 0), scale=0.72, hairs=('hair_tuft',), thigh='thigh_shorts', shirt='#c9503c', bottom='#3d5a45', skin='#96633f')
-        o += figure(kit, mat, (1.1, 0, 0), hairs=('hair_short', 'hat_cap'), thigh='thigh_shorts', shirt='#e8e2d0', bottom='#5a4a3a', hat_col='#b8402f', arm_fwd=30, leg=20)
-        o += figure(kit, mat, (2.0, 0, 0), hairs=('hair_short', 'hat_straw'), shirt='#5a8a5a', bottom='#3a3a3a', skin='#7a4e34')
+    PV = dict(front=(0, 0.06, 1), q3=(0.75, 0.22, 1), back=(-0.45, 0.2, -1))
+
+    # ---- (a) the boy: 1.50 m (kit x 0.87), head x 1.2, tuft hair, teal T-shirt, charcoal shorts,
+    #          trainers, ochre backpack: standing, mid-stride, seated paddling
+    def boy(m=None, seat=True):
+        m = m or mat
+        kw = dict(scale=0.87, head=1.2, hairs=('hair_tuft',), shirt='#2f8286', bottom='#34373c', hair='#2a1a12',
+                  skin='#b47a4f', shin='shin_shoe', pack='#c58d2e')
+        o = figure(kit, m, (-0.85, 0, 0), pose=STAND, **kw)
+        o += figure(kit, m, (0.0, 0, 0), pose=WALK, **kw)
+        o += figure(kit, m, (0.9, 0, 0), pose=PADDLE, seat=(black if m is black else wood) if seat else False, **kw)
         return o
-    run('lineup', lineup, dict(front=(0, 0.08, 1), q3=(0.8, 0.3, 1), back=(-0.6, 0.3, -1)), res=(1100, 560))
+    run('boy', boy, PV, floor=0.0, res=(1150, 700))
+    silhouette('boy', boy, (0.75, 0.05, 1), res=(1150, 700))
+
+    # ---- (b) the family line-up
+    def lineup(m=None):
+        m = m or mat
+        o = []
+        # man: straw hat, work shirt, trousers, rubber boots
+        o += figure(kit, m, (-2.05, 0, 0), hairs=('hair_short', 'hat_straw'), shirt='#8a8f6a', bottom='#5a5142',
+                    thigh='thigh_trousers', shin='shin_boot', boot='#2f3a33', skin='#8f5c3c', hat_col='#c8ab63')
+        # young man: cap, shorts, bare feet
+        o += figure(kit, m, (-1.25, 0, 0), scale=1.02, hairs=('hair_short', 'hat_cap'), shirt='#b5392c', bottom='#2c2d33',
+                    hat_col='#d9cfae', skin='#a66c45', pose=dict(STAND, armL=(8, 20, 12)))
+        # girl, 13: long hair, T-shirt, shorts
+        o += figure(kit, m, (-0.5, 0, 0), scale=0.89, head=1.1, hairs=('hair_long',), shirt='#e2b23c', bottom='#2f7a80',
+                    skin='#a66c45', hair='#1a120e')
+        # small boy, 7
+        o += figure(kit, m, (0.2, 0, 0), scale=0.69, head=1.25, hairs=('hair_tuft',), shirt='#4f9fd8', bottom='#b03a2c',
+                    skin='#a66c45', hair='#20150f')
+        # grandmother: bun, skirt
+        o += figure(kit, m, (0.9, 0, 0), scale=0.91, hips='hips_skirt', thigh='thigh', hairs=('hair_bun',), shirt='#a892b8',
+                    bottom='#2f3a66', hair='#b9b6b0', skin='#8f5c3c')
+        # woman: bun, blouse, skirt
+        o += figure(kit, m, (1.7, 0, 0), scale=0.95, hips='hips_skirt', thigh='thigh', hairs=('hair_bun',), shirt='#e6e2d2',
+                    bottom='#3d6b4a', hair='#1c1410', skin='#a66c45')
+        return o
+    run('lineup', lineup, dict(front=(0, 0.06, 1), q3=(0.75, 0.25, 1), back=(-0.5, 0.22, -1)), floor=0.0, res=(1400, 640))
+    silhouette('lineup', lineup, (0.3, 0.05, 1), res=(1400, 640))
 
     def heads():
         o = []
-        for k, hs in enumerate((('hair_short',), ('hair_long',), ('hair_bun',), ('hair_tuft',), ('hat_cap',), ('hat_straw',), ())):
-            tn = dict(skin=hexc('#8a5a3c'), cloth=hexc('#c9a24a'), hair=hexc('#17130f'), light=hexc('#7a3b2a'))
-            m = T((0.42 * k, 0, 0))
+        for k, hs in enumerate((('hair_tuft',), ('hair_short',), ('hair_long',), ('hair_bun',), ('hair_short', 'hat_cap'),
+                                ('hair_short', 'hat_straw'), ())):
+            tn = dict(skin=hexc('#a9714a'), cloth=hexc('#c9a24a'), hair=hexc('#1c1410'), light=hexc('#7a3b2a'))
+            m = T((0.52 * k, 0, 0))
             o.append(inst(kit['head'], m, mat, tn))
             for h in hs:
                 o.append(inst(kit[h], m, mat, tn))
         return o
-    run('heads', heads, dict(front=(0, 0.05, 1), q3=(0.8, 0.2, 1), back=(-0.5, 0.25, -1), top=(0.0, 1, -0.6)), res=(1500, 420))
+    run('heads', heads, dict(front=(0, 0.05, 1), q3=(0.8, 0.2, 1), back=(-0.5, 0.25, -1)), res=(1700, 420))
+
+    # ---- joints at their limits: elbow / knee 120, shoulder / hip 150
+    def bend():
+        kw = dict(shirt='#2f8286', bottom='#34373c', skin='#b47a4f')
+        o = figure(kit, mat, (-0.9, 0, 0), pose=dict(STAND, armL=(150, 0, 8), armR=(60, 120, 8), legL=(90, 120), legR=(0, 120)), **kw)
+        o += figure(kit, mat, (0.0, 0, 0), thigh='thigh', pose=dict(STAND, armL=(-60, 120, 8), armR=(0, 0, 150), legL=(150, 60), legR=(-30, 0)), **kw)
+        o += figure(kit, mat, (0.9, 0, 0), thigh='thigh_trousers', shin='shin_trousers',
+                    pose=dict(STAND, armL=(90, 90, 8), armR=(150, 120, 20), legL=(110, 120), legR=(0, 0)), **kw)
+        return o
+    run('bend', bend, dict(side=(1, 0.1, 0.25), q3=(-0.8, 0.2, 1)), res=(1150, 700))
 
     def kitparts():
         o = []
-        names = ['torso', 'hips_shorts', 'hips_skirt', 'upperarm', 'forearm', 'thigh', 'thigh_shorts', 'shin', 'head']
+        names = [n for n in kit]
         for k, n in enumerate(names):
-            o.append(inst(kit[n], T((0.42 * k, 0, 0)), mat))
+            o.append(inst(kit[n], T((0.5 * (k % 10), -0.9 * (k // 10), 0)), mat))
         return o
-    run('kit', kitparts, dict(q3=(0.6, 0.3, 1)), res=(1100, 400))
+    run('kit', kitparts, dict(q3=(0.6, 0.3, 1)), res=(1500, 700))
 
     V2 = dict(a=(1, 0.45, 0.8), b=(-0.25, 0.9, 1), side=(1, 0.08, 0.02))
     run('canoe', lambda: [inst(boats['canoe'], I, mat)], V2, res=(900, 480))
@@ -262,8 +360,9 @@ def main():
     def scene():
         o = [inst(boats['canoe'], I, mat), inst(boats['paddle'], T((0.15, 0.3, -0.6)) @ RX(80), mat),
              inst(fish['fish'], T((-1.0, -0.05, 0.3)), mat)]
-        o += figure(kit, mat, (0.9, -0.13, 0.6))
-        o += figure(kit, mat, (0.9, -0.13, -0.5), scale=0.72, hairs=('hair_tuft',), thigh='thigh_shorts', shirt='#c9503c', bottom='#3d5a45')
+        o += figure(kit, mat, (0.9, -0.13, 0.6), hairs=('hair_short', 'hat_straw'), thigh='thigh_trousers', shin='shin_boot')
+        o += figure(kit, mat, (0.9, -0.13, -0.5), scale=0.87, head=1.2, hairs=('hair_tuft',), shirt='#2f8286', bottom='#34373c',
+                    shin='shin_shoe', pack='#c58d2e')
         return o
     run('scene', scene, dict(a=(1, 0.5, 0.6)), res=(900, 540))
 

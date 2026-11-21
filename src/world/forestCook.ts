@@ -235,7 +235,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
   }
   // ---- light shafts: where the canopy is thick, a few per clearing edge
   const rs = rng('shafts')
-  for (let i = 0; i < 2600 * density; i++) {
+  for (let i = 0; i < 1100 * density; i++) {
     const x = rs.range(-lim, lim), z = rs.range(-lim, lim), w = rs.range(1.0, 3.2), seed = rs(), len = rs.range(16, 26)
     const k = COVER_N / (CORE * 2)
     const c = cover[Math.min(COVER_N - 1, Math.floor((z + CORE) * k)) * COVER_N + Math.min(COVER_N - 1, Math.floor((x + CORE) * k))]

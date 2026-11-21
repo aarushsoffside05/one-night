@@ -78,10 +78,35 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
     add(new THREE.Mesh(geo, m), 6)
   }
 
+  // ---------- leaf litter: big fallen leaves lying on the forest floor round the eye, each one drawn
+  {
+    const r = rng('litter')
+    const g = new GB()
+    g.v(-0.5, 0.0, 0, 0, 1, 0, 0, 0, 0); g.v(0.05, 0.05, 0.3, 0.2, 1, 0.3, 0.5, 0, 0); g.v(0.5, 0.02, 0, 0, 1, 0, 1, 0, 0); g.v(0.05, 0.05, -0.3, 0.2, 1, -0.3, 0.5, 0, 0)
+    g.quad(0, 1, 2, 3)
+    const n = Math.round(9000 * density)
+    const geo = instanced(g.build(), n, (_i, a, b) => { a[0] = r(); a[1] = r(); a[2] = r(); a[3] = r.range(0.14, 0.34); b[0] = r() * 6.283; b[1] = r(); b[2] = r(); b[3] = r() })
+    const m = new PaintedMaterial({ wrap: 0.6, pools: true })
+    m.side = THREE.DoubleSide
+    m.positionNode = Fn(() => {
+      const box = 34
+      const xz = wrapXZ(ia.xy, box)
+      const bed = texture(TEX.height, hUV(xz)).r
+      const cover = texture(TEX.cover, hUV(xz)).r
+      const dry = smoothstep(0.0, 0.25, bed.sub(waterAt(xz)))
+      const lp = positionLocal.mul(ia.w)
+      const rp = vec3(lp.x.mul(cos(ib.x)).sub(lp.z.mul(sin(ib.x))), lp.y.add(lp.x.mul(ib.z.sub(0.5)).mul(0.35)), lp.x.mul(sin(ib.x)).add(lp.z.mul(cos(ib.x))))
+      const fade = smoothstep(box * 0.5, box * 0.36, length(xz.sub(U.eye.xz)))
+      return rp.mul(dry).mul(fade).mul(smoothstep(0.15, 0.5, cover.add(ib.w.mul(0.3)))).add(vec3(xz.x, bed.add(0.025), xz.y))
+    })()
+    m.colorNode = Fn(() => mix(mix(vec3(0.2, 0.09, 0.035), vec3(0.42, 0.22, 0.07), ib.y), vec3(0.5, 0.38, 0.14), smoothstep(0.75, 0.95, ib.z)).mul(mix(float(0.75), float(1.1), aux.x)))()
+    add(new THREE.Mesh(geo, m))
+  }
+
   // ---------- motes in the sun by day, fireflies by night: soft additive specks that face the eye
   {
     const r = rng('motes')
-    const n = Math.round(700 * density)
+    const n = Math.round(260 * density)
     const geo = instanced(new THREE.PlaneGeometry(1, 1), n, (_i, a, b) => { a[0] = r(); a[1] = r(); a[2] = r(); a[3] = r.range(0.5, 1.4); b[0] = r(); b[1] = r(); b[2] = r(); b[3] = r() })
     const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false })
     const box = 46
