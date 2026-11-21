@@ -929,10 +929,10 @@ def build_head():
     # nose: a soft button bump
     P, n, tu, tv = head_frame(0.0, math.radians(110))
     nrs = []
-    for h, s in ((-0.006, 1.0), (0.0035, 0.86), (0.008, 0.52)):
-        nrs.append([P + n * h + tu * (0.022 * s * math.sin(2 * PI * k / 6)) + tv * (0.019 * s * math.cos(2 * PI * k / 6) - 0.003 * (1 - s))
+    for h, s in ((-0.006, 1.0), (0.003, 0.84), (0.0068, 0.50)):
+        nrs.append([P + n * h + tu * (0.0175 * s * math.sin(2 * PI * k / 6)) + tv * (0.0155 * s * math.cos(2 * PI * k / 6) - 0.003 * (1 - s))
                     for k in range(6)])
-    mb.loft(nrs, SKIN, cap1=tuple(P + n * 0.0098 - tv * 0.003))
+    mb.loft(nrs, SKIN, cap1=tuple(P + n * 0.0082 - tv * 0.002))
     # eyes: dark upright ovals, flat so they read as painted / slightly set in
     for sx in (1, -1):
         P, n, tu, tv = head_frame(sx * 0.40, math.radians(96))
@@ -1188,6 +1188,10 @@ def torso_surf(y, az, off=0.0):
             break
     e = 2.0 / p
     return Vector(((rx + off) * sgnpow(math.sin(az), e), y, cz + (rz + off) * sgnpow(math.cos(az), e)))
+
+
+def TORSO_CZ(y):
+    return torso_surf(y, PI / 2).z
 
 
 def _torso_depth(x, y):
@@ -1448,23 +1452,24 @@ def build_backpack():
     X = 0.094
 
     for sx in (1, -1):
-        path = [(Vector((sx * X, 0.415, -0.100)), Vector((0, 0.3, -1)), Vector((1, 0, 0))),
-                (Vector((sx * X, 0.470, -0.074)), Vector((0, 0.6, -1)), Vector((1, 0, 0))),
-                (Vector((sx * X, 0.5005, -0.006)), Vector((0, 1, 0)), Vector((1, 0, 0))),
-                (Vector((sx * X, 0.474, 0.066)), Vector((0, 0.6, 1)), Vector((1, 0, 0)))]
-        for y, x in ((0.40, X + 0.004), (0.31, X + 0.016)):
-            path.append((Vector((sx * x, y, _torso_depth(x, y))), Vector((sx * 0.3, 0.1, 1)), Vector((1, 0, 0))))
+        path = []
+        for y, ny in ((0.415, 0.15), (0.452, 0.3), (0.484, 0.75)):                 # up the back
+            path.append((Vector((sx * X, y, 2 * TORSO_CZ(y) - _torso_depth(X, y))), Vector((0, ny, -1)), Vector((1, 0, 0))))
+        path.append((Vector((sx * X, 0.5025, 0.0)), Vector((0, 1, 0)), Vector((1, 0, 0))))   # over the shoulder
+        for y, x, ny in ((0.484, X, 0.75), (0.452, X, 0.3), (0.39, X + 0.006, 0.1), (0.31, X + 0.018, 0.1)):   # down the chest
+            path.append((Vector((sx * x, y, _torso_depth(x, y))), Vector((sx * 0.3, ny, 1)), Vector((1, 0, 0))))
         for y, azd in ((0.235, 52), (0.185, 90), (0.160, 135)):
             az = sx * math.radians(azd)
             n = Vector((math.sin(az) * 1.25, 0, math.cos(az)))
             path.append((torso_surf(y, az), n, Vector((0, 1, 0))))
+        path.append((Vector((sx * 0.112, 0.150, -0.118)), Vector((sx, 0, -0.6)), Vector((0, 1, 0))))   # into the pack
         rows = [[], [], []]
         for P, n, wdir in path:
             n = n.normalized()
             wd = (wdir - n * wdir.dot(n)).normalized()
-            rows[0].append(P - wd * 0.021 + n * 0.001)
-            rows[1].append(P + n * 0.012)
-            rows[2].append(P + wd * 0.021 + n * 0.001)
+            rows[0].append(P - wd * 0.021 + n * 0.003)
+            rows[1].append(P + n * 0.014)
+            rows[2].append(P + wd * 0.021 + n * 0.003)
         mb.loft(rows, CLOTH, closed=False)
     return to_object('backpack', mb, sharp=45, ref=(0, cy, -0.17))
 

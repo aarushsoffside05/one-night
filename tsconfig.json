@@ -9,6 +9,7 @@
     "noUnusedLocals": false,
     "noEmit": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "isolatedModules": true,
     "allowImportingTsExtensions": true,
     "types": ["vite/client"]

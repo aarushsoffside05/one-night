@@ -21,6 +21,7 @@ import { Story } from './story'
 import { SCENES_A } from './scenesA'
 import { SCENES_B } from './scenesB'
 import { autoRoll } from '../world/life'
+import { loadScans } from '../world/scans'
 
 const params = new URLSearchParams(location.search)
 export const DEV = params.get('dev') === '1'
@@ -69,7 +70,7 @@ export class Game {
     r.shadowMap.enabled = TIERS[this.tier].shadows
     this.camera.fov = 52; this.camera.near = 0.25; this.camera.far = 4000; this.camera.updateProjectionMatrix()
 
-    const cooked = await this.cook()
+    const [cooked] = await Promise.all([this.cook(), loadScans(() => {})])
     ui.set({ loadStage: 'Raising the forest', loadPct: 0.7 })
     await nextFrame()
     this.world = buildWorld(cooked, this.scene, r, this.tier, this.backend)
@@ -285,6 +286,15 @@ export class Game {
       // ---- play checks (scripts/check-play.mjs): run game logic without drawing
       step(dt = 1 / 30, n = 1) { for (let i = 0; i < n; i++) { g.frameMs = dt * 1000; g.frame() } },
       play(mode: 'roam' | 'story', scene = 0) { g.startPlay(mode, scene) },
+      // run a scene with the bot until its log shows a line containing `mark` (plus some seconds), then stop there for a picture
+      sceneUntil(i: number, mark: string, extra = 0.5) {
+        const S = g.story; S.bot = true; S.botHold = 'right'; S.log = []
+        g.startPlay('story', i)
+        let t = 0, hit = -1; const dt = 1 / 30
+        while (S.scene === i && t < 900) { g.frameMs = dt * 1000; g.frame(); t += dt; if (hit < 0 && S.log.some((l) => l.includes(mark))) hit = t; if (hit >= 0 && t - hit >= extra) break }
+        input.keys.clear(); g.frozen = true
+        return { hit: hit >= 0, t: Math.round(t), log: S.log.slice(-3) }
+      },
       // run one story scene with the bot at the controls; returns its log
       runScene(i: number, how: 'right' | 'rush' | 'film' = 'right', maxSeconds = 900) {
         const S = g.story; S.bot = true; S.botHold = how; S.log = []

@@ -5,6 +5,7 @@ import { Fn, positionWorld, normalWorld, texture, vec2, vec3, float, mix, smooth
 import { U } from './uniforms'
 import { PaintedMaterial, noise, TEX, worldUV } from './shade'
 import { LAKE } from './layout'
+import { detail } from './scans'
 
 export const inLake = () => smoothstep(1.42, 1.3, positionWorld.xz.sub(vec2(LAKE.x, LAKE.z)).div(vec2(LAKE.rx, LAKE.rz)).length())
 export const waterHere = () => mix(U.water, U.lake, inLake())
@@ -41,20 +42,24 @@ export function groundMaterial(): THREE.Material {
     let sand: any = mix(vec3(0.5, 0.41, 0.27), vec3(0.74, 0.65, 0.46), smoothstep(0.3, 0.7, rip.mul(0.35).add(n1.mul(0.65))))
     sand = mix(sand, vec3(0.4, 0.32, 0.21), drift2.mul(0.5))
     sand = mix(sand, vec3(0.3, 0.25, 0.18), smoothstep(0.7, 0.76, n3.mul(0.5).add(n4.mul(0.5))).mul(0.7))
-    const earth = mix(vec3(0.15, 0.1, 0.06), vec3(0.27, 0.19, 0.115), smoothstep(0.35, 0.6, n2.mul(0.6).add(n3.mul(0.4))))
+    const earth = mix(vec3(0.11, 0.075, 0.045), vec3(0.2, 0.14, 0.085), smoothstep(0.35, 0.6, n2.mul(0.6).add(n3.mul(0.4))))
 
+    // the scans as detail on each kind of ground (two floors mixed so the repeat does not show)
+    const fl = mix(detail('floor', pw.xz.mul(0.41), 0.9), detail('floor2', pw.xz.mul(0.27).add(0.37), 0.8), smoothstep(0.42, 0.6, n1))
+    litter = litter.mul(fl)
     const steep = smoothstep(0.86, 0.62, normalWorld.y)
-    let col: any = mix(litter, mud, max(k.b, steep))
+    const mudD = mix(detail('mud', pw.xz.mul(0.36), 0.9), detail('mud', vec2(pw.x.add(pw.z).mul(0.3), pw.y.mul(0.42)), 0.9), steep)
+    let col: any = mix(litter, mud.mul(mudD), max(k.b, steep))
     const low = smoothstep(4.0, 1.2, pw.y).mul(max(k.b, steep.mul(0.5)))
-    col = mix(col, silt, max(k.a, low))
-    col = mix(col, sand, k.r)
-    col = mix(col, earth, k.g)
+    col = mix(col, mix(vec3(0.38, 0.31, 0.22), vec3(0.55, 0.47, 0.35), n2).mul(detail('crack', pw.xz.mul(0.33), 1)), max(k.a, low))
+    col = mix(col, sand.mul(detail('sand', pw.xz.mul(0.3), 1)), k.r)
+    col = mix(col, earth.mul(detail('soil', pw.xz.mul(0.4), 0.9)), k.g)
     // river and lake beds
     col = mix(col, vec3(0.34, 0.29, 0.2), smoothstep(0.3, -1.5, pw.y))
     // relief: leaves, clods and cracks catch the low sun on one side
     const off = U.sunDir.xz.mul(0.035)
     const emb = n2.sub(noise(pw.xz.mul(0.19).add(off.mul(0.19))).g).mul(3.2).add(n3.sub(noise(pw.xz.mul(0.83).add(off.mul(0.83))).b).mul(1.5)).clamp(-0.4, 0.5)
-    col = col.mul(emb.mul(U.day.mul(0.7).add(0.3)).add(1))
+    col = col.mul(emb.mul(U.day.mul(0.5).add(0.2)).mul(smoothstep(0.1, 0.6, cov).mul(0.7).add(0.3)).add(1))
     // the wet band above the waterline, and darker still below it
     const hw = pw.y.sub(waterHere())
     const wet = smoothstep(1.0, 0.04, hw.add(n2.mul(0.3)))

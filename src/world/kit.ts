@@ -6,8 +6,9 @@ import { U } from './uniforms'
 import { PaintedMaterial, noise } from './shade'
 import { floodStain } from './forest'
 import { envUniforms } from './env'
+import { detail } from './scans'
 
-export const SURF = { plank: 0, metal: 1, thatch: 2, plain: 3, rope: 4, glass: 5 } as const
+export const SURF = { plank: 0, paint: 0.4, metal: 1, thatch: 2, plain: 3, rope: 4, glass: 5 } as const
 
 export class Kit {
   pos: number[] = []; nrm: number[] = []; col: number[] = []; aux: number[] = []; idx: number[] = []
@@ -97,7 +98,9 @@ export function kitMaterial(floating: boolean): THREE.Material {
     const seam = smoothstep(0.455, 0.5, abs(fract(across.div(0.16)).sub(0.5)))
     const tone = noise(vec2(pid.mul(0.137), pid.mul(0.071).add(positionWorld.y.mul(0.01)))).r
     const grain = noise(vec2(across.mul(1.7), along.mul(0.12))).a
-    const plank = vc.mul(tone.mul(0.55).add(0.7)).mul(grain.mul(0.35).add(0.82)).mul(seam.mul(0.55).oneMinus())
+    const worn = detail('planks', vec2(across.div(1.9), along.div(1.9)), 1)
+    const painted = detail('paint', vec2(along.div(2.1), across.div(2.1)), 1)
+    const plank = vc.mul(tone.mul(0.4).add(0.78)).mul(seam.mul(0.35).oneMinus()).mul(mix(worn, painted, smoothstep(0.3, 0.35, type))).mul(grain.mul(0.15).add(0.92))
     // corrugated sheet: ridges, rust creeping from the edges
     const ridge = sin(across.mul(38)).mul(0.5).add(0.5)
     const rust = smoothstep(0.55, 0.8, noise(vec2(across.mul(0.4), along.mul(0.25))).r)
@@ -105,7 +108,7 @@ export function kitMaterial(floating: boolean): THREE.Material {
     // thatch: layered strokes
     const th = noise(vec2(across.mul(2.6), along.mul(0.22))).a
     const layer = fract(along.mul(1.6))
-    const thatch = vc.mul(th.mul(0.6).add(0.6)).mul(mix(float(0.7), float(1.08), layer))
+    const thatch = vc.mul(th.mul(0.3).add(0.8)).mul(mix(float(0.8), float(1.05), layer)).mul(detail('thatch', vec2(across.div(1.6), along.div(1.6)), 1))
     let col: any = mix(plank, metal, smoothstep(0.5, 0.51, type).mul(smoothstep(1.51, 1.5, type)))
     col = mix(col, thatch, smoothstep(1.5, 1.51, type).mul(smoothstep(2.51, 2.5, type)))
     col = mix(col, vc, smoothstep(2.5, 2.51, type))

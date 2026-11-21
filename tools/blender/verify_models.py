@@ -4,7 +4,8 @@
 
 1. Parses each GLB JSON chunk directly (no Blender): mesh names, attributes, node transforms,
    absence of images / textures / materials / skins / animations / cameras, bounding boxes,
-   triangle counts, colour ranges (people masks must be pure R/G/B/black/white).
+   triangle counts, colour ranges (people masks must be pure R/G/B/black/white and each part must
+   carry exactly its documented set), x-symmetry of the parts that are mirrored, file size limits.
 2. Re-imports each file into a fresh Blender scene: object names, identity transforms, triangle
    counts, colour attribute presence.
 Exits non-zero on any failure.
@@ -32,13 +33,33 @@ EXPECT = {
     },
     'fish.glb': {'fish': dict(tris=1400, size=(None, None, 2.3))},
     'people.glb': {
-        'torso': dict(tris=260, ymax=0.508), 'hips_shorts': dict(tris=200, ymin=-0.20),
-        'hips_skirt': dict(tris=200, ymin=-0.55), 'upperarm': dict(tris=120), 'forearm': dict(tris=120, ymin=-0.37),
-        'thigh': dict(tris=120), 'thigh_shorts': dict(tris=120), 'shin': dict(tris=120, ymin=-0.45),
-        'head': dict(tris=500, ymax=0.30), 'hair_short': dict(tris=250), 'hair_long': dict(tris=250),
-        'hair_bun': dict(tris=250), 'hair_tuft': dict(tris=250), 'hat_cap': dict(tris=250), 'hat_straw': dict(tris=250),
+        # pivots: torso / hips / backpack = waist, head + hair + hats = neck base, limbs = their joint
+        'torso': dict(tris=420, ymin=-0.08, ymax=0.505, xsym=True),
+        'hips_shorts': dict(tris=260, xsym=True), 'hips_skirt': dict(tris=260, ymin=-0.56),
+        'upperarm': dict(tris=220, ymin=-0.28 - 0.052, xsym=True, zsym=True),
+        'forearm': dict(tris=220, ymin=-0.37, ymax=0.05, xsym=True),
+        'thigh': dict(tris=220, ymin=-0.42 - 0.067, ymax=0.085, xsym=True),
+        'thigh_shorts': dict(tris=220, ymin=-0.42 - 0.067, ymax=0.09, xsym=True),
+        'thigh_trousers': dict(tris=220, ymin=-0.42 - 0.072, ymax=0.09, xsym=True),
+        'shin': dict(tris=220, ymin=-0.45, ymax=0.067, xsym=True),
+        'shin_shoe': dict(tris=220, ymin=-0.45, ymax=0.067, xsym=True),
+        'shin_boot': dict(tris=220, ymin=-0.45, ymax=0.067, xsym=True),
+        'shin_trousers': dict(tris=220, ymin=-0.45, ymax=0.072, xsym=True),
+        'shin_trousers_boot': dict(tris=220, ymin=-0.45, ymax=0.072, xsym=True),
+        'head': dict(tris=700, ymax=0.33, xsym=True),
+        'hair_short': dict(tris=420), 'hair_long': dict(tris=420), 'hair_bun': dict(tris=420),
+        'hair_tuft': dict(tris=420), 'hat_cap': dict(tris=420), 'hat_straw': dict(tris=420),
+        'backpack': dict(tris=260, xsym=True),
     },
 }
+# which mask colours each people mesh must contain, exactly (R skin, G cloth, B hair/boot, K dark, W light)
+MASKS = {
+    'torso': 'GR', 'hips_shorts': 'G', 'hips_skirt': 'G', 'upperarm': 'GR', 'forearm': 'R', 'thigh': 'R',
+    'thigh_shorts': 'GR', 'thigh_trousers': 'G', 'shin': 'R', 'shin_shoe': 'KRW', 'shin_boot': 'BKR',
+    'shin_trousers': 'GR', 'shin_trousers_boot': 'BGK', 'head': 'BKR', 'hair_short': 'B', 'hair_long': 'B',
+    'hair_bun': 'B', 'hair_tuft': 'B', 'hat_cap': 'GW', 'hat_straw': 'GW', 'backpack': 'G',
+}
+SIZE_LIMITS = {'people.glb': 230 * 1024}
 COMP = {5120: ('b', 1), 5121: ('B', 1), 5122: ('h', 2), 5123: ('H', 2), 5125: ('I', 4), 5126: ('f', 4)}
 NC = {'SCALAR': 1, 'VEC2': 2, 'VEC3': 3, 'VEC4': 4}
 fails = []
@@ -131,6 +152,10 @@ def check_file(fname):
             fail('%s ymin %.3f want %.3f' % (name, lo[1], e['ymin']))
         if 'ymax' in e and abs(hi[1] - e['ymax']) > 0.012:
             fail('%s ymax %.3f want %.3f' % (name, hi[1], e['ymax']))
+        if e.get('xsym') and abs(lo[0] + hi[0]) > 0.002:      # same mesh serves both sides (mirrored in X)
+            fail('%s is not symmetric in x: %.3f %.3f' % (name, lo[0], hi[0]))
+        if e.get('zsym') and abs(lo[2] + hi[2]) > 0.002:
+            fail('%s is not symmetric in z: %.3f %.3f' % (name, lo[2], hi[2]))
         for nv in nrm:
             if abs(sum(c * c for c in nv) - 1) > 0.01:
                 fail('%s has a non-unit normal' % name)
@@ -146,6 +171,10 @@ def check_file(fname):
             if not seen <= pure:
                 fail('%s mask colours not pure: %s' % (name, sorted(seen - pure)[:4]))
             cinfo = ' '.join({(1, 0, 0): 'R', (0, 1, 0): 'G', (0, 0, 1): 'B', (0, 0, 0): 'K', (1, 1, 1): 'W'}[c] for c in sorted(seen, reverse=True))
+            if seen <= pure and ''.join(sorted(cinfo.replace(' ', ''))) != MASKS.get(name):
+                fail('%s masks %s, want %s' % (name, cinfo, MASKS.get(name)))
+            if vol <= 0:
+                fail('%s signed volume %.5f: faces point inwards?' % (name, vol))
         else:
             cinfo = '%d colours' % len(set(col))
         rows[name] = tris
@@ -170,10 +199,27 @@ def check_file(fname):
             fail('%s has %d colour attributes after import' % (name, len(o.data.color_attributes)))
         if len(o.data.uv_layers):
             fail('%s has UVs' % name)
+    if os.path.getsize(path) > SIZE_LIMITS.get(fname, 10 ** 9):
+        fail('%s is %d bytes, limit %d' % (fname, os.path.getsize(path), SIZE_LIMITS[fname]))
     return os.path.getsize(path)
 
 
+def check_rig():
+    """The joint numbers the game hard-codes (src/world/figures.ts) must never move."""
+    from build_models import RIG
+    want = {'waist_y': 0.94, 'neck': (0.0, 0.50, 0.0), 'shoulder': (0.18, 0.45, 0.0), 'hip': (0.09, -0.07, 0.0),
+            'elbow_y': -0.28, 'knee_y': -0.42, 'sole_y': -0.45, 'hand_tip_y': -0.37}
+    for k, v in want.items():
+        if RIG.get(k) != v:
+            fail('RIG[%s] = %s, must stay %s' % (k, RIG.get(k), v))
+    soles = RIG['waist_y'] + RIG['hip'][1] + RIG['knee_y'] + RIG['sole_y']
+    if abs(soles) > 1e-9:
+        fail('soles are not on the ground: %.4f' % soles)
+    print('RIG joints unchanged; soles at %.3f, top of skull at %.3f' % (soles, RIG['waist_y'] + RIG['neck'][1] + RIG['head_top_y']))
+
+
 def main():
+    check_rig()
     total = sum(check_file(f) for f in EXPECT)
     print('total %d bytes' % total)
     if total >= 350 * 1024:

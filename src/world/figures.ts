@@ -9,19 +9,19 @@ import { mergeGeos } from './glb'
 // Joint numbers of the kit for the 1.70 m reference figure (from tools/blender/README.md).
 export const J = { shoulderX: 0.18, shoulderY: 0.45, neckY: 0.5, hipX: 0.09, hipY: -0.07, upperArm: 0.28, forearm: 0.37, thigh: 0.42, shin: 0.45, waist: 0.94 }
 
-export type CharDef = { id: string; name: string; height: number; child: number; skin: number[]; shirt: number[]; bottom: number[]; hair: number[]; hairPart: string; hat?: string; hatCol?: number[]; skirt?: boolean }
+export type CharDef = { id: string; name: string; height: number; child: number; skin: number[]; shirt: number[]; bottom: number[]; hair: number[]; hairPart: string; hat?: string; hatCol?: number[]; skirt?: boolean; legs?: 'shoe' | 'boot' | 'trousers' | 'trousers_boot'; shoe?: number[] }
 const SKIN_A = [0.62, 0.4, 0.27], SKIN_B = [0.5, 0.31, 0.2], SKIN_C = [0.7, 0.48, 0.34]
 export const CHARS: CharDef[] = [
-  { id: 'davi', name: 'Davi', height: 1.5, child: 0.6, skin: SKIN_C, shirt: [0.16, 0.42, 0.42], bottom: [0.1, 0.1, 0.11], hair: [0.07, 0.045, 0.03], hairPart: 'hair_tuft' },
-  { id: 'tome', name: 'Tomé', height: 1.7, child: 0, skin: SKIN_B, shirt: [0.4, 0.48, 0.32], bottom: [0.3, 0.24, 0.17], hair: [0.08, 0.07, 0.06], hairPart: 'hair_short', hat: 'hat_straw', hatCol: [0.72, 0.6, 0.36] },
+  { id: 'davi', name: 'Davi', height: 1.5, child: 0.6, skin: SKIN_C, shirt: [0.16, 0.42, 0.42], bottom: [0.1, 0.1, 0.11], hair: [0.07, 0.045, 0.03], hairPart: 'hair_tuft', legs: 'shoe' },
+  { id: 'tome', name: 'Tomé', height: 1.7, child: 0, skin: SKIN_B, shirt: [0.4, 0.48, 0.32], bottom: [0.3, 0.24, 0.17], hair: [0.08, 0.07, 0.06], hairPart: 'hair_short', hat: 'hat_straw', hatCol: [0.72, 0.6, 0.36], legs: 'trousers_boot', shoe: [0.1, 0.12, 0.1] },
   { id: 'caio', name: 'Caio', height: 1.75, child: 0, skin: SKIN_A, shirt: [0.55, 0.15, 0.13], bottom: [0.09, 0.09, 0.1], hair: [0.05, 0.04, 0.04], hairPart: 'hair_short' },
   { id: 'lia', name: 'Lia', height: 1.53, child: 0.45, skin: SKIN_A, shirt: [0.93, 0.74, 0.22], bottom: [0.12, 0.4, 0.42], hair: [0.05, 0.04, 0.04], hairPart: 'hair_long' },
   { id: 'nino', name: 'Nino', height: 1.17, child: 1, skin: SKIN_A, shirt: [0.3, 0.62, 0.86], bottom: [0.7, 0.16, 0.13], hair: [0.06, 0.05, 0.04], hairPart: 'hair_tuft' },
   { id: 'socorro', name: 'Dona Socorro', height: 1.55, child: 0, skin: SKIN_B, shirt: [0.66, 0.56, 0.74], bottom: [0.16, 0.2, 0.4], hair: [0.62, 0.61, 0.6], hairPart: 'hair_bun', skirt: true },
   { id: 'marta', name: 'Marta', height: 1.62, child: 0, skin: SKIN_A, shirt: [0.9, 0.9, 0.85], bottom: [0.2, 0.36, 0.24], hair: [0.07, 0.05, 0.04], hairPart: 'hair_bun', skirt: true },
-  { id: 'rafa', name: 'Rafa', height: 1.78, child: 0, skin: SKIN_C, shirt: [0.85, 0.83, 0.75], bottom: [0.4, 0.4, 0.42], hair: [0.12, 0.08, 0.05], hairPart: 'hair_short' },
+  { id: 'rafa', name: 'Rafa', height: 1.78, child: 0, skin: SKIN_C, shirt: [0.85, 0.83, 0.75], bottom: [0.4, 0.4, 0.42], hair: [0.12, 0.08, 0.05], hairPart: 'hair_short', legs: 'shoe' },
   { id: 'mae', name: 'Davi\'s mother', height: 1.64, child: 0, skin: SKIN_C, shirt: [0.9, 0.5, 0.45], bottom: [0.85, 0.82, 0.74], hair: [0.12, 0.08, 0.05], hairPart: 'hair_long' },
-  { id: 'pai', name: 'Davi\'s father', height: 1.77, child: 0, skin: SKIN_C, shirt: [0.55, 0.68, 0.85], bottom: [0.25, 0.27, 0.22], hair: [0.1, 0.07, 0.05], hairPart: 'hair_short', hat: 'hat_cap', hatCol: [0.2, 0.25, 0.4] },
+  { id: 'pai', name: 'Davi\'s father', height: 1.77, child: 0, skin: SKIN_C, shirt: [0.55, 0.68, 0.85], bottom: [0.25, 0.27, 0.22], hair: [0.1, 0.07, 0.05], hairPart: 'hair_short', hat: 'hat_cap', hatCol: [0.2, 0.25, 0.4], legs: 'trousers' },
 ]
 export const charIndex = (id: string) => CHARS.findIndex((c) => c.id === id)
 
@@ -71,7 +71,8 @@ export class Figures {
       }
       part(def.skirt ? 'hips_skirt' : 'hips_shorts', 0, def.bottom, def.hair)
       part('torso', 1, def.shirt, def.hair)
-      if (def.id === 'davi') {
+      if (def.id === 'davi' && kit.backpack) part('backpack', 1, [0.62, 0.42, 0.1], def.hair)
+      else if (def.id === 'davi') {
         const bp = new THREE.BoxGeometry(0.25, 0.3, 0.13, 2, 2, 1).translate(0, 0.27, -0.16) as unknown as THREE.BufferGeometry
         const n = bp.attributes.position.count, c = new Float32Array(n * 3)
         for (let i = 0; i < n; i++) { c[i * 3] = 0; c[i * 3 + 1] = 1; c[i * 3 + 2] = 0 }
@@ -84,9 +85,14 @@ export class Figures {
       if (def.hat) part(def.hat, 2, def.hatCol!, def.hatCol!)
       part('upperarm', 3, def.shirt, def.hair); part('forearm', 4, def.shirt, def.hair)
       part('upperarm', 5, def.shirt, def.hair, true); part('forearm', 6, def.shirt, def.hair, true)
-      const th = def.skirt || !kit.thigh_shorts ? 'thigh' : 'thigh_shorts'
-      part(th, 7, def.bottom, def.hair); part('shin', 8, def.bottom, def.hair)
-      part(th, 9, def.bottom, def.hair, true); part('shin', 10, def.bottom, def.hair, true)
+      const has = (n: string) => !!kit[n]
+      const tr = (def.legs === 'trousers' || def.legs === 'trousers_boot') && has('thigh_trousers')
+      const th = tr ? 'thigh_trousers' : def.skirt || !has('thigh_shorts') ? 'thigh' : 'thigh_shorts'
+      const want = def.legs === 'shoe' ? 'shin_shoe' : def.legs === 'boot' ? 'shin_boot' : def.legs === 'trousers' ? 'shin_trousers' : def.legs === 'trousers_boot' ? 'shin_trousers_boot' : 'shin'
+      const sh = has(want) ? want : 'shin'
+      const shoeCol = def.shoe ?? def.hair
+      part(th, 7, def.bottom, def.hair); part(sh, 8, def.bottom, shoeCol)
+      part(th, 9, def.bottom, def.hair, true); part(sh, 10, def.bottom, shoeCol, true)
       this.figs.push({ def, active: false, x: 0, y: -50, z: 0, heading: 0, anim: 'idle', phase: ci * 1.7, speed: 0, side: 1, look: 0, pose: new Float32Array(NP), target: new Float32Array(NP), tx: 0, tz: 0, moving: false, arrive: 0, k: def.height / 1.72 })
     })
     const geo = mergeGeos(geos)

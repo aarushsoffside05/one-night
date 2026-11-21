@@ -51,10 +51,10 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
     K.box(0, fy, V / 2, W + 0.5, 0.07, D + V + 0.2, WOOD_L)
     // walls: planks, a dark doorway and two shuttered windows on the front
     const wy = fy + 0.035 + wallH / 2
-    K.box(0, wy, -D / 2, W, wallH, 0.08, TEAL)
-    K.box(-W / 2, wy, 0, 0.08, wallH, D, TEAL)
-    K.box(W / 2, wy, 0, 0.08, wallH, D, TEAL)
-    K.box(0, wy, D / 2, W, wallH, 0.08, TEAL)
+    K.box(0, wy, -D / 2, W, wallH, 0.08, TEAL, SURF.paint)
+    K.box(-W / 2, wy, 0, 0.08, wallH, D, TEAL, SURF.paint)
+    K.box(W / 2, wy, 0, 0.08, wallH, D, TEAL, SURF.paint)
+    K.box(0, wy, D / 2, W, wallH, 0.08, TEAL, SURF.paint)
     K.box(-0.6, fy + 1.0, D / 2 + 0.05, 0.9, 1.95, 0.05, DARK, SURF.plain)
     K.box(-0.6, fy + 2.02, D / 2 + 0.06, 1.06, 0.08, 0.06, TRIM)
     for (const wx of [1.6, -2.6]) {
@@ -69,7 +69,7 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
     // lean-to roof over the walk
     K.at(0, fy + wallH + 0.25, D / 2 + 0.55, 0, 0.3).box(0, 0, V / 2 + 0.2, W + 1.0, 0.05, V + 0.7, ROOF, SURF.metal).pop()
     // gable ends
-    for (const sx of [-1, 1]) for (let k = 0; k < 5; k++) { const t = (k + 0.5) / 5; K.box(sx * W / 2, fy + wallH + 0.04 + t * 1.2 - 0.12, 0, 0.07, 0.25, D * (1 - t), TEAL) }
+    for (const sx of [-1, 1]) for (let k = 0; k < 5; k++) { const t = (k + 0.5) / 5; K.box(sx * W / 2, fy + wallH + 0.04 + t * 1.2 - 0.12, 0, 0.07, 0.25, D * (1 - t), TEAL, SURF.paint) }
     // rail round the walk
     const rz = D / 2 + V
     for (let i = 0; i <= 6; i++) { const x = -W / 2 + (i / 6) * W; if (i === 5) continue; K.cyl(x, fy, rz, x, fy + 0.95, rz, 0.04, 0.04, WOOD, SURF.plain, 5) }

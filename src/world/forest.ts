@@ -7,6 +7,7 @@ import { Field } from './instanced'
 import type { ForestCook, FieldName } from './forestCook'
 import * as G from './geom'
 import { WATER_RANGE } from './layout'
+import { detailUpright } from './scans'
 
 type N = any
 const ia: N = attribute('ia', 'vec4'), ib: N = attribute('ib', 'vec4'), aux: N = attribute('aux', 'vec3')
@@ -39,6 +40,8 @@ export const barkColor = (seed: N, groundY: N) => {
   const streak2 = noise(vec2(pw.x.add(pw.z).mul(0.5).add(0.012), pw.y.mul(0.05).add(0.004))).a
   const ridge = streak.sub(streak2).mul(9).clamp(-0.5, 0.6)
   col = col.mul(streak.mul(0.7).add(0.55)).mul(fine.mul(0.3).add(0.85)).mul(ridge.add(1))
+  // real bark from the scans: ridged kapok on some trunks, ropey banyan on others
+  col = col.mul(mix(detailUpright('kapok', 0.42, 0.9), detailUpright('banyan', 0.36, 0.9), smoothstep(0.45, 0.55, seed)))
   // pale lichen blotches and green moss near the foot
   col = mix(col, vec3(0.58, 0.58, 0.5), smoothstep(0.62, 0.78, blot).mul(0.45))
   const moss = smoothstep(0.45, 0.7, noise(pw.xz.mul(0.21).add(pw.y.mul(0.13))).g).mul(smoothstep(5.5, 0.5, pw.y.sub(groundY)))
