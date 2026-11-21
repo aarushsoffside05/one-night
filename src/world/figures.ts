@@ -2,7 +2,7 @@
 // Everybody lives in ONE skinned mesh (each part bound rigidly to one bone), so all the people together
 // cost one draw in the main pass and one in the shadow pass.
 import * as THREE from 'three/webgpu'
-import { Fn, attribute } from './tsl'
+import { Fn, attribute, texture, uv } from './tsl'
 import { PaintedMaterial } from './shade'
 import { mergeGeos } from './glb'
 
@@ -10,7 +10,7 @@ import { mergeGeos } from './glb'
 export const J = { shoulderX: 0.18, shoulderY: 0.45, neckY: 0.5, hipX: 0.09, hipY: -0.07, upperArm: 0.28, forearm: 0.37, thigh: 0.42, shin: 0.45, waist: 0.94 }
 
 export type Body = 'man_tee' | 'man_shirt' | 'man_long' | 'woman_tee' | 'woman_dress'
-export type BodyData = { bin: Uint8Array; meta: { verts: number; tris: number; posScale: number; materials: string[]; joints: Record<string, number[]> } }
+export type BodyData = { bin: Uint8Array; meta: { verts: number; tris: number; posScale: number; joints: Record<string, number[]> } }
 export type CharDef = { body?: Body; id: string; name: string; height: number; child: number; skin: number[]; shirt: number[]; bottom: number[]; hair: number[]; hairPart: string; hat?: string; hatCol?: number[]; skirt?: boolean; legs?: 'shoe' | 'boot' | 'trousers' | 'trousers_boot'; shoe?: number[] }
 const SKIN_A = [0.62, 0.4, 0.27], SKIN_B = [0.5, 0.31, 0.2], SKIN_C = [0.7, 0.48, 0.34]
 export const CHARS: CharDef[] = [
@@ -53,43 +53,25 @@ export class Figures {
   private fore = [new THREE.Matrix4(), new THREE.Matrix4()]
   private foreM = CHARS.flatMap(() => [new THREE.Matrix4(), new THREE.Matrix4()]); private headM = CHARS.map(() => new THREE.Matrix4())
 
-  constructor(kit: Record<string, THREE.BufferGeometry>, bodies: Record<string, BodyData>, group: THREE.Object3D) {
+  constructor(bodies: Record<string, BodyData>, atlas: THREE.Texture, group: THREE.Object3D) {
     const geos: THREE.BufferGeometry[] = []
     CHARS.forEach((def, ci) => {
-      const B = bodies[def.body ?? 'man_tee'], M = B.meta, J = M.joints
-      // region colours: the body files name their regions; each character paints them its own way
-      const shoe = def.shoe ?? (def.id === 'davi' ? [0.8, 0.78, 0.7] : [0.1, 0.08, 0.07])
-      const barefoot = ['tome', 'caio', 'lia', 'nino', 'socorro'].includes(def.id)
-      const colOf = (m: string): number[] => m === 'Skin' ? def.skin : m === 'Eyes' ? [0.03, 0.025, 0.02] : m.startsWith('Hair') ? def.hair : m === 'Shirt' || m === 'Dress' ? def.shirt : m === 'Shirt2' ? def.shirt.map((c) => c * 0.75) : m === 'Pants' ? def.bottom : m === 'Socks' ? (barefoot ? def.skin : [0.75, 0.73, 0.68]) : barefoot ? def.skin.map((c) => c * 0.9) : shoe
-      const cols = M.materials.map(colOf)
+      const B = bodies[def.id], M = B.meta, J = M.joints as Record<string, number[]>
+      // realistic bodies (Microsoft Rocketbox, MIT): 17 bytes a vertex: position, normal, two body segments and a weight, uv into the shared atlas
       const n = M.verts, dv = new DataView(B.bin.buffer, B.bin.byteOffset, B.bin.byteLength)
-      const pos = new Float32Array(n * 3), nrm = new Float32Array(n * 3), col = new Float32Array(n * 3), si = new Uint16Array(n * 4), sw = new Float32Array(n * 4)
+      const pos = new Float32Array(n * 3), nrm = new Float32Array(n * 3), uvs = new Float32Array(n * 2), si = new Uint16Array(n * 4), sw = new Float32Array(n * 4)
       for (let i = 0; i < n; i++) {
-        const o = i * 13
-        for (let c = 0; c < 3; c++) { pos[i * 3 + c] = (dv.getInt16(o + c * 2, true) / 32767) * M.posScale; nrm[i * 3 + c] = dv.getInt8(o + 6 + c) / 127; col[i * 3 + c] = cols[dv.getUint8(o + 9)][c] }
+        const o = i * 17
+        for (let c = 0; c < 3; c++) { pos[i * 3 + c] = (dv.getInt16(o + c * 2, true) / 32767) * M.posScale; nrm[i * 3 + c] = dv.getInt8(o + 6 + c) / 127 }
         const wa = dv.getUint8(o + 12) / 255
         si[i * 4] = ci * NB + dv.getUint8(o + 10); si[i * 4 + 1] = ci * NB + dv.getUint8(o + 11); sw[i * 4] = wa; sw[i * 4 + 1] = 1 - wa
+        uvs[i * 2] = dv.getUint16(o + 13, true) / 65535; uvs[i * 2 + 1] = dv.getUint16(o + 15, true) / 65535
       }
       const g = new THREE.BufferGeometry()
-      g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3))
+      g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uvs, 2))
       g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(si, 4)); g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(sw, 4))
-      g.setIndex(new THREE.BufferAttribute(new Uint16Array(B.bin.buffer.slice(B.bin.byteOffset + n * 13, B.bin.byteOffset + n * 13 + M.tris * 6)), 1))
+      g.setIndex(new THREE.BufferAttribute(new Uint16Array(B.bin.buffer.slice(B.bin.byteOffset + n * 17, B.bin.byteOffset + n * 17 + M.tris * 6)), 1))
       geos.push(g)
-      // hats and the backpack come from our own kit, fixed rigidly to the head or the torso
-      const rigid = (name: string, seg: number, c: number[], ox: number, oy: number, oz: number, sc: number) => {
-        const src = kit[name]; if (!src) return
-        const h = src.clone(); h.scale(sc, sc, sc); h.translate(ox, oy, oz)
-        const m2 = h.attributes.position.count, cc = new Float32Array(m2 * 3), mask = h.attributes.color.array as Float32Array
-        for (let i = 0; i < m2; i++) { const w = Math.min(mask[i * 3], mask[i * 3 + 1], mask[i * 3 + 2]); for (let q = 0; q < 3; q++) cc[i * 3 + q] = c[q] * (1 - w) + w * 0.85 }
-        h.setAttribute('color', new THREE.BufferAttribute(cc, 3))
-        const hi = new Uint16Array(m2 * 4), hw = new Float32Array(m2 * 4)
-        for (let i = 0; i < m2; i++) { hi[i * 4] = ci * NB + seg; hw[i * 4] = 1 }
-        h.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(hi, 4)); h.setAttribute('skinWeight', new THREE.Float32BufferAttribute(hw, 4))
-        if (h.attributes.aux) h.deleteAttribute('aux')
-        geos.push(h)
-      }
-      if (def.hat) rigid(def.hat, 2, def.hatCol!, J.Head[0], J.Head[1] - 0.125, J.Head[2] + 0.035, 0.94)
-      if (def.id === 'davi') rigid('backpack', 1, [0.62, 0.42, 0.1], 0, J.Abdomen[1] + 0.05, J.Abdomen[2] + 0.035, 0.9)
       const W = J.Abdomen, sh = J['UpperArm.L'], el = J['LowerArm.L'], pa = J['Palm.L'], hp = J['UpperLeg.L'], kn = J['LowerLeg.L']
       const j = { waistY: W[1], waistZ: W[2], neckY: J.Head[1] - W[1], neckZ: J.Head[2] - W[2], shX: sh[0], shY: sh[1] - W[1], shZ: sh[2] - W[2], ua: el[0] - sh[0], fa: pa[0] - el[0] + 0.07, hipX: hp[0], hipY: hp[1] - W[1], hipZ: hp[2] - W[2], th: hp[1] - kn[1], sh: kn[1],
         rest: [[0, W[1], W[2]], [0, W[1], W[2]], J.Head, sh, el, [-sh[0], sh[1], sh[2]], [-el[0], el[1], el[2]], hp, kn, [-hp[0], hp[1], hp[2]], [-kn[0], kn[1], kn[2]]] }
@@ -97,7 +79,7 @@ export class Figures {
     })
     const geo = mergeGeos(geos)
     const mat = new PaintedMaterial({ wrap: 0.55, pools: true })
-    mat.colorNode = Fn(() => attribute('color', 'vec3'))()
+    mat.colorNode = Fn(() => texture(atlas, uv()).rgb)()
     this.mesh = new THREE.SkinnedMesh(geo, mat)
     for (let i = 0; i < CHARS.length * NB; i++) { const b = new THREE.Bone(); b.matrixAutoUpdate = false; this.bones.push(b); this.mesh.add(b) }
     this.mesh.bind(new THREE.Skeleton(this.bones, this.bones.map(() => new THREE.Matrix4())), new THREE.Matrix4())
@@ -203,7 +185,7 @@ export class Figures {
   }
   private solve(ci: number, f: Fig) {
     const p = f.pose, k = f.k, ch = f.def.child, j = f.j
-    const limb = k * (1 - ch * 0.05), headS = k * (1 + ch * 0.2)
+    const limb = k * (1 - ch * 0.05), headS = k * (1 + ch * 0.07)
     const waist = (j.waistY + p[P.dy]) * limb
     this.m0.makeRotationY(Math.PI - f.heading).setPosition(f.x, f.y + waist, f.z)
     this.m0.multiply(this.rot(p[P.tilt], 0, p[P.roll]))

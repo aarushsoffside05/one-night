@@ -6,12 +6,17 @@ import boatsUrl from '../assets/models/boats.glb?inline'
 import fishUrl from '../assets/models/fish.glb?inline'
 import peopleUrl from '../assets/models/people.glb?inline'
 import { b64ToBytes, parseGlb, mergeGeos } from './glb'
-import peopleMeta from '../assets/models/people.json'
-import bManTee from '../assets/models/p_man_tee.bin?inline'
-import bManShirt from '../assets/models/p_man_shirt.bin?inline'
-import bManLong from '../assets/models/p_man_long.bin?inline'
-import bWomanTee from '../assets/models/p_woman_tee.bin?inline'
-import bWomanDress from '../assets/models/p_woman_dress.bin?inline'
+import rbMeta from '../assets/models/rocketbox.json'
+import rb_davi from '../assets/models/r_davi.bin?inline'
+import rb_tome from '../assets/models/r_tome.bin?inline'
+import rb_caio from '../assets/models/r_caio.bin?inline'
+import rb_lia from '../assets/models/r_lia.bin?inline'
+import rb_nino from '../assets/models/r_nino.bin?inline'
+import rb_socorro from '../assets/models/r_socorro.bin?inline'
+import rb_marta from '../assets/models/r_marta.bin?inline'
+import rb_rafa from '../assets/models/r_rafa.bin?inline'
+import rb_mae from '../assets/models/r_mae.bin?inline'
+import rb_pai from '../assets/models/r_pai.bin?inline'
 import type { BodyData } from './figures'
 import { PaintedMaterial, noise } from './shade'
 import { U } from './uniforms'
@@ -40,8 +45,8 @@ export class Props {
   constructor(private group: THREE.Object3D) {
     this.geo = parseGlb(b64ToBytes(boatsUrl))
     this.kit = parseGlb(b64ToBytes(peopleUrl))
-    const bins: Record<string, string> = { man_tee: bManTee, man_shirt: bManShirt, man_long: bManLong, woman_tee: bWomanTee, woman_dress: bWomanDress }
-    for (const k in bins) this.bodies[k] = { bin: b64ToBytes(bins[k]), meta: (peopleMeta as any)[k] }
+    const bins: Record<string, string> = { davi: rb_davi, tome: rb_tome, caio: rb_caio, lia: rb_lia, nino: rb_nino, socorro: rb_socorro, marta: rb_marta, rafa: rb_rafa, mae: rb_mae, pai: rb_pai }
+    for (const k in bins) this.bodies[k] = { bin: b64ToBytes(bins[k]), meta: (rbMeta as any)[k] }
     this.fishGeo = parseGlb(b64ToBytes(fishUrl)).fish
     // skiff and its outboard become one mesh
     if (this.geo.skiff && this.geo.outboard) { const o = this.geo.outboard.clone(); o.translate(0, 0.42, -3.085); this.geo.skiff = mergeGeos([this.geo.skiff, o]) }

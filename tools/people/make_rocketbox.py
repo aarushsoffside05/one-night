@@ -56,7 +56,7 @@ CHARS = [
 ]
 
 TARGET_TRIS = 5800      # decimate the 'hipoly' mesh (the only one in the FBX) to at most this
-OPACITY_KEEP = 0.80     # hair cards: keep triangles whose mean texture alpha is above this
+OPACITY_KEEP = 0.62     # hair cards: keep whole cards whose area-weighted mean texture alpha is above this
 ATLAS = 2048
 COLS, ROWS = 5, 2
 PAD = 2                 # texels of edge padding round every sub-texture
@@ -198,7 +198,8 @@ def recolour(rgb, kind, opt):
         xx = (xx + 0.5) / W; yy = (yy + 0.5) / H
         keep = 1.0 - (((xx < 0.36) & (yy > 0.83)) | ((xx < 0.24) & (yy > 0.60))).astype(np.float32)
         if hair == "dark":       # blonde -> dark brown: hair is darker and yellower than the skin
-            m = smooth(0.74 - v, 0.0, 0.10) * smooth(h, 0.058, 0.070) * (h < 0.25) * keep
+            face = (((xx - 0.5) / 0.15) ** 2 + ((yy - 0.41) / 0.20) ** 2 < 1) | ((np.abs(xx - 0.5) < 0.30) & (yy > 0.47) & (yy < 0.62)) | ((np.abs(xx - 0.5) < 0.30 - (yy - 0.62) * 1.5) & (yy >= 0.62))
+            m = smooth(0.80 - v, 0.0, 0.08) * smooth(h, 0.058, 0.070) * (h < 0.25) * keep * (1 - face)
             if kind == "opacity":
                 m = np.ones_like(m)
             l2 = lum ** 1.15
@@ -302,7 +303,7 @@ def convert(cid, folder, opt, repo, cache):
         bm = bmesh.new(); bm.from_mesh(me)
         bm.faces.ensure_lookup_table()
         uvlay = bm.loops.layers.uv[0]
-        kill = []
+        cov = {}
         for f in bm.faces:
             if f.material_index != oi:
                 continue
@@ -310,10 +311,26 @@ def convert(cid, folder, opt, repo, cache):
             pts = rs @ t[:3] if len(t) == 3 else np.concatenate([rs @ t[[0, 1, 2]], rs @ t[[0, 2, 3]]])
             x = np.clip(pts[:, 0] * W, 0, W - 1).astype(int)
             y = np.clip((1 - pts[:, 1]) * H, 0, H - 1).astype(int)
-            if A[y, x].mean() < OPACITY_KEEP:
-                kill.append(f)
+            cov[f.index] = (float(A[y, x].mean()), f.calc_area())
+        # decide per card (connected piece), so a kept card has no notches cut out of it
+        kill, seen = [], set()
+        for fi in cov:
+            if fi in seen:
+                continue
+            comp, stack = [], [fi]
+            seen.add(fi)
+            while stack:
+                g = stack.pop(); comp.append(g)
+                for vtx in bm.faces[g].verts:
+                    for nf in vtx.link_faces:
+                        if nf.index in cov and nf.index not in seen:
+                            seen.add(nf.index); stack.append(nf.index)
+            area = sum(cov[g][1] for g in comp)
+            mean = sum(cov[g][0] * cov[g][1] for g in comp) / max(area, 1e-12)
+            if mean < OPACITY_KEEP:
+                kill += [bm.faces[g] for g in comp]
             else:
-                kept_op += 1
+                kept_op += len(comp)
         dropped = len(kill)
         bmesh.ops.delete(bm, geom=kill, context="FACES")
         loose = [v for v in bm.verts if not v.link_faces]

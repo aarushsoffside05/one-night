@@ -1,0 +1,624 @@
+{
+ "davi": {
+  "source": "Assets/Avatars/Children/Male_Child_01",
+  "verts": 3414,
+  "tris": 5800,
+  "posScale": 1.71,
+  "bytes": 92838,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    0.951,
+    -0.0386
+   ],
+   "Head": [
+    -0.0,
+    1.4862,
+    -0.0294
+   ],
+   "UpperArm.L": [
+    0.197,
+    1.3374,
+    -0.0608
+   ],
+   "LowerArm.L": [
+    0.4645,
+    1.3374,
+    -0.0608
+   ],
+   "Palm.L": [
+    0.7182,
+    1.3374,
+    -0.0608
+   ],
+   "UpperLeg.L": [
+    0.0827,
+    0.8384,
+    -0.037
+   ],
+   "LowerLeg.L": [
+    0.0827,
+    0.4649,
+    -0.037
+   ],
+   "Foot.L": [
+    0.0827,
+    0.0935,
+    -0.037
+   ]
+  },
+  "ageNote": "Rocketbox child (source 1.43 m, reads about 10-12). Visitor boy; long-sleeved sweatshirt and jeans, not T-shirt and shorts.",
+  "atlasRect": [
+   0.0,
+   0.0,
+   0.200195,
+   0.5
+  ],
+  "srcHeight": 1.4345,
+  "srcTris": 6660,
+  "hairCards": {
+   "dropped": 0,
+   "kept": 0
+  }
+ },
+ "tome": {
+  "source": "Assets/Avatars/Professions/Wood_Male_01",
+  "verts": 3480,
+  "tris": 5800,
+  "posScale": 1.71,
+  "bytes": 93960,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    0.9535,
+    -0.0413
+   ],
+   "Head": [
+    -0.0,
+    1.4886,
+    -0.0321
+   ],
+   "UpperArm.L": [
+    0.1969,
+    1.3398,
+    -0.0635
+   ],
+   "LowerArm.L": [
+    0.4645,
+    1.3398,
+    -0.0635
+   ],
+   "Palm.L": [
+    0.7181,
+    1.3398,
+    -0.0635
+   ],
+   "UpperLeg.L": [
+    0.0827,
+    0.8409,
+    -0.0398
+   ],
+   "LowerLeg.L": [
+    0.0827,
+    0.4674,
+    -0.0398
+   ],
+   "Foot.L": [
+    0.0827,
+    0.096,
+    -0.0398
+   ]
+  },
+  "ageNote": "Adult man about 40-50 with cap, pale work shirt, jeans and boots; brown skin. Fits the fisher.",
+  "atlasRect": [
+   0.200195,
+   0.0,
+   0.399902,
+   0.5
+  ],
+  "srcHeight": 1.816,
+  "srcTris": 7108,
+  "hairCards": {
+   "dropped": 0,
+   "kept": 0
+  }
+ },
+ "caio": {
+  "source": "Assets/Avatars/Adults/Male_Adult_09",
+  "verts": 3404,
+  "tris": 5800,
+  "posScale": 1.71,
+  "bytes": 92668,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    0.957,
+    -0.021
+   ],
+   "Head": [
+    -0.0,
+    1.494,
+    -0.0118
+   ],
+   "UpperArm.L": [
+    0.1976,
+    1.3447,
+    -0.0433
+   ],
+   "LowerArm.L": [
+    0.4661,
+    1.3447,
+    -0.0433
+   ],
+   "Palm.L": [
+    0.7207,
+    1.3447,
+    -0.0433
+   ],
+   "UpperLeg.L": [
+    0.083,
+    0.844,
+    -0.0194
+   ],
+   "LowerLeg.L": [
+    0.083,
+    0.4691,
+    -0.0194
+   ],
+   "Foot.L": [
+    0.083,
+    0.0964,
+    -0.0194
+   ]
+  },
+  "ageNote": "Young man about 20-25 with long tied-back black hair, dark T-shirt, jeans. Jeans instead of shorts; small forearm tattoo in the source texture.",
+  "atlasRect": [
+   0.399902,
+   0.0,
+   0.600098,
+   0.5
+  ],
+  "srcHeight": 1.8095,
+  "srcTris": 7426,
+  "hairCards": {
+   "dropped": 274,
+   "kept": 0
+  }
+ },
+ "lia": {
+  "source": "Assets/Avatars/Children/Female_Child_01",
+  "verts": 3448,
+  "tris": 5800,
+  "posScale": 1.71,
+  "bytes": 93416,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    1.019,
+    0.0235
+   ],
+   "Head": [
+    -0.0,
+    1.4843,
+    -0.0295
+   ],
+   "UpperArm.L": [
+    0.1552,
+    1.3544,
+    -0.0346
+   ],
+   "LowerArm.L": [
+    0.4089,
+    1.3544,
+    -0.0346
+   ],
+   "Palm.L": [
+    0.6527,
+    1.3544,
+    -0.0346
+   ],
+   "UpperLeg.L": [
+    0.0859,
+    0.9021,
+    0.0251
+   ],
+   "LowerLeg.L": [
+    0.0859,
+    0.488,
+    0.0251
+   ],
+   "Foot.L": [
+    0.0859,
+    0.0804,
+    0.0251
+   ]
+  },
+  "ageNote": "Rocketbox child (source 1.43 m, reads about 10-12; the library has no teenager). Blonde source: hair darkened and skin tanned in the atlas. T-shirt over long sleeves and jeans, not shorts.",
+  "atlasRect": [
+   0.600098,
+   0.0,
+   0.799805,
+   0.5
+  ],
+  "srcHeight": 1.4349,
+  "srcTris": 7102,
+  "hairCards": {
+   "dropped": 0,
+   "kept": 0
+  }
+ },
+ "nino": {
+  "source": "Assets/Avatars/Children/Male_Child_02",
+  "verts": 3542,
+  "tris": 5800,
+  "posScale": 1.72,
+  "bytes": 95014,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    0.9584,
+    -0.0458
+   ],
+   "Head": [
+    -0.0,
+    1.4963,
+    -0.0366
+   ],
+   "UpperArm.L": [
+    0.198,
+    1.3467,
+    -0.0682
+   ],
+   "LowerArm.L": [
+    0.4669,
+    1.3467,
+    -0.0682
+   ],
+   "Palm.L": [
+    0.7218,
+    1.3467,
+    -0.0682
+   ],
+   "UpperLeg.L": [
+    0.0832,
+    0.8452,
+    -0.0443
+   ],
+   "LowerLeg.L": [
+    0.0832,
+    0.4698,
+    -0.0443
+   ],
+   "Foot.L": [
+    0.0832,
+    0.0965,
+    -0.0443
+   ]
+  },
+  "ageNote": "Rocketbox child (source 1.43 m, reads about 10; there is no smaller child, the game scales him down to a 7-year-old). T-shirt, cargo shorts, sandals.",
+  "atlasRect": [
+   0.799805,
+   0.0,
+   1.0,
+   0.5
+  ],
+  "srcHeight": 1.4272,
+  "srcTris": 7310,
+  "hairCards": {
+   "dropped": 0,
+   "kept": 0
+  }
+ },
+ "socorro": {
+  "source": "Assets/Avatars/Adults/Female_Adult_02",
+  "verts": 3628,
+  "tris": 5800,
+  "posScale": 1.71,
+  "bytes": 96476,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    1.0281,
+    0.0039
+   ],
+   "Head": [
+    -0.0,
+    1.4964,
+    -0.0494
+   ],
+   "UpperArm.L": [
+    0.1684,
+    1.3572,
+    -0.0537
+   ],
+   "LowerArm.L": [
+    0.4155,
+    1.3572,
+    -0.0537
+   ],
+   "Palm.L": [
+    0.6504,
+    1.3572,
+    -0.0537
+   ],
+   "UpperLeg.L": [
+    0.0864,
+    0.9104,
+    0.0055
+   ],
+   "LowerLeg.L": [
+    0.0864,
+    0.4937,
+    0.0055
+   ],
+   "Foot.L": [
+    0.0864,
+    0.102,
+    0.0055
+   ]
+  },
+  "ageNote": "The library has no elderly woman. This is the oldest-looking casual woman (about 45-55) in a jumper and denim skirt; hair greyed in the atlas to read as a grandmother. Court shoes, not sandals.",
+  "atlasRect": [
+   0.0,
+   0.5,
+   0.200195,
+   1.0
+  ],
+  "srcHeight": 1.7381,
+  "srcTris": 8940,
+  "hairCards": {
+   "dropped": 292,
+   "kept": 0
+  }
+ },
+ "marta": {
+  "source": "Assets/Avatars/Adults/Female_Adult_03",
+  "verts": 3749,
+  "tris": 5800,
+  "posScale": 1.71,
+  "bytes": 98533,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    1.0262,
+    -0.0058
+   ],
+   "Head": [
+    -0.0,
+    1.4956,
+    -0.0593
+   ],
+   "UpperArm.L": [
+    0.1687,
+    1.356,
+    -0.0636
+   ],
+   "LowerArm.L": [
+    0.4164,
+    1.356,
+    -0.0636
+   ],
+   "Palm.L": [
+    0.6519,
+    1.356,
+    -0.0636
+   ],
+   "UpperLeg.L": [
+    0.0866,
+    0.9083,
+    -0.0043
+   ],
+   "LowerLeg.L": [
+    0.0866,
+    0.4906,
+    -0.0043
+   ],
+   "Foot.L": [
+    0.0866,
+    0.098,
+    -0.0043
+   ]
+  },
+  "ageNote": "Woman about 25-35, black hair, sleeveless purple top and black trousers, flat shoes.",
+  "atlasRect": [
+   0.200195,
+   0.5,
+   0.399902,
+   1.0
+  ],
+  "srcHeight": 1.7341,
+  "srcTris": 9208,
+  "hairCards": {
+   "dropped": 912,
+   "kept": 24
+  }
+ },
+ "rafa": {
+  "source": "Assets/Avatars/Adults/Male_Adult_01",
+  "verts": 3605,
+  "tris": 5800,
+  "posScale": 1.71,
+  "bytes": 96085,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    0.9486,
+    -0.0326
+   ],
+   "Head": [
+    -0.0,
+    1.481,
+    -0.0235
+   ],
+   "UpperArm.L": [
+    0.1959,
+    1.333,
+    -0.0548
+   ],
+   "LowerArm.L": [
+    0.4621,
+    1.333,
+    -0.0548
+   ],
+   "Palm.L": [
+    0.7144,
+    1.333,
+    -0.0548
+   ],
+   "UpperLeg.L": [
+    0.0823,
+    0.8366,
+    -0.0311
+   ],
+   "LowerLeg.L": [
+    0.0823,
+    0.465,
+    -0.0311
+   ],
+   "Foot.L": [
+    0.0823,
+    0.0955,
+    -0.0311
+   ]
+  },
+  "ageNote": "Young man about 20-25 in striped polo shirt, shorts and trainers. Fits the visiting young man.",
+  "atlasRect": [
+   0.399902,
+   0.5,
+   0.600098,
+   1.0
+  ],
+  "srcHeight": 1.8253,
+  "srcTris": 7440,
+  "hairCards": {
+   "dropped": 202,
+   "kept": 292
+  }
+ },
+ "mae": {
+  "source": "Assets/Avatars/Adults/Female_Adult_05",
+  "verts": 3774,
+  "tris": 5799,
+  "posScale": 1.71,
+  "bytes": 98952,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    1.0242,
+    -0.0161
+   ],
+   "Head": [
+    -0.0,
+    1.4926,
+    -0.0695
+   ],
+   "UpperArm.L": [
+    0.1684,
+    1.3534,
+    -0.0738
+   ],
+   "LowerArm.L": [
+    0.4156,
+    1.3534,
+    -0.0738
+   ],
+   "Palm.L": [
+    0.6506,
+    1.3534,
+    -0.0738
+   ],
+   "UpperLeg.L": [
+    0.0865,
+    0.9065,
+    -0.0146
+   ],
+   "LowerLeg.L": [
+    0.0865,
+    0.4897,
+    -0.0146
+   ],
+   "Foot.L": [
+    0.0865,
+    0.0979,
+    -0.0146
+   ]
+  },
+  "ageNote": "Woman about 35-45, black bob, pale pink jacket over blouse and jeans (city visitor).",
+  "atlasRect": [
+   0.600098,
+   0.5,
+   0.799805,
+   1.0
+  ],
+  "srcHeight": 1.7376,
+  "srcTris": 8288,
+  "hairCards": {
+   "dropped": 370,
+   "kept": 550
+  }
+ },
+ "pai": {
+  "source": "Assets/Avatars/Adults/Male_Adult_14",
+  "verts": 3426,
+  "tris": 5800,
+  "posScale": 1.71,
+  "bytes": 93042,
+  "joints": {
+   "Abdomen": [
+    -0.0,
+    0.9629,
+    -0.0469
+   ],
+   "Head": [
+    -0.0,
+    1.5032,
+    -0.0376
+   ],
+   "UpperArm.L": [
+    0.1989,
+    1.353,
+    -0.0693
+   ],
+   "LowerArm.L": [
+    0.4691,
+    1.353,
+    -0.0693
+   ],
+   "Palm.L": [
+    0.7252,
+    1.353,
+    -0.0693
+   ],
+   "UpperLeg.L": [
+    0.0835,
+    0.8492,
+    -0.0453
+   ],
+   "LowerLeg.L": [
+    0.0835,
+    0.472,
+    -0.0453
+   ],
+   "Foot.L": [
+    0.0835,
+    0.0969,
+    -0.0453
+   ]
+  },
+  "ageNote": "Balding man about 45-55 in grey long-sleeved shirt and khaki trousers (city visitor).",
+  "atlasRect": [
+   0.799805,
+   0.5,
+   1.0,
+   1.0
+  ],
+  "srcHeight": 1.7983,
+  "srcTris": 6842,
+  "hairCards": {
+   "dropped": 0,
+   "kept": 0
+  }
+ },
+ "atlas": "people_atlas.webp",
+ "licence": "MIT, Microsoft Rocketbox"
+}

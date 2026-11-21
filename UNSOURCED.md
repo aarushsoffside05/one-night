@@ -27,3 +27,9 @@ Things the build shows or says that are not on the brief's list of facts (sectio
 - Scenes 5 and 6: how the net is set and lifted; a canoe kept at the lake; the line from the canoe to the bank and the children holding it; fish "each longer than Davi"; "Big one. Not ours."; "The week's sale."; the catch carried out on a shoulder.
 - Scene 7: "one channel" as this made-up community's only way in at low water; a fast boat's swell endangering a canoe at the landing; children lifted to the deck.
 - Scene 8: the yard dry enough to tow a board across; the map's shapes (the reserve between two rivers, the river and its branches, the continent) are sketches, not traced maps.
+
+## The people are stand-ins (needs the reserve's reader, and Aarush)
+- Every figure is a ready-made avatar from a general library (Microsoft Rocketbox), chosen as the nearest fit. **None was made to look like people of Mamirauá.** Faces, builds and above all clothes are generic and largely European casual wear: jeans, sweatshirts, shoes. Nobody is barefoot; the grandmother wears a jumper and court shoes and reads about fifty.
+- Skin and hair of some avatars were tinted to bring the family closer together. That is a crude fix and may read wrong; Nino in particular does not look like Lia's brother.
+- The library has one child size, so Davi, Lia and Nino share a ten-to-twelve-year-old's proportions; Nino is that body scaled down.
+- This is the weakest point of the build for the brief's "truth and care" section, and should be the first thing a reader from the reserve's communities is asked about.
