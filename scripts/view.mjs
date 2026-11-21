@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import { open } from './_pw.mjs'
 const [out, views = 'map', water = '0', tod = '0'] = process.argv.slice(2).filter((a) => !a.startsWith('--'))
 const gl = process.argv.includes('--gl')
-const { browser, page } = await open('http://localhost:5173/?shots=1' + (gl ? '&gl=1' : ''), { gl, quiet: true })
+const { browser, page } = await open((process.argv.find((a) => a.startsWith('--url='))?.slice(6) || 'http://localhost:5173/') + '?shots=1&q=' + (process.argv.find((a) => a.startsWith('--q='))?.slice(4) || 'high') + (gl ? '&gl=1' : ''), { gl, quiet: false })
 const list = views.split(';')
 for (let i = 0; i < list.length; i++) {
   const v = list[i] === 'map' ? [0, 760, 0, 0, 0, 0] : list[i].startsWith('cam') ? null : list[i].split(',').map(Number)

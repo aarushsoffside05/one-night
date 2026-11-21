@@ -1,6 +1,6 @@
 // Every state the world can be in is a uniform here. Materials never get swapped at run time,
 // so nothing compiles mid-play: water level, time of day, lamps and wind are all just numbers.
-import { uniform } from 'three/tsl'
+import { uniform } from './tsl'
 import { Color, Vector3, Vector4 } from 'three/webgpu'
 
 export const U = {
@@ -26,10 +26,24 @@ export const U = {
   lamp0: uniform(new Vector4(0, -100, 0, 0)), // xyz position, w strength
   lamp1: uniform(new Vector4(0, -100, 0, 0)),
   lamp2: uniform(new Vector4(0, -100, 0, 0)),
+  orb: uniform(new Vector4(0, -100, 0, 0)), // the orb's light at the boy's hand
+  fogMax: uniform(0.96),
+  cloudCol: uniform(new Color(1, 1, 1)),
+  cloudShade: uniform(new Color(0.6, 0.65, 0.75)),
+  stars: uniform(0),
+  discCol: uniform(new Color(1, 0.95, 0.8)),
+  sunI: uniform(1), // direct light strength, for shaders that fake it (water glitter, shafts)
+  mist: uniform(0),
+  raft: uniform(new Vector4(0, 0, 0, 0)), // floating house: x,z tilt and y dip when someone steps on (xyz), spare
+  fishRoll: uniform(new Vector3(0, 0.3, 0.5)), // the giant fish: progress, bend, tail wag
+  boatLake: uniform(0), // 1 while the boats being drawn sit on the lake (wet band height)
+  ripple: uniform(1), // water surface roughness (still lake at dawn = low) // low ground mist before dawn
+
   lampCol: uniform(new Color(1, 0.62, 0.28)),
   orbCol: uniform(new Color(0.55, 0.85, 1)),
   orbWater: uniform(-100), // the lent "way of seeing": a ghost sheet of water at this height
   orbMix: uniform(0),
   detail: uniform(1), // draw-distance scale from the quality controller
   player: uniform(new Vector3()),
+  eye: uniform(new Vector3()), // main camera position (shadow passes have their own camera, so shaders use this)
 }

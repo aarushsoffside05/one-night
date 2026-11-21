@@ -1,85 +1,133 @@
 // Builds the world's few big objects from the cooked arrays. One call, returns handles.
 import * as THREE from 'three/webgpu'
-import { Fn, positionWorld, normalWorld, vec3, float, mix, smoothstep, texture, vec2, uniform } from 'three/tsl'
 import type { CookResult } from './cook.worker'
 import { Heightfield, GRID_N } from './terrain'
-import { CORE, LAKE, LAKE_LEVEL } from './layout'
+import { LAKE, LAKE_LEVEL } from './layout'
+import { COVER_N } from './forestCook'
 import { U } from './uniforms'
+import { TEX, makeNoiseTexture, makeFog } from './shade'
+import { groundMaterial } from './ground'
+import { waterMaterial } from './water'
+import { makeSky, makeFarRings } from './sky'
+import { buildForest, type Forest } from './forest'
+import { buildShafts } from './shafts'
+import { updateCellVisibility } from './instanced'
+import { applyEnv, envOut } from './env'
+import { buildStructures, type Structures } from './structures'
+import { buildLife, setLifeHeight, type Life } from './life'
+import { Props } from './props'
+import { Figures } from './figures'
+import { TIERS, type Tier } from '../game/quality'
 
 export type World = {
   hf: Heightfield
   group: THREE.Group
   sun: THREE.DirectionalLight
-  hemi: THREE.HemisphereLight
-  heightTex: THREE.DataTexture
-  kindsTex: THREE.DataTexture
-  lakeMesh: THREE.Mesh
-  update(dt: number, camera: THREE.PerspectiveCamera): void
-  counts: Record<string, number>
+  forest: Forest
+  solids: Float32Array
+  structures: Structures
+  life: Life
+  props: Props
+  figures: Figures
+  update(dt: number, camera: THREE.PerspectiveCamera, tod: number, focus: THREE.Vector3): void
+  counts(): Record<string, number>
 }
 
-export function worldUV() { return positionWorld.xz.add(CORE).div(CORE * 2) }
+const frustum = new THREE.Frustum(), pm = new THREE.Matrix4()
 
-export function buildWorld(c: CookResult, scene: THREE.Scene): World {
+export function buildWorld(c: CookResult, scene: THREE.Scene, renderer: THREE.WebGPURenderer, tier: Tier, backend: string): World {
   const hf = new Heightfield(c.h)
   const group = new THREE.Group()
   scene.add(group)
 
-  // height + ground-kind textures for shaders (water depth, wet band, ground painting)
+  // textures made from the cooked arrays: land height, ground kinds, canopy cover; plus the noise sheet
   const half = new Uint16Array(c.h.length)
   for (let i = 0; i < half.length; i++) half[i] = THREE.DataUtils.toHalfFloat(c.h[i])
-  const heightTex = new THREE.DataTexture(half, GRID_N, GRID_N, THREE.RedFormat, THREE.HalfFloatType)
-  heightTex.minFilter = heightTex.magFilter = THREE.LinearFilter
-  heightTex.needsUpdate = true
-  const kindsTex = new THREE.DataTexture(c.kinds, GRID_N, GRID_N, THREE.RGBAFormat, THREE.UnsignedByteType)
-  kindsTex.minFilter = kindsTex.magFilter = THREE.LinearFilter
-  kindsTex.needsUpdate = true
+  TEX.height = new THREE.DataTexture(half, GRID_N, GRID_N, THREE.RedFormat, THREE.HalfFloatType)
+  TEX.kinds = new THREE.DataTexture(c.kinds, GRID_N, GRID_N, THREE.RGBAFormat, THREE.UnsignedByteType)
+  TEX.cover = new THREE.DataTexture(c.forest.cover, COVER_N, COVER_N, THREE.RedFormat, THREE.UnsignedByteType)
+  for (const t of [TEX.height, TEX.kinds, TEX.cover]) { t.minFilter = t.magFilter = THREE.LinearFilter; t.needsUpdate = true }
+  TEX.noise = makeNoiseTexture()
+
+  scene.fogNode = makeFog()
+  scene.background = null
+  const sky = makeSky()
+  scene.add(sky)
+  group.add(makeFarRings())
 
   // terrain
   const tg = new THREE.BufferGeometry()
   tg.setAttribute('position', new THREE.BufferAttribute(c.terrain.pos, 3))
   tg.setAttribute('normal', new THREE.BufferAttribute(c.terrain.nrm, 3))
   tg.setIndex(new THREE.BufferAttribute(c.terrain.idx, 1))
-  tg.computeBoundingSphere()
-  const tm = new THREE.MeshLambertNodeMaterial()
-  tm.colorNode = Fn(() => {
-    const k = texture(kindsTex, worldUV())
-    const base = mix(vec3(0.42, 0.42, 0.4), vec3(0.6, 0.58, 0.5), k.r)
-    const wet = smoothstep(float(0.9), float(0.0), positionWorld.y.sub(U.water))
-    const slope = smoothstep(float(0.95), float(0.6), normalWorld.y)
-    return mix(base, vec3(0.3, 0.28, 0.25), slope.mul(0.6)).mul(mix(float(1), float(0.55), wet))
-  })()
-  const terrain = new THREE.Mesh(tg, tm)
+  const terrain = new THREE.Mesh(tg, groundMaterial())
   terrain.receiveShadow = true
   terrain.frustumCulled = false
   group.add(terrain)
 
+  const forest = buildForest(c.forest, group)
+  forest.fields.push(buildShafts(c.forest.fields.shaft, group))
+
+  const structures = buildStructures(hf, group, c.forest.markedR)
+  const solids = new Float32Array(c.forest.solids.length + structures.solids.length)
+  solids.set(c.forest.solids); solids.set(structures.solids, c.forest.solids.length)
+
+  const props = new Props(group)
+  const figures = new Figures(props.kit, group)
+  const life = buildLife(group, TIERS[tier].density, props.fishGeo)
+  setLifeHeight((x, z) => hf.at(x, z))
+
   // water: one material, the river sheet plus the perched lake disc
-  const wm = new THREE.MeshBasicNodeMaterial({ transparent: true })
-  wm.colorNode = Fn(() => {
-    const depth = positionWorld.y.sub(texture(heightTex, worldUV()).r)
-    return mix(vec3(0.45, 0.5, 0.5), vec3(0.2, 0.26, 0.3), smoothstep(float(0), float(4), depth))
-  })()
-  wm.opacityNode = Fn(() => smoothstep(float(0.0), float(0.5), positionWorld.y.sub(texture(heightTex, worldUV()).r)).mul(0.85).add(0.1))()
-  const river = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000).rotateX(-Math.PI / 2), wm)
+  const wm = waterMaterial(backend === 'webgpu' && tier !== 'low')
+  const river = new THREE.Mesh(new THREE.PlaneGeometry(7000, 7000).rotateX(-Math.PI / 2), wm)
   river.frustumCulled = false
+  river.renderOrder = 5
   const lakeMesh = new THREE.Mesh(new THREE.CircleGeometry(1, 48).rotateX(-Math.PI / 2), wm)
-  lakeMesh.scale.set(LAKE.rx * 1.35, 1, LAKE.rz * 1.35)
+  lakeMesh.scale.set(LAKE.rx * 1.4, 1, LAKE.rz * 1.4)
   lakeMesh.position.set(LAKE.x, LAKE_LEVEL, LAKE.z)
+  lakeMesh.renderOrder = 5
   group.add(river, lakeMesh)
 
-  const sun = new THREE.DirectionalLight(0xfff0dd, 2.2)
-  const hemi = new THREE.HemisphereLight(0xbcd0ff, 0x4a3a28, 1.1)
-  scene.add(sun, sun.target, hemi)
+  // the one real light: sun or moon, with one shadow over the near ground
+  const sun = new THREE.DirectionalLight(0xffffff, 2)
+  const T = TIERS[tier]
+  if (T.shadows) {
+    sun.castShadow = true
+    sun.shadow.mapSize.set(T.shadowSize, T.shadowSize)
+    const sc = sun.shadow.camera
+    sc.left = -46; sc.right = 46; sc.top = 46; sc.bottom = -46; sc.near = 1; sc.far = 400
+    sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.06
+  }
+  scene.add(sun, sun.target)
 
-  const counts: Record<string, number> = { terrainTris: c.terrain.idx.length / 3 }
+  const snap = new THREE.Vector3()
   return {
-    hf, group, sun, hemi, heightTex, kindsTex, lakeMesh, counts,
-    update(_dt, camera) {
+    hf, group, sun, forest, solids, structures, life, props, figures,
+    update(dt, camera, tod, focus) {
+      applyEnv(tod, sun, renderer)
       const wy = U.water.value
+      U.eye.value.copy(camera.position)
       river.position.set(camera.position.x, wy, camera.position.z)
+      sky.position.copy(camera.position)
       lakeMesh.visible = wy < LAKE_LEVEL - 0.02
       U.lake.value = Math.max(LAKE_LEVEL, wy)
+      structures.update(wy)
+      // lamps: lit by the time of day, with a slow flicker
+      const fl = 0.86 + 0.09 * Math.sin(U.time.value * 7.3) + 0.05 * Math.sin(U.time.value * 17.1)
+      const L0 = structures.lamps[1], L1 = structures.lamps[0]
+      U.lamp0.value.set(L0.x, L0.y + (L0.floats ? wy : 0), L0.z, envOut.lamp * 5.5 * fl)
+      U.lamp1.value.set(L1.x, L1.y, L1.z, envOut.lamp * 4.0 * (1.9 - fl))
+      // shadow follows the focus point, snapped so it does not shimmer
+      snap.set(Math.round(focus.x / 2) * 2, focus.y, Math.round(focus.z / 2) * 2)
+      sun.target.position.copy(snap)
+      sun.position.copy(snap).addScaledVector(U.sunDir.value, 180)
+      camera.updateMatrixWorld()
+      pm.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+      frustum.setFromProjectionMatrix(pm, renderer.coordinateSystem)
+      updateCellVisibility(frustum, camera.position.x, camera.position.z)
+      forest.update(U.detail.value * T.far)
+      life.update(dt, U.time.value, camera.position, tod)
     },
+    counts() { return { terrainTris: c.terrain.idx.length / 3, trees: c.forest.treeCount, ...forest.count() } },
   }
 }

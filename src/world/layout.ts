@@ -4,7 +4,9 @@ export const WATER_RANGE = 10.6 // mean yearly swing, metres (brief section 7)
 export const waterYOf = (w: number) => w * WATER_RANGE
 export const LAKE_LEVEL = 6.2 // the cut-off lake sits perched above the low river
 export const FLOOR_Y = 8.0 // the forest floor that floods (about 2.6 m under at top level)
-export const HIGH_Y = 10.3 // the community's high ground: ankle-deep at top level
+export const HIGH_Y = 10.3 // the knoll behind the yard: the high ground, ankle-deep at top level
+export const YARD_Y = 8.8 // the yard: last year's water stood about 1.8 m over it (over a boy's head)
+export const HOUSE_FLOOR_Y = 11.3 // the stilt house floor sits just above the top level: that is why it has legs
 export const PLAY = 300 // playable half-size
 export const CORE = 340 // half-size of the baked height grid
 export const CELL = 2 // height grid spacing
@@ -42,7 +44,8 @@ export const COMMUNITY = { x: 16, z: 44, r: 44 }
 export const PLACES = {
   stiltHouse: { x: 24, z: 56, rot: 0.25 },
   markedTree: { x: 12, z: 30 },
-  aerial: { x: 40, z: 46 },
+  aerial: { x: 47, z: 52 },
+  knoll: { x: 46, z: 54, r: 17 },
   stepsTop: { x: -10, z: 52 },
   landing: { x: -29, z: 56 },
   floatHouse: { x: -31, z: 70, rot: 1.45 },

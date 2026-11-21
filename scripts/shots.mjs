@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import { open } from './_pw.mjs'
 const step = process.argv[2] || 'wip'
 const gl = process.argv.includes('--gl')
-const url = (process.argv.find((a) => a.startsWith('--url=')) || '--url=http://localhost:5173/').slice(6)
+const url = (process.argv.find((a) => a.startsWith('--url=')) || '--url=http://localhost:4173/').slice(6)
 const only = (process.argv.find((a) => a.startsWith('--cams=')) || '').slice(7).split(',').filter(Boolean).map(Number)
 const STATES = [
   { name: 'low water, late afternoon', water: 0, tod: 0.0 },
@@ -15,7 +15,7 @@ const STATES = [
 const out = `shots/${step}`
 fs.mkdirSync(out, { recursive: true })
 const t0 = Date.now()
-const { browser, page, errors } = await open(url + (url.includes('?') ? '&' : '?') + 'shots=1' + (gl ? '&gl=1' : ''), { gl })
+const { browser, page, errors } = await open(url + (url.includes('?') ? '&' : '?') + 'shots=1&q=' + (process.argv.find((a) => a.startsWith('--q='))?.slice(4) || 'high') + (gl ? '&gl=1' : ''), { gl })
 const meta = await page.evaluate(() => ({ backend: window.__ON.backend, tier: window.__ON.tier, cams: window.__ON.cams }))
 console.log(`backend ${meta.backend}, level ${meta.tier}, ${meta.cams.length} cameras, load ${((Date.now() - t0) / 1000).toFixed(0)} s`)
 const rows = []
@@ -25,7 +25,7 @@ for (let ci = 0; ci < meta.cams.length; ci++) {
   for (const s of STATES) {
     const r = await page.evaluate(async ({ ci, s }) => {
       window.__ON.set({ water: s.water, tod: s.tod, frozen: true, clock: 20, cam: ci })
-      window.__ON.cap(); window.__ON.cap() // settle culling + shadow before the kept frame
+      window.__ON.cap() // settle culling + shadow before the kept frame
       const d = window.__ON.cap(0.9)
       return { d, info: window.__ON.info() }
     }, { ci, s })

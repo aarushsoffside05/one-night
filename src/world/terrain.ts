@@ -1,6 +1,6 @@
 // Land from a height formula. Pure functions over numbers and typed arrays: runs in the worker
 // (to bake the grid) and on the main thread (to read it). No three.js in here.
-import { CHANNEL, DRYBED, TRAIL, YARDPATH, LAKE, RIVER_Z, COMMUNITY, PLACES, FLOOR_Y, HIGH_Y, CORE, CELL, distPoly, polyT } from './layout'
+import { CHANNEL, DRYBED, TRAIL, YARDPATH, LAKE, RIVER_Z, COMMUNITY, PLACES, FLOOR_Y, HIGH_Y, YARD_Y, CORE, CELL, distPoly, polyT } from './layout'
 import { fbm2, noise2, seedInt } from './rng'
 
 const ss = (a: number, b: number, x: number) => { const t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t) }
@@ -26,12 +26,15 @@ export function heightFormula(x: number, z: number): number {
   // the community's high ground
   const cd = Math.hypot((x - COMMUNITY.x), (z - COMMUNITY.z) * 0.9) / COMMUNITY.r
   const high = 1 - ss(0.62, 1.0, cd + (n2 - 0.5) * 0.3)
-  h = mix(h, HIGH_Y + (n2 - 0.5) * 0.12 + (n3 - 0.5) * 0.05, high)
+  h = mix(h, YARD_Y + (n2 - 0.5) * 0.14 + (n3 - 0.5) * 0.05, high)
   kind.high = high
+  // the knoll: the one piece of ground the big floods barely cover
+  const kn = 1 - ss(0.45, 1.0, Math.hypot(x - PLACES.knoll.x, z - PLACES.knoll.z) / PLACES.knoll.r + (n2 - 0.5) * 0.25)
+  h = mix(h, HIGH_Y + (n2 - 0.5) * 0.2, kn)
 
   // natural levee: ground stands a little higher beside the channel
   const dc = distPoly(x, z, CHANNEL), s = polyT
-  h += 0.9 * ss(70, 30, dc) * (1 - high)
+  h += 0.9 * ss(70, 30, dc) * (1 - high * 0.6)
 
   // the lake, cut off in the forest; a high bank on its west side where the trail arrives
   const dl = lakeD(x, z, S)
@@ -71,7 +74,9 @@ export function heightFormula(x: number, z: number): number {
   const run = mix(10.5, 8, s) + 3 * (noise2(x / 18, z / 18, S + 44) - 0.5)
   const p = ss(wb, wb + run, dc)
   // banks slump in steps: terraces left by the falling river
-  const terr = p + 0.05 * Math.sin(p * 19) * p * (1 - p) * 4
+  // a gentle silt foot, then a steep cut face, then the lip; slumped in steps left by the falling river
+  const face = 0.3 * ss(0, 0.62, p) + 0.7 * ss(0.6, 0.9, p)
+  const terr = face + 0.035 * Math.sin(p * 21) * p * (1 - p) * 4
   const carved = mix(bedY, h, Math.min(Math.max(terr, 0), 1))
   kind.channel = 1 - p
   kind.bank = Math.max(ss(0.02, 0.2, p) * (1 - ss(0.82, 1.0, p)), Math.max(0, 1 - Math.abs(dr + 6) / 9) * (1 - beachness)) * (h > 1 ? 1 : 0)

@@ -10,6 +10,10 @@ import { waterYOf } from '../world/layout'
 import { ui, type BenchResult } from './store'
 import { pickTier, QualityController, TIERS, type Tier } from './quality'
 import { CAMS, FLIGHT } from '../dev/cameras'
+import { Player } from './player'
+import { input, installInput, pollInput, endFrameInput } from './input'
+import { PLACES } from '../world/layout'
+import { Cast } from './cast'
 
 const params = new URLSearchParams(location.search)
 export const DEV = params.get('dev') === '1'
@@ -30,6 +34,13 @@ export class Game {
   private bench: { t: number; times: Float32Array; n: number; draws: number; tris: number; per: string[]; li: number; ln: number; lacc: number; lworst: number } | null = null
   private freeCam: { i: number } | null = DEV ? { i: 0 } : null
   private v1 = new THREE.Vector3()
+  focus = new THREE.Vector3()
+  player!: Player
+  cast!: Cast
+  waterTarget = 0; todTarget = 0.0
+  devCam = false // a fixed dev camera or the benchmark flight has the camera
+  titleT = 0
+  hooks: { frame?: (dt: number) => void } = {}
 
   constructor(public renderer: THREE.WebGPURenderer, public scene: THREE.Scene, public camera: THREE.PerspectiveCamera) {}
 
@@ -50,12 +61,17 @@ export class Game {
     const cooked = await this.cook()
     ui.set({ loadStage: 'Raising the forest', loadPct: 0.7 })
     await nextFrame()
-    this.world = buildWorld(cooked, this.scene)
-    this.scene.background = new THREE.Color(0x9fb4bd)
+    this.world = buildWorld(cooked, this.scene, r, this.tier, this.backend)
     ui.set({ loadStage: 'Mixing the light', loadPct: 0.85 })
     await nextFrame()
+    this.player = new Player(this.world)
+    this.player.place(PLACES.markedTree.x + 6, PLACES.markedTree.z + 4, -2.2)
+    this.cast = new Cast(this.world, this.player)
+    installInput(r.domElement)
     this.setCam(0)
     this.applyState()
+    this.world.update(0, this.camera, this.tod, this.camera.position)
+    this.devCam = false
     await r.compileAsync(this.scene, this.camera)
     ui.set({ loadStage: 'Ready', loadPct: 1, phase: 'title' })
     this.ready = true
@@ -72,7 +88,7 @@ export class Game {
         else { resolve(e.data); w.terminate() }
       }
       w.onerror = (e) => reject(new Error('cook worker: ' + e.message))
-      w.postMessage({ seed: WORLD_SEED })
+      w.postMessage({ seed: WORLD_SEED, density: TIERS[this.tier].density })
     })
   }
 
@@ -93,16 +109,56 @@ export class Game {
     if (!this.ready) return
     const dt = this.frozen ? 0 : Math.min(this.frameMs / 1000, 0.1)
     this.clock += dt
+    pollInput()
+    const phase = ui.get().phase
     if (this.bench) this.flyBench(dt)
+    else if (!this.devCam) {
+      // water and time ease toward where the player (or the story) has set them
+      const dw = this.waterTarget - this.water
+      this.water += Math.sign(dw) * Math.min(Math.abs(dw), dt * 0.045)
+      const dtod = this.todTarget - this.tod
+      this.tod += Math.sign(dtod) * Math.min(Math.abs(dtod), dt * 0.06)
+      if (phase === 'title') this.titleCamera(dt)
+      else if (phase === 'play') {
+        this.player.update(dt, waterYOf(this.water))
+        this.hooks.frame?.(dt)
+        this.player.updateCamera(dt, this.camera)
+      }
+    }
     this.applyState()
-    this.world.update(dt, this.camera)
+    if (phase === 'play' && !this.devCam && !this.bench) this.focus.set(this.player.x, this.player.y, this.player.z)
+    else this.focus.copy(this.camera.position)
+    U.player.value.set(this.player.x, this.player.y, this.player.z)
+    this.cast.update(dt, this.clock)
+    this.world.update(dt, this.camera, this.tod, this.focus)
+    endFrameInput()
   }
 
   applyState() {
     U.water.value = waterYOf(this.water)
     U.time.value = this.clock
-    const w = this.world
-    if (w) { w.sun.position.set(-60, 90, 40); w.sun.target.position.set(0, 0, 0) }
+  }
+
+  // title screen: a slow drift up the channel under the banks
+  private titleCamera(dt: number) {
+    this.titleT += dt
+    const t = this.titleT
+    const x = -46 + Math.sin(t * 0.05) * 5, z = 176 - t * 0.35 % 40
+    this.camera.position.set(x, 2.2 + Math.sin(t * 0.21) * 0.15, z)
+    this.camera.lookAt(-30 + Math.sin(t * 0.04) * 4, 5.5, z - 60)
+  }
+
+  startPlay(mode: 'roam' | 'story') {
+    this.devCam = false
+    ui.set({ phase: 'play', mode })
+    this.player.place(PLACES.markedTree.x + 6, PLACES.markedTree.z + 4, -2.2)
+  }
+
+  goTo(x: number, z: number, heading: number) {
+    this.devCam = false
+    this.player.place(x, z, heading, this.player.depthAt(x, z) > 0.7 ? 'canoe' : 'foot')
+    this.player.waterY = waterYOf(this.water)
+    this.player.place(x, z, heading, this.player.depthAt(x, z) > 0.7 ? 'canoe' : 'foot')
   }
 
   setCam(i: number) {
@@ -112,6 +168,7 @@ export class Game {
     this.camera.position.set(c.x, y, c.z)
     this.camera.lookAt(c.lx, Math.max(hf.at(c.lx, c.lz), wy) + c.lup, c.lz)
     if (this.freeCam) this.freeCam.i = i % CAMS.length
+    this.devCam = true
   }
 
   private afterRender() {
@@ -149,7 +206,7 @@ export class Game {
       b.li = li; b.ln = 0; b.lacc = 0; b.lworst = 0
     }
     if (b.t >= LEG * 3) return this.endBench()
-    this.water = [0, 0.5, 1][li]
+    this.water = this.waterTarget = [0, 0.5, 1][li]
     const u = ((b.t % LEG) / LEG) * (FLIGHT.length - 1)
     flightPoint(u, this.v1)
     const px = this.v1.x, pz = this.v1.z, ph = this.v1.y
@@ -162,6 +219,7 @@ export class Game {
   private endBench() {
     const b = this.bench!; this.bench = null
     this.quality.locked = false
+    this.devCam = false
     const arr = Array.from(b.times.subarray(10, b.n)).sort((x, y) => x - y) // skip the first frames after the key press
     const n = arr.length || 1
     const avg = arr.reduce((s, x) => s + x, 0) / n
@@ -179,8 +237,8 @@ export class Game {
     ;(window as any).__ON = {
       ready: true, backend: this.backend, tier: this.tier, cams: CAMS.map((c) => c.name), game: this,
       set(o: { water?: number; tod?: number; cam?: number; frozen?: boolean; clock?: number; view?: number[] }) {
-        if (o.water !== undefined) g.water = o.water
-        if (o.tod !== undefined) g.tod = o.tod
+        if (o.water !== undefined) g.water = g.waterTarget = o.water
+        if (o.tod !== undefined) g.tod = g.todTarget = o.tod
         if (o.frozen !== undefined) g.frozen = o.frozen
         if (o.clock !== undefined) g.clock = o.clock
         if (o.cam !== undefined) g.setCam(o.cam)
@@ -188,18 +246,19 @@ export class Game {
       },
       // render one frame now and read it back (page screenshots of a WebGPU canvas come out blank headless)
       cap(q = 0.85) { g.renderer.info.reset(); advance(performance.now()); return g.renderer.domElement.toDataURL('image/jpeg', q) },
-      info() { const i = g.renderer.info.render; return { draws: i.drawCalls, tris: i.triangles, counts: g.world.counts, scale: g.quality.scale } },
+      info() { const i = g.renderer.info.render; return { draws: i.drawCalls, tris: i.triangles, counts: g.world.counts(), scale: g.quality.scale } },
       bench: () => g.startBench(),
     }
     if (!DEV) return
     window.addEventListener('keydown', (e) => {
       if (e.key === 'b' || e.key === 'B') this.startBench()
+      else if (e.key === 'Escape') this.devCam = false
       else if (e.key === ']') this.setCam((this.freeCam!.i + 1) % CAMS.length)
       else if (e.key === '[') this.setCam((this.freeCam!.i + CAMS.length - 1) % CAMS.length)
-      else if (e.key === 'ArrowUp' && e.shiftKey) { this.water = Math.min(1, this.water + 0.05); this.setCam(this.freeCam!.i) }
-      else if (e.key === 'ArrowDown' && e.shiftKey) { this.water = Math.max(0, this.water - 0.05); this.setCam(this.freeCam!.i) }
-      else if (e.key === 'ArrowRight' && e.shiftKey) this.tod = Math.min(1, this.tod + 0.02)
-      else if (e.key === 'ArrowLeft' && e.shiftKey) this.tod = Math.max(0, this.tod - 0.02)
+      else if (e.key === 'ArrowUp' && e.shiftKey) this.water = this.waterTarget = Math.min(1, this.water + 0.05)
+      else if (e.key === 'ArrowDown' && e.shiftKey) this.water = this.waterTarget = Math.max(0, this.water - 0.05)
+      else if (e.key === 'ArrowRight' && e.shiftKey) this.tod = this.todTarget = Math.min(1, this.tod + 0.02)
+      else if (e.key === 'ArrowLeft' && e.shiftKey) this.tod = this.todTarget = Math.max(0, this.tod - 0.02)
     })
   }
 }
