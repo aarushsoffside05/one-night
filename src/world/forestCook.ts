@@ -141,7 +141,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
       if (h < 6.4 || kind.lake > 0.04 || kind.sand > 0.25 || kind.dry > 0.45) continue
       if (kind.channel > 0.06) continue
       const dTrail = Math.min(distPoly(x, z, TRAIL), distPoly(x, z, YARDPATH))
-      if (dTrail < 1.9) continue
+      if (dTrail < 2.8) continue
       const cd = Math.hypot(x - COMMUNITY.x, (z - COMMUNITY.z) * 0.9) / COMMUNITY.r
       if (cd < 0.62) continue // the yard is open ground; its few trees are placed by hand below
       if (Math.hypot(x - PLACES.giantTrunk.x, z - PLACES.giantTrunk.z) < 17) continue

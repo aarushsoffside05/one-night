@@ -68,7 +68,7 @@ export class Player {
       for (let k = this.cellStart[c]; k < this.cellStart[c + 1]; k++) {
         const sx = this.cellItems[k * 3], sz = this.cellItems[k * 3 + 1], sr = this.cellItems[k * 3 + 2] + r
         const dx = x - sx, dz = z - sz, d2 = dx * dx + dz * dz
-        if (d2 < sr * sr && d2 > 1e-6) { const d = Math.sqrt(d2); x = sx + (dx / d) * sr; z = sz + (dz / d) * sr }
+        if (d2 < sr * sr && d2 > 1e-6) { const d = Math.sqrt(d2); x = sx + (dx / d) * sr - (dz / d) * 0.05; z = sz + (dz / d) * sr + (dx / d) * 0.05 } // pushed out, and eased a little sideways so a head-on bump slides round instead of sticking
       }
     }
     resolveBlockers(x, z, r, feetY, this.waterY, this.out)
