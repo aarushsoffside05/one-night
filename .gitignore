@@ -1,0 +1,17 @@
+node_modules/
+dist/
+single/
+*.zip
+*.log
+.DS_Store
+# the reference pack must never be committed
+2026-11-21-amazon-pack/
+pack/
+08-junior-eos/
+01-story/
+02-truth/
+03-eos/
+04-look/
+05-technique/
+06-bar/
+07-studio/
