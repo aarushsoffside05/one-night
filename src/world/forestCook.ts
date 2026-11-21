@@ -11,7 +11,7 @@ export const cellOf = (x: number, z: number) => {
   return cz * CELLS + cx
 }
 export type FieldData = { data: Float32Array; cellStart: Uint32Array }
-export const FIELD_NAMES = ['trunk', 'clump', 'spray', 'palm', 'sapling', 'broadleaf', 'tuft', 'log', 'root', 'vine', 'bankroot', 'floater', 'shaft', 'spFern', 'spFern2', 'spLeather', 'spPalm', 'spFan', 'spBanana', 'spEar', 'spTree'] as const
+export const FIELD_NAMES = ['trunk', 'clump', 'spray', 'palm', 'sapling', 'broadleaf', 'tuft', 'log', 'root', 'vine', 'bankroot', 'floater', 'shaft', 'spFern', 'spFern2', 'spLeather', 'spPalm', 'spFan', 'spBanana', 'spEar', 'spTree', 'spDrift'] as const
 export type FieldName = (typeof FIELD_NAMES)[number]
 
 class Rec {
@@ -65,7 +65,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     if (rad > 0.13) solids.push(x, z, rad * (type === 0 ? 1.9 : 1.25))
     // crown: clumps round the top. The trunk leans along (sin rot, cos rot) by lean*h at the top.
     const tx = x + Math.sin(rot) * lean * h, tz = z + Math.cos(rot) * lean * h
-    const n = type === 0 ? 10 + r.int(3) : type === 1 ? 6 + r.int(3) : type === 2 ? 4 + r.int(2) : type === 3 ? 1 + r.int(2) : 1 + r.int(2)
+    const n = type === 0 ? 12 + r.int(3) : type === 1 ? 8 + r.int(3) : type === 2 ? 5 + r.int(2) : type === 3 ? 1 + r.int(2) : 1 + r.int(2)
     const cs = type === 0 ? r.range(6.5, 9.5) : type === 1 ? r.range(3.8, 6.2) : type === 2 ? r.range(2.4, 3.8) : type === 3 ? r.range(1.3, 2.1) : r.range(0.9, 1.6)
     const tint = fbm2(x / 90, z / 90, S + 5, 2) * 0.6 + r() * 0.4
     const a0 = r() * 6.283
@@ -74,7 +74,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
       const ang = a0 + (i / Math.max(1, n - 1)) * 6.283 + r.range(-0.3, 0.3)
       const ring = top ? 0 : cs * (type === 0 ? r.range(0.55, 1.1) : r.range(0.35, 0.75))
       const s = cs * (top ? 1.05 : r.range(0.65, 1.0))
-      const cy = y + h * (top ? 0.97 : r.range(0.7, 0.93)) - (type === 0 && !top ? 1.5 : 0)
+      const cy = y + h * (top ? 0.97 : r.range(0.62, 0.93)) - (type === 0 && !top ? 1.5 : 0)
       ;(type >= 3 ? R.spray : R.clump).push(tx + Math.cos(ang) * ring, cy, tz + Math.sin(ang) * ring, s, r() * 6.283, r(), type === 0 ? r.range(0.45, 0.6) : r.range(0.6, 0.95), Math.min(1, Math.max(0, tint + r.range(-0.12, 0.12))))
     }
     if (type <= 2) splat(tx, tz, cs * (type === 0 ? 2.1 : 1.7), 0.8)
@@ -97,7 +97,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
       if (dTrail < 1.9) continue
       const cd = Math.hypot(x - COMMUNITY.x, (z - COMMUNITY.z) * 0.9) / COMMUNITY.r
       if (cd < 0.62) continue // the yard is open ground; its few trees are placed by hand below
-      if (Math.hypot(x - PLACES.giantTrunk.x, z - PLACES.giantTrunk.z) < 11) continue
+      if (Math.hypot(x - PLACES.giantTrunk.x, z - PLACES.giantTrunk.z) < 17) continue
       const dens = 0.3 + 0.62 * smooth(0.3, 0.68, fbm2(x / 38, z / 38, S + 3, 3))
       if (roll > dens * density) continue
       const dc = distPoly(x, z, CHANNEL)
@@ -204,14 +204,15 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
 
   // ---- fallen wood: scattered on the floor, and stranded in lines where the flood left it (bank tops, dry bed edges)
   const rl = rng('logs')
-  for (let i = 0; i < 4200 * density; i++) {
+  for (let i = 0; i < 6500 * density; i++) {
     const x = rl.range(-lim, lim), z = rl.range(-lim, lim), len = rl.range(1.2, 6) * (rl() < 0.12 ? 2 : 1), rad = rl.range(0.07, 0.28), rot = rl() * 6.283, seed = rl(), roll = rl()
     const h = heightFormula(x, z)
     if (kind.lake > 0.2 || kind.trail > 0.3 || h < 0.3) continue
     const strand = kind.bank > 0.2 || (kind.dry > 0.15 && kind.dry < 0.7) || kind.sand > 0.3
     if (!strand && roll > 0.3) continue
     if (kind.channel > 0.12 && roll > 0.12) continue
-    if (seed < 0.14 && len > 2.5) R.spTree.push(x, h - 0.05, z, len / 1.77, rot, seed, 1, rl())
+    if (strand && seed > 0.45) R.spDrift.push(x, h - 0.03, z, rl.range(2.2, 5.5), rot, seed, 1, rl())
+    else if (seed < 0.14 && len > 2.5) R.spTree.push(x, h - 0.05, z, len / 1.77, rot, seed, 1, rl())
     else R.log.push(x, h + rad * 0.5, z, len, rot, seed, rad, 0)
   }
   // ---- hanging roots and fallen trunks along the top of the channel banks, both sides, all the way up

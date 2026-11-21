@@ -239,6 +239,7 @@ export class Game {
     const wy = waterYOf(this.water)
     const y = Math.max(hf.at(c.x, c.z) + c.up, wy + 1.3)
     this.camera.position.set(c.x, y, c.z)
+    this.camera.fov = c.fov ?? 52; this.camera.updateProjectionMatrix()
     this.camera.lookAt(c.lx, Math.max(hf.at(c.lx, c.lz), wy) + c.lup, c.lz)
     if (this.freeCam) this.freeCam.i = i % CAMS.length
     this.devCam = true

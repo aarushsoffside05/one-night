@@ -24,11 +24,12 @@ import sBanana from '../assets/tex/scan_banana.webp?inline'
 import sEar from '../assets/tex/scan_elephantear.webp?inline'
 import sLily from '../assets/tex/scan_waterlily.webp?inline'
 import sTree from '../assets/tex/scan_fallentree.webp?inline'
+import sDrift from '../assets/tex/scan_driftwood.webp?inline'
 import sCanna from '../assets/tex/scan_canna.webp?inline'
 
 import peopleAtlas from '../assets/tex/people_atlas.webp?inline'
 export const PEOPLE_TEX = {} as { atlas: THREE.Texture }
-export const PLANT_URLS = { fern: sFern, leatherfern: sLeather, palm: sPalm, fanpalm: sFan, banana: sBanana, elephantear: sEar, waterlily: sLily, canna: sCanna, fallentree: sTree }
+export const PLANT_URLS = { fern: sFern, leatherfern: sLeather, palm: sPalm, fanpalm: sFan, banana: sBanana, elephantear: sEar, waterlily: sLily, canna: sCanna, fallentree: sTree, driftwood: sDrift }
 export const PLANT_TEX = {} as Record<keyof typeof PLANT_URLS, THREE.Texture>
 const URLS = { floor, floor2, mud, crack, sand, soil, kapok, banyan, planks, paint, thatch }
 export type ScanName = keyof typeof URLS

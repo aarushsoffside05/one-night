@@ -91,7 +91,7 @@ class PaintedLighting extends (THREE as any).PhongLightingModel {
     const up = normalWorld.y.mul(0.5).add(0.5)
     // under the canopy the sky is mostly shut out: shade is deep (never black), and light arrives in patches
     const open = texture(TEX.cover, worldUV()).r.oneMinus()
-    const amb = mix(U.ambGround, U.amb, up).mul(this.o.pools ? mix(float(0.5), float(1), open) : float(1))
+    const amb = mix(U.ambGround, U.amb, up).mul(this.o.pools ? mix(mix(float(0.85), float(0.5), U.day), float(1), open) : float(1))
     reflectedLight.indirectDiffuse.assign(vec4(amb.add(lampLight()).mul(diffuseColor.rgb).mul(context.ambientOcclusion), 0))
   }
 }

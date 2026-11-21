@@ -168,7 +168,7 @@ export function leafClumpGeometry(leaves: number, leafSize: number, coreDetail: 
     v.fromBufferAttribute(p, i).normalize()
     const key = `${v.x.toFixed(4)},${v.y.toFixed(4)},${v.z.toFixed(4)}`
     let id = map.get(key)
-    if (id === undefined) { const s = rad(v.x, v.y, v.z) * 0.66; id = g.v(v.x * s, (v.y < 0 ? v.y * 0.7 : v.y) * s, v.z * s, v.x, v.y + 0.2, v.z, 0.5, v.y, 0); map.set(key, id) }
+    if (id === undefined) { const s = rad(v.x, v.y, v.z) * 0.56; id = g.v(v.x * s, (v.y < 0 ? v.y * 0.7 : v.y) * s, v.z * s, v.x, v.y + 0.2, v.z, 0.5, v.y, 0); map.set(key, id) }
     g.idx.push(id)
   }
   // leaves grow in sprays: a twig leaves the mass, and five or six leaves sit along it in pairs, all hanging

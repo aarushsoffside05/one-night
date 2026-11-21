@@ -235,12 +235,12 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
     const fins = 7
     for (let j = 0; j <= rings; j++) {
       const v = Math.pow(j / rings, 2.1), y = v * Hh
-      const R0 = 2.5 - 1.0 * v
+      const R0 = 3.4 - 1.5 * v
       const flare = Math.exp(-y / 4.2)
       for (let i = 0; i < sides; i++) {
         const th = (i / sides) * Math.PI * 2
         const fin = Math.pow(0.5 + 0.5 * Math.cos(th * fins + Math.sin(th * 2) * 0.8), 7)
-        const rr = R0 * (1 + 0.06 * Math.sin(th * 13 + y * 0.3)) + flare * (0.7 + 6.2 * fin)
+        const rr = R0 * (1 + 0.06 * Math.sin(th * 13 + y * 0.3)) + flare * (0.8 + 4.4 * fin)
         g.v(Math.cos(th) * rr, y, Math.sin(th) * rr, Math.cos(th), flare * 0.5, Math.sin(th), 0, v, 0)
       }
     }
@@ -260,8 +260,8 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
     mesh.position.set(T.x, gy, T.z)
     mesh.castShadow = true; mesh.receiveShadow = true
     group.add(mesh)
-    solids.push(T.x, T.z, 3.3)
-    for (let i = 0; i < fins; i++) { const th = (i / fins) * Math.PI * 2; for (const d of [4.2, 5.6]) solids.push(T.x + Math.cos(th) * d, T.z + Math.sin(th) * d, 0.8) }
+    solids.push(T.x, T.z, 4.4)
+    for (let i = 0; i < fins; i++) { const th = (i / fins) * Math.PI * 2; for (const d of [4.8, 6.4]) solids.push(T.x + Math.cos(th) * d, T.z + Math.sin(th) * d, 0.8) }
   }
   void attribute; void positionWorld; void U
 

@@ -40,14 +40,14 @@ export function waterMaterial(useSceneDepth: boolean): THREE.Material {
     col = col.mul(mix(vec3(luma, luma, luma), lightCol, 0.2).mul(1.25)).add(col.mul(lampLight()))
     // reflection: sky by direction, or the dark forest where the reflected ray would meet land
     const R = reflect(view, n)
-    const Rs = reflect(view, normalize(vec3(r1.sub(0.5).mul(0.1).mul(U.ripple), 1, r1.sub(0.5).mul(0.06).mul(U.ripple))))
+    const Rs = reflect(view, normalize(vec3(r1.sub(0.5).mul(0.03).mul(U.ripple), 1, r1.sub(0.5).mul(0.02).mul(U.ripple))))
     const ry = max(R.y, 0.02)
     // the whole sky, clouds and sun path included, along the reflected ray; plus the glitter of the sun itself
     const sd = max(dot(R, U.sunDir), 0)
     let refl: any = skyColor(vec3(R.x, ry, R.z).normalize(), false).add(U.discCol.mul(pow(sd, 260)).mul(0.9))
     const hit = pw.xz.add(Rs.xz.div(max(Rs.y, 0.03)).mul(15))
     const landH = texture(TEX.height, hit.add(340).div(680)).r
-    const cov = texture(TEX.cover, hit.add(340).div(680)).r
+    const cov = texture(TEX.cover, hit.add(340).div(680)).r.add(texture(TEX.cover, hit.add(vec2(6, 3)).add(340).div(680)).r).add(texture(TEX.cover, hit.sub(vec2(4, 7)).add(340).div(680)).r).div(3)
     const wall = max(smoothstep(-2.0, 7.0, landH.sub(pw.y)).mul(smoothstep(0.0, 0.3, cov.add(0.2))), smoothstep(0.08, 0.8, cov))
     const forestCol = mix(vec3(0.03, 0.035, 0.015), vec3(0.08, 0.08, 0.03), r2).mul(U.amb.add(U.sunCol.mul(U.sunI).mul(0.25)))
     refl = mix(refl, forestCol, wall.mul(0.92))

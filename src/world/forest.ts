@@ -151,7 +151,7 @@ function woodMaterial(far: number, kind: 'log' | 'root' | 'vine' | 'bankroot') {
   })()
   m.colorNode = Fn(() => {
     const c = barkColor(ib.y.mul(kind === 'vine' ? 0.4 : kind === 'log' ? 0.9 : 0.6), ia.y.sub(kind === 'vine' ? 30 : 0))
-    return kind === 'log' ? mix(c, vec3(0.42, 0.4, 0.36), 0.35) : c
+    return kind === 'log' ? c.mul(0.7) : c
   })()
   return m
 }
@@ -216,13 +216,13 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
   ], 60))
   const clumpM = [clumpMaterial(9999), clumpMaterial(9999), clumpMaterial(520)]
   fields.push(mk('clump', [
-    { geometry: G.leafClumpGeometry(240, 0.32, 1, 'clump-a'), material: clumpM[0], near: 0, far: 48 },
-    { geometry: G.leafClumpGeometry(80, 0.52, 0, 'clump-a'), material: clumpM[1], near: 48, far: 150 },
-    { geometry: G.leafClumpGeometry(15, 0.9, 0, 'clump-a'), material: clumpM[2], near: 150, far: 520 },
+    { geometry: G.leafClumpGeometry(170, 0.36, 1, 'clump-a'), material: clumpM[0], near: 0, far: 48 },
+    { geometry: G.leafClumpGeometry(50, 0.6, 0, 'clump-a'), material: clumpM[1], near: 48, far: 150 },
+    { geometry: G.leafClumpGeometry(20, 0.95, 0, 'clump-a'), material: clumpM[2], near: 150, far: 520 },
   ]))
   fields.push(mk('spray', [
     { geometry: G.sprayGeometry(), material: plantMaterial(9999, 'spray'), near: 0, far: 60 },
-    { geometry: G.leafClumpGeometry(22, 0.7, 0, 'clump-a'), material: clumpMaterial(300), near: 60, far: 300 },
+    { geometry: G.leafClumpGeometry(30, 0.7, 0, 'clump-a'), material: clumpMaterial(300), near: 60, far: 300 },
   ]))
   fields.push(mk('palm', [
     { geometry: G.palmGeometry(14, 6, true), material: plantMaterial(9999, 'palm'), near: 0, far: 60 },
@@ -240,6 +240,7 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
   sp('spFern', 'fern_A_near', PLANT_TEX.fern, 1.0); sp('spFern2', 'fern_C_near', PLANT_TEX.fern, 0.9); sp('spLeather', 'leatherfern_A_near', PLANT_TEX.leatherfern, 1.0)
   sp('spPalm', 'palm_A_near', PLANT_TEX.palm, 0.9, 60); sp('spFan', 'fanpalm_C_near', PLANT_TEX.fanpalm, 1.1, 60); sp('spBanana', 'banana_B_near', PLANT_TEX.banana, 1.0, 60); sp('spEar', 'elephantear_A_near', PLANT_TEX.elephantear, 0.9, 60)
   if (SG.fallentree_A_near) { const tm = scanPlantMaterial(PLANT_TEX.fallentree, 120, 1); tm.alphaTest = 0; tm.side = THREE.FrontSide; (tm as any).opacityNode = null; fields.push(mk('spTree' as any, [{ geometry: SG.fallentree_A_near, material: tm, near: 0, far: 120, shadow: true }], 50)) }
+  if (SG.driftwood_A_near) { const dm = scanPlantMaterial(PLANT_TEX.driftwood, 110, 1); dm.alphaTest = 0; dm.side = THREE.FrontSide; (dm as any).opacityNode = null; fields.push(mk('spDrift' as any, [{ geometry: SG.driftwood_A_far ?? SG.driftwood_A_near, material: dm, near: 0, far: 110 }])) }
   if (SG.waterlily_A_near) fields.push(mk('floater', [{ geometry: SG.waterlily_A_near, material: scanPlantMaterial(PLANT_TEX.waterlily, 110, 1.3, true), near: 0, far: 110 }]))
   else fields.push(mk('floater', [{ geometry: G.floaterGeometry(), material: floaterMaterial(120), near: 0, far: 120 }]))
   return {
