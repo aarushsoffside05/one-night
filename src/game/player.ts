@@ -55,7 +55,7 @@ export class Player {
   place(x: number, z: number, heading: number, mode: Mode = 'foot') {
     this.x = x; this.z = z; this.heading = heading; this.mode = mode; this.vx = this.vz = 0
     this.y = mode === 'canoe' ? this.waterAt(x, z) : this.groundAt(x, z, 1e9)
-    if (mode === 'canoe') { this.canoe.x = x; this.canoe.z = z; this.canoe.heading = heading; this.canoe.vx = this.canoe.vz = 0 }
+    if (mode === 'canoe') { this.canoe.y = this.y; this.canoe.x = x; this.canoe.z = z; this.canoe.heading = heading; this.canoe.vx = this.canoe.vz = 0 }
     this.camYaw = heading
   }
 

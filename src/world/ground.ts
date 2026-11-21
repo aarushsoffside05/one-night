@@ -31,7 +31,8 @@ export function groundMaterial(): THREE.Material {
     litter = mix(mix(green, litter, 0.35), litter, smoothstep(0.05, 0.4, cov.add(n1.mul(0.2))))
     // bare bank mud, in strata left by the falling river
     const strata = smoothstep(0.35, 0.65, noise(vec2(pw.x.add(pw.z).mul(0.02), pw.y.mul(0.16))).a)
-    const mud = mix(vec3(0.16, 0.1, 0.06), vec3(0.36, 0.23, 0.13), strata.mul(0.55).add(n2.mul(0.45))).mul(st.mul(0.4).add(0.8))
+    const gully = noise(vec2(pw.x.add(pw.z).mul(0.55), pw.y.mul(0.045))).g
+    const mud = mix(vec3(0.16, 0.1, 0.06), vec3(0.36, 0.23, 0.13), strata.mul(0.28).add(n2.mul(0.42)).add(n3.mul(0.2))).mul(st.mul(0.4).add(0.8)).mul(smoothstep(0.25, 0.6, gully).mul(0.45).add(0.6))
     // cracked silt where water stood
     const c1 = abs(noise(pw.xz.mul(0.47)).g.sub(0.5)), c2 = abs(noise(pw.xz.mul(1.21).add(3.1)).r.sub(0.5))
     const crack = smoothstep(0.03, 0.004, min(c1, c2.mul(1.4))).mul(smoothstep(0.7, 0.92, normalWorld.y))
@@ -47,7 +48,7 @@ export function groundMaterial(): THREE.Material {
     // the scans as detail on each kind of ground (two floors mixed so the repeat does not show)
     const fl = mix(detail('floor', pw.xz.mul(0.41), 0.9), detail('floor2', pw.xz.mul(0.27).add(0.37), 0.8), smoothstep(0.42, 0.6, n1))
     litter = litter.mul(fl)
-    const steep = smoothstep(0.86, 0.62, normalWorld.y)
+    const steep = smoothstep(0.9, 0.7, normalWorld.y)
     const mudD = mix(detail('mud', pw.xz.mul(0.36), 0.9), detail('mud', vec2(pw.x.add(pw.z).mul(0.3), pw.y.mul(0.42)), 0.9), steep)
     let col: any = mix(litter, mud.mul(mudD), max(k.b, steep))
     const low = smoothstep(4.0, 1.2, pw.y).mul(max(k.b, steep.mul(0.5)))

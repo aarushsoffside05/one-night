@@ -89,8 +89,8 @@ export function trunkGeometry(sides: number, rings: number, limbs: number): THRE
     const flare = Math.exp(-y * 34)
     for (let i = 0; i < sides; i++) {
       const th = (i / sides) * Math.PI * 2
-      const lobe = Math.pow(0.5 + 0.5 * Math.cos(th * 3), 2)
-      g.v(Math.cos(th) * taper, y, Math.sin(th) * taper, Math.cos(th), flare * 0.8, Math.sin(th), flare * (0.5 + 1.9 * lobe), y, 0)
+      const lobe = Math.pow(0.5 + 0.5 * Math.cos(th * 3 + Math.sin(th) * 0.9), 3) * (0.75 + 0.25 * Math.sin(th * 2 + 1))
+      g.v(Math.cos(th) * taper, y, Math.sin(th) * taper, Math.cos(th), flare * 0.8, Math.sin(th), flare * (0.45 + 1.0 * lobe), y, 0)
     }
   }
   for (let j = 0; j < rings; j++) for (let i = 0; i < sides; i++) {
@@ -271,13 +271,19 @@ export function logGeometry(): THREE.BufferGeometry {
 }
 // surface root: runs out along +x from the trunk, dropping from the flare to the ground. aux = (0, t, 0)
 export function rootGeometry(): THREE.BufferGeometry {
+  // a buttress: a thin standing plank of wood, tall at the trunk, falling in a hollow curve to the ground,
+  // wandering a little, thicker at its foot than along its top edge
   const g = new GB()
-  const pts: [number, number, number][] = [], rad: number[] = []
-  for (let i = 0; i <= 6; i++) {
-    const t = i / 6
-    pts.push([t, 0.32 * Math.exp(-t * 4.2) + 0.02 * Math.sin(t * 11), 0.06 * Math.sin(t * 7)]); rad.push(0.075 * (1 - 0.85 * t))
+  const N = 12, ring = 7
+  for (let i = 0; i <= N; i++) {
+    const t = i / N
+    const h = 0.24 * Math.pow(1 - t, 2.6) + 0.03 * (1 - t) + 0.006 * Math.sin(t * 17)
+    const zc = 0.11 * Math.sin(t * 4.4 + 0.6) * t + 0.02 * Math.sin(t * 13)
+    const wb = 0.05 * (1 - 0.5 * t), wt = 0.016 * (1 - 0.3 * t)
+    const prof: [number, number, number, number][] = [[-0.06, -wb * 1.5, -0.8, 0.5], [h * 0.3, -wb, -1, 0.15], [h * 0.8, -wt * 1.4, -1, 0.25], [h, 0, 0, 1], [h * 0.8, wt * 1.4, 1, 0.25], [h * 0.3, wb, 1, 0.15], [-0.06, wb * 1.5, 0.8, 0.5]]
+    for (const [y, z, nz, ny] of prof) g.v(t, y, zc + z, 0.05, ny, nz, 0, t, 0)
   }
-  g.tube(pts, rad, 5, 0, 0, true)
+  for (let i = 0; i < N; i++) for (let k = 0; k < ring - 1; k++) { const a = i * ring + k, b2 = a + ring; g.quad(a, a + 1, b2 + 1, b2) }
   return g.build()
 }
 // vine: hangs from y = 0 to y = -1. aux = (0, t down, 0)

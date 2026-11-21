@@ -18,7 +18,7 @@ export const skyColor = (dir: any, stars: boolean) => {
   const drift = vec2(U.time.mul(0.0012), U.time.mul(0.0004))
   const big = noise(cuv.mul(0.5).add(drift)).r
   const mid = noise(cuv.mul(1.3).sub(drift.mul(1.7))).g
-  const brush = noise(cuv.mul(vec2(1.1, 2.6)).add(drift.mul(2))).a
+  const brush = noise(cuv.mul(2.7).add(drift.mul(2))).b
   const dens = big.mul(0.62).add(mid.mul(0.28)).add(brush.mul(0.16))
   const c = smoothstep(0.56, 0.74, dens).mul(smoothstep(0.03, 0.2, y)).mul(0.9)
   const lit = smoothstep(0.5, 0.95, dens.add(pow(sd, 3).mul(0.2)))

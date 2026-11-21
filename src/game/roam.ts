@@ -27,7 +27,7 @@ export class Roam {
     f.hideAll()
     f.get('davi').active = true
     const y = (x: number, z: number) => hf.at(x, z)
-    f.show('nino', 15.5, y(15.5, 33), 33, 2.2, 'board')
+    f.show('nino', 19, y(19, 46.5), 46.5, 2.6, 'board')
     f.show('lia', 20, y(20, 40), 40, 0.5, 'walk')
     f.show('caio', 112, y(112, -74), -74, 0, 'carry')
     f.show('tome', PLACES.lakeBank.x + 3.2, y(PLACES.lakeBank.x + 3.2, PLACES.lakeBank.z - 1), PLACES.lakeBank.z - 1, 1.6, 'liftNet')
@@ -67,7 +67,7 @@ export class Roam {
       if (yardWet) { const c = Math.cos(H.rot), s = Math.sin(H.rot); const w = (lx: number, lz: number) => v.set(H.x + lx * c + lz * s, HOUSE_FLOOR_Y + 0.04, H.z - lx * s + lz * c)
         w(-1.6, 3.6); ni.x = v.x; ni.y = v.y; ni.z = v.z; ni.anim = 'sit'; ni.heading = H.rot + Math.PI; ni.moving = false
         w(0.9, 3.5); li.x = v.x; li.y = v.y; li.z = v.z; li.anim = 'idle'; li.heading = H.rot + Math.PI; li.moving = false
-      } else { ni.x = 15.5; ni.z = 33; ni.y = hf.at(15.5, 33); ni.anim = 'board'; ni.heading = 2.2; li.x = 20; li.z = 40; li.moving = false }
+      } else { ni.x = 19; ni.z = 46.5; ni.y = hf.at(19, 46.5); ni.anim = 'board'; ni.heading = 2.6; li.x = 20; li.z = 40; li.moving = false }
     }
     if (!yardWet) {
       li.y = hf.at(li.x, li.z)
@@ -89,8 +89,8 @@ export class Roam {
       cast.seat(ca, lc, -1.3, 'paddle', Math.sin(this.t * 0.6) > 0 ? 1 : -1); cast.seat(to, lc, 1.1, 'ride')
     }
     // by night the boy carries the hand lamp: one warm pool in a dark blue forest
-    cast.lampHolder = envOut.lamp > 0.45 && p.mode === 'foot' ? 'davi' : null
-    cast.boyAnim = cast.lampHolder && p.speed < 0.2 ? 'lamp' : null
+    cast.lampHolder = envOut.lamp > 0.45 ? (p.mode === 'foot' ? 'davi' : 'bow') : null
+    cast.boyAnim = cast.lampHolder === 'davi' && p.speed < 0.2 ? 'lamp' : null
     // paddles for the paddlers
     pr.paddles[1].visible = false; pr.paddles[2].visible = false
     f.handPos('marta', ma.side > 0 ? 1 : 0, v); f.handPos('marta', ma.side > 0 ? 0 : 1, v2); v2.y -= 0.12; pr.holdPaddle(1, v, v2)

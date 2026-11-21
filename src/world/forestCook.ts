@@ -208,11 +208,11 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
       R.sapling.push(x, h, z, rc.range(0.5, 1.3), rc() * 6.283, rc(), rc.range(0.8, 1.2), rc())
     }
     if (t.type <= 1) {
-      const nr = t.type === 0 ? 7 : 3 + rc.int(3)
+      const nr = t.type === 0 ? 5 : 2 + rc.int(3)
       const a0 = rc() * 6.283
       for (let i = 0; i < nr; i++) {
         const a = a0 + (i / nr) * 6.283 + rc.range(-0.3, 0.3)
-        R.root.push(t.x + Math.cos(a) * t.r * 1.2, hf.at(t.x + Math.cos(a) * t.r * 2.5, t.z + Math.sin(a) * t.r * 2.5) - 0.05, t.z + Math.sin(a) * t.r * 1.2, t.r * rc.range(4.5, 9), a, rc(), t.r * rc.range(0.45, 0.8), 0)
+        R.root.push(t.x + Math.cos(a) * t.r * 1.2, hf.at(t.x + Math.cos(a) * t.r * 2.5, t.z + Math.sin(a) * t.r * 2.5) - 0.05, t.z + Math.sin(a) * t.r * 1.2, t.r * rc.range(3.2, 6), a, rc(), t.r * rc.range(0.45, 0.8), 0)
       }
       const nv = rc.int(3)
       for (let i = 0; i < nv; i++) {
@@ -262,7 +262,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     const strand = kind.bank > 0.2 || (kind.dry > 0.15 && kind.dry < 0.7) || kind.sand > 0.3
     if (!strand && roll > 0.3) continue
     if (kind.channel > 0.12 && roll > 0.12) continue
-    if (strand && seed > 0.45) R.spDrift.push(x, h - 0.03, z, rl.range(1.4, 3.2), rot, seed, 1, rl())
+    if (strand && seed > 0.45) R.spDrift.push(x, h - 0.16, z, rl.range(1.4, 3.2), rot, seed, 1, rl())
     else if (seed < 0.14 && len > 2.5) R.spTree.push(x, h - 0.05, z, len / 1.77, rot, seed, 1, rl())
     else R.log.push(x, h + rad * 0.5, z, len, rot, seed, rad, 0)
   }

@@ -25,7 +25,7 @@ for (let ci = 0; ci < meta.cams.length; ci++) {
   for (const s of STATES) {
     const r = await page.evaluate(async ({ ci, s }) => {
       window.__ON.set({ water: s.water, tod: s.tod, frozen: true, clock: 20, cam: ci })
-      { const c = window.__ON.camData[ci], k = 0.42; window.__ON.game.goTo(c.x + (c.lx - c.x) * k + 1.2, c.z + (c.lz - c.z) * k, Math.atan2(c.lx - c.x, -(c.lz - c.z))); window.__ON.set({ cam: ci, frozen: false }); window.__ON.step(1 / 30, 6); window.__ON.set({ frozen: true, cam: ci }) }
+      { const c = window.__ON.camData[ci], k = Math.hypot(c.lx - c.x, c.lz - c.z) < 14 ? 0.8 : 0.42; window.__ON.game.goTo(c.x + (c.lx - c.x) * k + 1.2, c.z + (c.lz - c.z) * k, Math.atan2(c.lx - c.x, -(c.lz - c.z))); window.__ON.set({ cam: ci, frozen: false }); window.__ON.step(1 / 30, 6); window.__ON.set({ frozen: true, cam: ci }) }
       if (ci === 10 && s.tod > 0.7 && s.tod < 0.9) { window.__ON.set({ frozen: false }); window.__ON.game.world.life.fishRoll(134.5, -131.5, 1.2); window.__ON.step(1 / 30, 48); window.__ON.set({ frozen: true }) }
       await window.__ON.cap() // settle culling + shadow before the kept frame
       const d = await window.__ON.cap(0.9)

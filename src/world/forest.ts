@@ -31,7 +31,9 @@ export const floodStain = (col: N, wobble: N) => {
   const band = smoothstep(0.22, 0.06, fl).mul(smoothstep(-0.6, -0.25, fl))
   const pale = mix(col, col.mul(0.55).add(vec3(0.15, 0.125, 0.095)), below.mul(0.7))
   const wet = smoothstep(0.7, 0.0, positionWorld.y.sub(U.water))
-  return mix(pale, vec3(0.05, 0.035, 0.025), band.mul(0.9)).mul(mix(float(1), float(0.5), wet))
+  // under the water everything goes dark: nothing pale shows through the surface
+  const sunk = smoothstep(0.0, -0.5, positionWorld.y.sub(U.water))
+  return mix(pale, vec3(0.05, 0.035, 0.025), band.mul(0.9)).mul(mix(float(1), float(0.5), wet)).mul(mix(float(1), float(0.35), sunk))
 }
 export const barkColor = (seed: N, groundY: N) => {
   const pw = positionWorld
@@ -154,6 +156,7 @@ function plantMaterial(far: number, kind: 'sapling' | 'broadleaf' | 'tuft' | 'pa
 
 function woodMaterial(far: number, kind: 'log' | 'root' | 'vine' | 'bankroot') {
   const m = new PaintedMaterial({ wrap: 0.4 })
+  if (kind === 'root') m.side = THREE.DoubleSide
   m.positionNode = Fn(() => {
     const rot = ib.x
     let p: N
@@ -214,7 +217,7 @@ function scanPlantMaterial(tex: THREE.Texture, far: number, base: number, floati
     return p.mul(shrink(far)).add(ia.xyz)
   })()
   const t = texture(tex, uv())
-  m.colorNode = Fn(() => floodStain(t.rgb.mul(mix(float(0.8), float(1.15), ib.w)), ib.w))()
+  m.colorNode = Fn(() => floating ? t.rgb.mul(mix(float(1.1), float(1.5), ib.w)) : floodStain(t.rgb.mul(mix(float(0.8), float(1.15), ib.w)), ib.w))()
   m.opacityNode = t.a
   return m
 }
@@ -227,7 +230,8 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
   const fields: Field[] = []
   const trunkM = [trunkMaterial(9999), trunkMaterial(9999), trunkMaterial(520)]
   fields.push(mk('trunk', [
-    { geometry: G.trunkGeometry(10, 9, 3), material: trunkM[0], near: 0, far: 52, shadow: true },
+    { geometry: G.trunkGeometry(22, 12, 3), material: trunkM[0], near: 0, far: 24, shadow: true },
+    { geometry: G.trunkGeometry(10, 9, 3), material: trunkM[0], near: 24, far: 52, shadow: true },
     { geometry: G.trunkGeometry(6, 4, 0), material: trunkM[1], near: 52, far: 170 },
     { geometry: G.trunkGeometry(4, 2, 0), material: trunkM[2], near: 170, far: 520 },
   ], 60))
@@ -237,9 +241,9 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
   ], 60))
   const clumpM = [clumpMaterial(9999), clumpMaterial(9999), clumpMaterial(520)]
   fields.push(mk('clump', [
-    { geometry: G.leafClumpGeometry(190, 0.36, 0, 'clump-a'), material: clumpM[0], near: 0, far: 48 },
-    { geometry: G.leafClumpGeometry(70, 0.56, 0, 'clump-a'), material: clumpM[1], near: 48, far: 150 },
-    { geometry: G.leafClumpGeometry(20, 0.95, 0, 'clump-a'), material: clumpM[2], near: 150, far: 520 },
+    { geometry: G.leafClumpGeometry(190, 0.36, 0, 'clump-a'), material: clumpM[0], near: 0, far: 40 },
+    { geometry: G.leafClumpGeometry(55, 0.62, 0, 'clump-a'), material: clumpM[1], near: 40, far: 140 },
+    { geometry: G.leafClumpGeometry(16, 1.05, 0, 'clump-a'), material: clumpM[2], near: 140, far: 520 },
   ]))
   fields.push(mk('spray', [
     { geometry: G.sprayGeometry(), material: plantMaterial(9999, 'spray'), near: 0, far: 60 },

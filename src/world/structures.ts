@@ -15,7 +15,7 @@ import { U } from './uniforms'
 
 const WOOD = [0.42, 0.3, 0.19], WOOD_D = [0.3, 0.21, 0.13], WOOD_L = [0.55, 0.43, 0.29], GREY = [0.46, 0.43, 0.38]
 const TEAL = [0.2, 0.4, 0.42], TRIM = [0.74, 0.7, 0.6], ROOF = [0.5, 0.2, 0.13], THATCH = [0.5, 0.4, 0.22], ROPE = [0.5, 0.43, 0.3]
-const DARK = [0.05, 0.045, 0.04], GLASS = [1.0, 0.72, 0.36]
+const DARK = [0.05, 0.045, 0.04], GLASS = [1.0, 0.72, 0.36], WIN = [0.17, 0.115, 0.055]
 
 export type Structures = {
   lamps: { x: number; y: number; z: number; floats: boolean }[]
@@ -55,15 +55,40 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
     K.box(-W / 2, wy, 0, 0.08, wallH, D, TEAL, SURF.paint)
     K.box(W / 2, wy, 0, 0.08, wallH, D, TEAL, SURF.paint)
     K.box(0, wy, D / 2, W, wallH, 0.08, TEAL, SURF.paint)
-    K.box(-0.6, fy + 1.0, D / 2 + 0.05, 0.9, 1.95, 0.05, DARK, SURF.plain)
+    K.box(-0.6, fy + 1.0, D / 2 + 0.05, 0.9, 1.95, 0.05, WIN, SURF.glass)
     K.box(-0.6, fy + 2.02, D / 2 + 0.06, 1.06, 0.08, 0.06, TRIM)
     for (const wx of [1.6, -2.6]) {
-      K.box(wx, fy + 1.35, D / 2 + 0.05, 0.85, 0.8, 0.05, DARK, SURF.plain)
+      K.box(wx, fy + 1.35, D / 2 + 0.05, 0.85, 0.8, 0.05, WIN, SURF.glass)
       K.box(wx - 0.62, fy + 1.35, D / 2 + 0.07, 0.4, 0.84, 0.04, TRIM)
       K.box(wx, fy + 0.92, D / 2 + 0.08, 1.0, 0.06, 0.1, TRIM)
     }
     // gable roof of corrugated sheet, wide eaves over the plank walk
     const ridgeY = fy + wallH + 1.25, half = D / 2 + 0.7, slope = Math.atan2(1.25, half), len = Math.hypot(1.25, half) + 0.5
+    // the other three walls: shuttered windows (lit from inside at night), corner posts, a skirt board, battens
+    for (const wx of [-2.1, 1.9]) {
+      K.box(wx, fy + 1.4, -D / 2 - 0.05, 0.9, 0.85, 0.05, WIN, SURF.glass)
+      K.at(wx - 0.47, fy + 1.4, -D / 2 - 0.06, 0.9).box(-0.22, 0, 0, 0.44, 0.88, 0.035, TRIM).pop()
+      K.at(wx + 0.47, fy + 1.4, -D / 2 - 0.06, -0.9).box(0.22, 0, 0, 0.44, 0.88, 0.035, TRIM).pop()
+      K.box(wx, fy + 0.95, -D / 2 - 0.09, 1.05, 0.06, 0.12, TRIM); K.box(wx, fy + 1.86, -D / 2 - 0.07, 1.05, 0.07, 0.06, TRIM)
+    }
+    for (const sx of [-1, 1]) {
+      K.box(sx * (W / 2 + 0.05), fy + 1.4, 0.3, 0.05, 0.85, 0.9, WIN, SURF.glass)
+      K.box(sx * (W / 2 + 0.07), fy + 1.4, -0.38, 0.035, 0.88, 0.44, TRIM)
+      K.box(sx * (W / 2 + 0.09), fy + 0.95, 0.3, 0.12, 0.06, 1.05, TRIM)
+      for (const sz of [-1, 1]) K.box(sx * W / 2, wy, sz * D / 2, 0.16, wallH + 0.1, 0.16, WOOD_D)
+    }
+    K.box(0, fy + 0.14, -D / 2 - 0.05, W + 0.1, 0.2, 0.04, TRIM); K.box(0, fy + wallH - 0.02, -D / 2 - 0.05, W + 0.1, 0.12, 0.04, WOOD_D)
+    for (let i = 1; i < 6; i++) { const x = -W / 2 + (i / 6) * W; if (Math.abs(x + 2.1) < 0.7 || Math.abs(x - 1.9) < 0.7) continue; K.box(x, wy, -D / 2 - 0.05, 0.07, wallH, 0.03, [0.16, 0.33, 0.35], SURF.paint) }
+    // rafters showing under the eaves, a ridge cap, a rain gutter of split bamboo to the barrel
+    for (let i = 0; i <= 8; i++) { const x = -W / 2 - 0.5 + (i / 8) * (W + 1.0); K.at(x, ridgeY - 0.09, 0, 0, -slope).box(0, 0, -len / 2, 0.07, 0.1, len, WOOD_D).pop() }
+    K.box(0, ridgeY + 0.03, 0, W + 1.4, 0.07, 0.3, ROOF.map((q) => q * 0.75), SURF.metal)
+    // under the house: a hammock between the legs, paddles and a fish trap leaning on a post, a net on a pole
+    for (let i = 0; i < 9; i++) { const t0 = i / 9, t1 = (i + 1) / 9, sag = (t: number) => fy - 0.5 - Math.sin(t * Math.PI) * 0.75; K.cyl(-W / 2 + 0.1 + t0 * (W / 3 - 0.2), sag(t0), -D / 2 + 0.25, -W / 2 + 0.1 + t1 * (W / 3 - 0.2), sag(t1), -D / 2 + 0.25, 0.3 * Math.sin((t0 + 0.05) * 3.0) + 0.04, 0.3 * Math.sin((t1 + 0.05) * 3.0) + 0.04, [0.72, 0.36, 0.2], SURF.plain, 6, false) }
+    for (const [px, lean, c] of [[1.0, 0.3, WOOD_L], [1.25, 0.42, [0.6, 0.3, 0.16]], [1.5, 0.2, WOOD]] as [number, number, number[]][]) { K.cyl(px, 0, -D / 2 - 0.5 - lean, px, 1.9, -D / 2 - 0.1, 0.025, 0.025, c, SURF.plain, 5); K.box(px, 0.3, -D / 2 - 0.47 - lean * 0.85, 0.2, 0.55, 0.03, c) }
+    K.cyl(-0.8, 0.05, -D / 2 - 0.9, -0.8, 0.75, -D / 2 - 0.9, 0.4, 0.22, [0.5, 0.42, 0.26], SURF.thatch, 9)
+    K.cyl(-W / 2 - 1.2, -0.3, -D / 2 - 1.5, -W / 2 - 1.2, 1.9, -D / 2 - 1.5, 0.05, 0.04, WOOD_D, SURF.plain, 5); K.cyl(-W / 2 - 3.6, -0.3, -D / 2 - 0.6, -W / 2 - 3.6, 1.9, -D / 2 - 0.6, 0.05, 0.04, WOOD_D, SURF.plain, 5)
+    K.cyl(-W / 2 - 1.2, 1.85, -D / 2 - 1.5, -W / 2 - 3.6, 1.85, -D / 2 - 0.6, 0.03, 0.03, WOOD, SURF.plain, 5)
+    for (let i = 0; i < 6; i++) { const t = (i + 0.5) / 6; K.box(-W / 2 - 1.2 - 2.4 * t, 1.85 - 0.45 - 0.1 * Math.sin(i * 2.1), -D / 2 - 1.5 + 0.9 * t, 0.42, 0.9 + 0.15 * Math.sin(i * 1.3), 0.02, [0.36, 0.42, 0.36], SURF.rope) }
     K.at(0, ridgeY, 0, 0, slope).box(0, -0.02, len / 2, W + 1.3, 0.05, len, ROOF, SURF.metal).pop()
     K.at(0, ridgeY, 0, 0, -slope).box(0, -0.02, -len / 2, W + 1.3, 0.05, len, ROOF, SURF.metal).pop()
     // lean-to roof over the walk
@@ -100,11 +125,11 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
   {
     const H = PLACES.stiltHouse, g = hf.at(H.x, H.z)
     const p0 = [H.x - 9, H.z + 6], p1 = [H.x - 15.5, H.z + 1]
-    for (const q of [p0, p1]) K.cyl(q[0], hf.at(q[0], q[1]) - 0.4, q[1], q[0], hf.at(q[0], q[1]) + 2.3, q[1], 0.06, 0.05, WOOD_D, SURF.plain, 5)
-    K.cyl(p0[0], hf.at(p0[0], p0[1]) + 2.2, p0[1], p1[0], hf.at(p1[0], p1[1]) + 2.2, p1[1], 0.012, 0.012, ROPE, SURF.plain, 3, false)
+    for (const q of [p0, p1]) K.cyl(q[0], hf.at(q[0], q[1]) - 0.4, q[1], q[0], hf.at(q[0], q[1]) + 3.1, q[1], 0.06, 0.05, WOOD_D, SURF.plain, 5)
+    K.cyl(p0[0], hf.at(p0[0], p0[1]) + 3.0, p0[1], p1[0], hf.at(p1[0], p1[1]) + 3.0, p1[1], 0.012, 0.012, ROPE, SURF.plain, 3, false)
     const cloth = [[0.85, 0.82, 0.74], [0.75, 0.22, 0.18], [0.2, 0.45, 0.6], [0.9, 0.7, 0.25], [0.3, 0.55, 0.35], [0.85, 0.85, 0.9]]
     const la = Math.atan2(p1[1] - p0[1], p1[0] - p0[0])
-    for (let i = 0; i < 6; i++) { const t = 0.12 + i * 0.15, x = p0[0] + (p1[0] - p0[0]) * t, z = p0[1] + (p1[1] - p0[1]) * t, hh = r.range(0.5, 0.9); K.at(x, hf.at(x, z) + 2.18 - hh / 2, z, -la).box(0, 0, 0, r.range(0.4, 0.7), hh, 0.02, cloth[i], SURF.plain).pop() }
+    for (let i = 0; i < 6; i++) { const t = 0.12 + i * 0.15, x = p0[0] + (p1[0] - p0[0]) * t, z = p0[1] + (p1[1] - p0[1]) * t, hh = r.range(0.5, 0.9); K.at(x, hf.at(x, z) + 2.98 - hh / 2, z, -la).box(0, 0, 0, r.range(0.4, 0.7), hh, 0.02, cloth[i], SURF.plain).pop() }
     // store hut on short legs
     const sx = H.x + 12, sz = H.z - 9, sg = hf.at(sx, sz), sf = HOUSE_FLOOR_Y - sg
     K.at(sx, sg, sz, -0.5)
@@ -165,7 +190,7 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
   // ---------- the marked tree: a painted ring at last year's water
   {
     const M = PLACES.markedTree
-    K.cyl(M.x, WATER_RANGE - 0.14, M.z, M.x, WATER_RANGE + 0.14, M.z, markedTreeR * 1.2 + 0.05, markedTreeR * 1.17 + 0.05, [0.9, 0.86, 0.72], SURF.plain, 14, false)
+    K.cyl(M.x, WATER_RANGE - 0.08, M.z, M.x, WATER_RANGE + 0.42, M.z, markedTreeR * 1.2 + 0.05, markedTreeR * 1.17 + 0.05, [0.9, 0.86, 0.72], SURF.plain, 14, false)
     // a small plank nailed below it and a notch board: the family's own mark
     K.box(M.x, WATER_RANGE - 0.5, M.z + markedTreeR + 0.1, 0.5, 0.16, 0.04, [0.8, 0.3, 0.2], SURF.paint)
     K.cyl(M.x, WATER_RANGE - 1.2, M.z + markedTreeR + 0.06, M.x, WATER_RANGE - 0.1, M.z + markedTreeR + 0.04, 0.012, 0.012, [0.86, 0.84, 0.76], SURF.plain, 4, false)
@@ -177,14 +202,15 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
   {
     F.at(R.x, 0, R.z, R.rot)
     const L = 10.5, Wd = 7.6
-    for (let i = 0; i < 9; i++) { const z = -Wd / 2 + 0.45 + (i / 8) * (Wd - 0.9); F.cyl(-L / 2 + r.range(-0.4, 0.2), -0.02, z, L / 2 + r.range(-0.2, 0.5), 0.0, z, r.range(0.3, 0.38), r.range(0.26, 0.34), [0.33, 0.27, 0.2], SURF.plain, 9) }
+    for (let i = 0; i < 9; i++) { const z = -Wd / 2 + 0.45 + (i / 8) * (Wd - 0.9); const tone = r.range(0.7, 1.15); F.cyl(-L / 2 + r.range(-0.9, 0.3), r.range(-0.08, 0.0), z + r.range(-0.08, 0.08), L / 2 + r.range(-0.3, 1.1), r.range(-0.06, 0.02), z + r.range(-0.1, 0.1), r.range(0.27, 0.44), r.range(0.2, 0.36), [0.33 * tone, 0.27 * tone, 0.2 * tone], SURF.plain, 9) }
     for (const x of [-3.8, 0, 3.8]) F.box(x, 0.26, 0, 0.18, 0.12, Wd, WOOD_D)
     F.box(0, DECK - 0.035, 0, L - 0.4, 0.07, Wd, WOOD_L)
     // the house: smaller than the deck, set to one end
     const hx = -1.9, hw = 5.4, hd = 4.0, wh = 2.1
     for (const [cx, cz, sx, sz] of [[hx, -hd / 2, hw, 0.07], [hx, hd / 2, hw, 0.07], [hx - hw / 2, 0, 0.07, hd], [hx + hw / 2, 0, 0.07, hd]]) F.box(cx, DECK + wh / 2, cz, sx, wh, sz, WOOD)
-    F.box(hx + hw / 2 + 0.04, DECK + 0.95, 0.6, 0.05, 1.9, 0.85, DARK, SURF.plain)
-    F.box(hx, DECK + 1.3, hd / 2 + 0.04, 0.9, 0.7, 0.05, DARK, SURF.plain)
+    F.box(hx + hw / 2 + 0.04, DECK + 0.95, 0.6, 0.05, 1.9, 0.85, WIN, SURF.glass)
+    F.box(hx, DECK + 1.3, hd / 2 + 0.04, 0.9, 0.7, 0.05, WIN, SURF.glass)
+    F.box(hx - 0.5, DECK + 1.3, -hd / 2 - 0.04, 0.9, 0.7, 0.05, WIN, SURF.glass); F.box(hx - hw / 2 - 0.04, DECK + 1.3, 0.2, 0.05, 0.7, 0.9, WIN, SURF.glass)
     for (const [cx, cz] of [[hx - hw / 2, -hd / 2], [hx + hw / 2, -hd / 2], [hx - hw / 2, hd / 2], [hx + hw / 2, hd / 2]]) F.cyl(cx, DECK, cz, cx, DECK + wh + 0.1, cz, 0.08, 0.07, WOOD_D, SURF.plain, 6)
     const half = hd / 2 + 0.9, rise = 1.5, slope = Math.atan2(rise, half), len = Math.hypot(rise, half) + 0.3
     F.at(hx, DECK + wh + rise, 0, 0, slope).box(0, -0.06, len / 2, hw + 1.6, 0.16, len, THATCH, SURF.thatch).pop()
@@ -212,6 +238,8 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
     F.pop()
   }
 
+  // mooring posts on the bank for the raft's ropes
+  for (const [tx, tz] of [[R.x + 14, R.z - 9], [R.x + 13, R.z + 12], [R.x - 4, R.z + 22]]) { const gy = hf.at(tx, tz); K.cyl(tx, gy - 0.8, tz, tx + 0.1, gy + 2.5, tz, 0.16, 0.12, WOOD_D, SURF.plain, 7); K.cyl(tx, gy + 2.05, tz, tx + 0.1, gy + 2.3, tz, 0.19, 0.19, ROPE, SURF.plain, 7, false); solids.push(tx, tz, 0.3) }
   const km = kitMaterial(false), fm = kitMaterial(true)
   const fixed = new THREE.Mesh(K.build(), km)
   fixed.castShadow = true; fixed.receiveShadow = true
@@ -260,17 +288,23 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
   {
     const T = PLACES.giantTrunk, gy = hf.at(T.x, T.z) - 0.6
     const g = new GB()
-    const sides = 112, rings = 26, Hh = 46
+    const sides = 168, rings = 34, Hh = 46
     const fins = 7
     for (let j = 0; j <= rings; j++) {
-      const v = Math.pow(j / rings, 2.1), y = v * Hh
-      const R0 = 3.4 - 1.5 * v
-      const flare = Math.exp(-y / 4.2)
+      const v = Math.pow(j / rings, 2.2), y = v * Hh
+      const R0 = 3.3 - 1.0 * v
+      const foot = 0.55 * Math.exp(-y / 1.4)
       for (let i = 0; i < sides; i++) {
         const th = (i / sides) * Math.PI * 2
-        const fin = Math.pow(0.5 + 0.5 * Math.cos(th * fins + Math.sin(th * 2) * 0.8), 7)
-        const rr = R0 * (1 + 0.06 * Math.sin(th * 13 + y * 0.3)) + flare * (0.8 + 4.4 * fin)
-        g.v(Math.cos(th) * rr, y, Math.sin(th) * rr, Math.cos(th), flare * 0.5, Math.sin(th), 0, v, 0)
+        const ph = th * fins + Math.sin(th * 2) * 0.8
+        const k = Math.round(ph / (Math.PI * 2))
+        const size = 0.72 + 0.28 * Math.sin(k * 2.4 + 1)
+        const top = 6.5 + 4.5 * (0.5 + 0.5 * Math.sin(k * 1.7 + 2))
+        const fin = Math.pow(0.5 + 0.5 * Math.cos(ph), 30)
+        const reach = y < top ? 5.2 * size * Math.pow(1 - y / top, 3.0) * (1 + 0.12 * Math.sin(y * 1.9 + k)) : 0
+        const lump = 1 + 0.07 * Math.sin(th * 5 + y * 0.21) + 0.04 * Math.sin(th * 11 - y * 0.5)
+        const rr = R0 * lump + foot + reach * (fin + 0.06 * Math.pow(0.5 + 0.5 * Math.cos(ph), 3))
+        g.v(Math.cos(th) * rr, y, Math.sin(th) * rr, Math.cos(th), 0.2, Math.sin(th), 0, v, 0)
       }
     }
     for (let j = 0; j < rings; j++) for (let i = 0; i < sides; i++) { const a = j * sides + i, b = j * sides + ((i + 1) % sides); g.quad(a, a + sides, b + sides, b) }
@@ -284,7 +318,7 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
     const geo = g.build()
     geo.computeVertexNormals()
     const m = new PaintedMaterial({ wrap: 0.3 })
-    m.colorNode = Fn(() => barkColor(float(0.42), float(gy)))()
+    m.colorNode = Fn(() => barkColor(float(0.56), float(gy)))()
     const mesh = new THREE.Mesh(geo, m)
     mesh.position.set(T.x, gy, T.z)
     mesh.castShadow = true; mesh.receiveShadow = true
