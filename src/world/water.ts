@@ -47,10 +47,10 @@ export function waterMaterial(useSceneDepth: boolean): THREE.Material {
     let refl: any = skyColor(vec3(R.x, ry, R.z).normalize(), false).add(U.discCol.mul(pow(sd, 260)).mul(0.9))
     const hit = pw.xz.add(Rs.xz.div(max(Rs.y, 0.03)).mul(15))
     const landH = texture(TEX.height, hit.add(340).div(680)).r
-    const cov = texture(TEX.cover, hit.add(340).div(680)).r.add(texture(TEX.cover, hit.add(vec2(6, 3)).add(340).div(680)).r).add(texture(TEX.cover, hit.sub(vec2(4, 7)).add(340).div(680)).r).div(3)
+    const cov = texture(TEX.cover, hit.add(340).div(680)).r.add(texture(TEX.cover, hit.add(vec2(14, 9)).add(340).div(680)).r).add(texture(TEX.cover, hit.sub(vec2(11, 15)).add(340).div(680)).r).div(3)
     const wall = max(smoothstep(-2.0, 7.0, landH.sub(pw.y)).mul(smoothstep(0.0, 0.3, cov.add(0.2))), smoothstep(0.08, 0.8, cov))
     const forestCol = mix(vec3(0.03, 0.035, 0.015), vec3(0.08, 0.08, 0.03), r2).mul(U.amb.add(U.sunCol.mul(U.sunI).mul(0.25)))
-    refl = mix(refl, forestCol, wall.mul(0.92))
+    refl = mix(refl, mix(forestCol, refl.mul(0.4), 0.45), wall.mul(0.8))
     // lamps lay a long warm path on the water
     const lampGlint = (L: any) => { const d = L.xyz.sub(pw); const dn = d.normalize(); return U.lampCol.mul(pow(max(dot(R, dn), 0), 40)).mul(L.w).mul(0.35).div(d.length().mul(d.length()).mul(0.012).add(1)) }
     refl = refl.add(lampGlint(U.lamp0)).add(lampGlint(U.lamp1)).add(lampGlint(U.lamp2))

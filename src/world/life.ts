@@ -188,14 +188,14 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
       const rad = ia.w.add(ib.y.mul(1.4))
       const c = vec3(ia.x.add(cos(ang).mul(rad)), ia.y.add(ib.y.mul(0.5)).add(sin(t.mul(0.3).add(ib.w.mul(9))).mul(1.5)), ia.z.add(sin(ang).mul(rad).mul(0.7)))
       const flap = sin(t.mul(7).add(ib.w.mul(40))).mul(0.7)
-      const lp = positionLocal.mul(2.4)
+      const lp = positionLocal.mul(1.6)
       const wing = vec3(lp.x.mul(cos(flap.mul(aux.x))), abs(lp.x).mul(sin(flap)).mul(aux.x.add(0.2)), lp.z)
       const dir = ang.add(mix(float(1.5708), float(-1.5708), smoothstep(-0.001, 0.001, ib.z.negate()))).add(3.14159)
       const rp = vec3(wing.x.mul(cos(dir)).sub(wing.z.mul(sin(dir))), wing.y, wing.x.mul(sin(dir)).add(wing.z.mul(cos(dir))))
       // fewer by night
       return rp.mul(smoothstep(0.2, 0.6, U.day.add(ib.w.mul(0.4)))).add(c)
     })()
-    m.colorNode = Fn(() => mix(vec3(0.07, 0.07, 0.08), vec3(0.85, 0.85, 0.82), smoothstep(0.62, 0.66, ib.w)).mul(U.amb.add(U.sunCol.mul(U.sunI).mul(0.3))))()
+    m.colorNode = Fn(() => mix(vec3(0.07, 0.07, 0.08), vec3(0.85, 0.85, 0.82), smoothstep(0.86, 0.9, ib.w)).mul(U.amb.add(U.sunCol.mul(U.sunI).mul(0.3))))()
     add(new THREE.Mesh(geo, m))
   }
 

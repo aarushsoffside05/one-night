@@ -96,6 +96,33 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
     K.pop()
   }
 
+  // ---------- signs of use round the house: washing on a line, pots, a store hut, a fence, firewood
+  {
+    const H = PLACES.stiltHouse, g = hf.at(H.x, H.z)
+    const p0 = [H.x - 9, H.z + 6], p1 = [H.x - 15.5, H.z + 1]
+    for (const q of [p0, p1]) K.cyl(q[0], hf.at(q[0], q[1]) - 0.4, q[1], q[0], hf.at(q[0], q[1]) + 2.3, q[1], 0.06, 0.05, WOOD_D, SURF.plain, 5)
+    K.cyl(p0[0], hf.at(p0[0], p0[1]) + 2.2, p0[1], p1[0], hf.at(p1[0], p1[1]) + 2.2, p1[1], 0.012, 0.012, ROPE, SURF.plain, 3, false)
+    const cloth = [[0.85, 0.82, 0.74], [0.75, 0.22, 0.18], [0.2, 0.45, 0.6], [0.9, 0.7, 0.25], [0.3, 0.55, 0.35], [0.85, 0.85, 0.9]]
+    const la = Math.atan2(p1[1] - p0[1], p1[0] - p0[0])
+    for (let i = 0; i < 6; i++) { const t = 0.12 + i * 0.15, x = p0[0] + (p1[0] - p0[0]) * t, z = p0[1] + (p1[1] - p0[1]) * t, hh = r.range(0.5, 0.9); K.at(x, hf.at(x, z) + 2.18 - hh / 2, z, -la).box(0, 0, 0, r.range(0.4, 0.7), hh, 0.02, cloth[i], SURF.plain).pop() }
+    // store hut on short legs
+    const sx = H.x + 12, sz = H.z - 9, sg = hf.at(sx, sz), sf = HOUSE_FLOOR_Y - sg
+    K.at(sx, sg, sz, -0.5)
+    for (const [qx, qz] of [[-1.6, -1.3], [1.6, -1.3], [-1.6, 1.3], [1.6, 1.3]]) K.cyl(qx, -0.6, qz, qx, sf + 2.0, qz, 0.1, 0.09, WOOD_D, SURF.plain)
+    K.box(0, sf, 0, 3.6, 0.07, 3.0, WOOD_L)
+    for (const [cx, cz, wx, wz] of [[0, -1.3, 3.2, 0.07], [0, 1.3, 3.2, 0.07], [-1.6, 0, 0.07, 2.6], [1.6, 0, 0.07, 2.6]]) K.box(cx, sf + 1.0, cz, wx, 1.9, wz, WOOD)
+    K.at(0, sf + 2.7, 0, 0, 0.5).box(0, 0, 1.0, 4.2, 0.12, 2.3, THATCH, SURF.thatch).pop(); K.at(0, sf + 2.7, 0, 0, -0.5).box(0, 0, -1.0, 4.2, 0.12, 2.3, THATCH, SURF.thatch).pop()
+    for (let i = 0; i < 7; i++) K.box(-1.2 + i * 0.05, sf * (1 - (i + 0.5) / 7), 1.6 + i * 0.32, 0.9, 0.05, 0.24, WOOD_L)
+    K.pop()
+    solids.push(sx, sz, 2.4)
+    // firewood stack, pots, a water jar, a bench under the house
+    for (let i = 0; i < 9; i++) K.cyl(H.x - 4.5 + (i % 3) * 0.24, g + 0.12 + Math.floor(i / 3) * 0.22, H.z - 4.2, H.x - 4.5 + (i % 3) * 0.24, g + 0.12 + Math.floor(i / 3) * 0.22, H.z - 3.0, 0.1, 0.1, [0.4, 0.3, 0.2], SURF.plain, 6)
+    for (const [dx, dz, rr, c] of [[3.5, 7.5, 0.28, [0.5, 0.26, 0.16]], [4.2, 7.9, 0.2, [0.2, 0.3, 0.45]], [-6, 3, 0.34, [0.55, 0.3, 0.18]]] as [number, number, number, number[]][]) K.cyl(H.x + dx, hf.at(H.x + dx, H.z + dz), H.z + dz, H.x + dx, hf.at(H.x + dx, H.z + dz) + rr * 1.6, H.z + dz, rr, rr * 0.8, c, SURF.plain, 9)
+    K.box(H.x + 1, g + 0.4, H.z - 1, 1.8, 0.06, 0.4, WOOD_L); K.box(H.x + 0.2, g + 0.2, H.z - 1, 0.06, 0.4, 0.36, WOOD); K.box(H.x + 1.8, g + 0.2, H.z - 1, 0.06, 0.4, 0.36, WOOD)
+    // a short fence line of sticks by the path
+    for (let i = 0; i < 14; i++) { const x = 2 + i * 0.7, z = 40 - i * 0.42; K.cyl(x, hf.at(x, z) - 0.2, z, x + r.range(-0.05, 0.05), hf.at(x, z) + r.range(0.8, 1.1), z, 0.03, 0.025, WOOD, SURF.plain, 4) }
+  }
+
   // ---------- the bank steps and the landing
   {
     const A = PLACES.stepsTop, B = PLACES.landing
@@ -138,7 +165,9 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
   // ---------- the marked tree: a painted ring at last year's water
   {
     const M = PLACES.markedTree
-    K.cyl(M.x, WATER_RANGE - 0.06, M.z, M.x, WATER_RANGE + 0.06, M.z, markedTreeR * 1.12 + 0.03, markedTreeR * 1.1 + 0.03, [0.86, 0.84, 0.76], SURF.plain, 12, false)
+    K.cyl(M.x, WATER_RANGE - 0.14, M.z, M.x, WATER_RANGE + 0.14, M.z, markedTreeR * 1.2 + 0.05, markedTreeR * 1.17 + 0.05, [0.9, 0.86, 0.72], SURF.plain, 14, false)
+    // a small plank nailed below it and a notch board: the family's own mark
+    K.box(M.x, WATER_RANGE - 0.5, M.z + markedTreeR + 0.1, 0.5, 0.16, 0.04, [0.8, 0.3, 0.2], SURF.paint)
     K.cyl(M.x, WATER_RANGE - 1.2, M.z + markedTreeR + 0.06, M.x, WATER_RANGE - 0.1, M.z + markedTreeR + 0.04, 0.012, 0.012, [0.86, 0.84, 0.76], SURF.plain, 4, false)
   }
 

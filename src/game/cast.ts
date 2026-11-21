@@ -52,7 +52,7 @@ export class Cast {
       b.float = true
       boy.x = p.x; boy.y = p.y; boy.z = p.z; boy.heading = p.heading
       const moving = Math.hypot(p.vx, p.vz)
-      boy.anim = this.boyAnim ?? (moving > 4.4 ? 'run' : moving > 0.25 ? 'walk' : 'idle')
+      boy.anim = this.boyAnim ?? (moving > 4.4 ? 'run' : moving > 0.25 ? (this.lampHolder === 'davi' ? 'lamp' : 'walk') : 'idle')
       boy.speed = moving
       if (moving > 0.25) boy.phase = p.walkPhase
     }
@@ -79,7 +79,7 @@ export class Cast {
     if (this.lampHolder) {
       figures.handPos(this.lampHolder, 1, v1)
       props.lamp.visible = true; props.lamp.position.copy(v1)
-      U.lamp2.value.set(v1.x, v1.y - 0.15, v1.z, (0.3 + night * 2.2) * (0.9 + 0.1 * Math.sin(clock * 9)))
+      U.lamp2.value.set(v1.x, v1.y - 0.15, v1.z, (0.3 + night * 5.5) * (0.92 + 0.08 * Math.sin(clock * 9)))
     } else { props.lamp.visible = false; U.lamp2.value.w = 0 }
   }
 }

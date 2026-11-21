@@ -229,6 +229,7 @@ export class Game {
 
   goTo(x: number, z: number, heading: number) {
     this.devCam = false
+    this.cast.playerBoat.visible = false // a jump leaves no canoe behind on dry ground
     this.player.place(x, z, heading, this.player.depthAt(x, z) > 0.7 ? 'canoe' : 'foot')
     this.player.waterY = waterYOf(this.water)
     this.player.place(x, z, heading, this.player.depthAt(x, z) > 0.7 ? 'canoe' : 'foot')
@@ -309,7 +310,7 @@ export class Game {
   private installDev() {
     const g = this
     ;(window as any).__ON = {
-      ready: true, backend: this.backend, tier: this.tier, cams: CAMS.map((c) => c.name), game: this,
+      ready: true, backend: this.backend, tier: this.tier, cams: CAMS.map((c) => c.name), camData: CAMS, game: this,
       set(o: { water?: number; tod?: number; cam?: number; frozen?: boolean; clock?: number; view?: number[] }) {
         if (o.water !== undefined) g.water = g.waterTarget = o.water
         if (o.tod !== undefined) g.tod = g.todTarget = o.tod

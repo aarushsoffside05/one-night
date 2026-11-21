@@ -81,14 +81,16 @@ export class Roam {
     if (!trailWet) {
       ca.y = hf.at(ca.x, ca.z)
       if (!ca.moving) { this.caioLeg ^= 1; f.walkTo('caio', this.caioLeg ? 119 : 100, this.caioLeg ? -118 : -48, 1.25, 0.5, 'carry') }
-      to.x = PLACES.lakeBank.x + 3.2; to.z = PLACES.lakeBank.z - 1; to.y = hf.at(to.x, to.z); to.anim = envOut.lamp > 0.5 ? 'lamp' : 'liftNet'; to.heading = 1.6
+      to.x = PLACES.lakeBank.x + 3.2; to.z = PLACES.lakeBank.z - 1; to.y = hf.at(to.x, to.z); to.anim = 'liftNet'; to.heading = 1.6
       lc.x = PLACES.lakeBank.x + 9; lc.z = PLACES.lakeBank.z - 3; lc.heading = 1.2
     } else {
       const a = this.t * 0.07
-      lc.x = 150 + Math.cos(a) * 22; lc.z = -128 + Math.sin(a) * 14; lc.heading = a + Math.PI
+      lc.x = 168 + Math.cos(a) * 18; lc.z = -136 + Math.sin(a) * 12; lc.heading = a + Math.PI
       cast.seat(ca, lc, -1.3, 'paddle', Math.sin(this.t * 0.6) > 0 ? 1 : -1); cast.seat(to, lc, 1.1, 'ride')
     }
-    cast.lampHolder = !trailWet && envOut.lamp > 0.5 ? 'tome' : null
+    // by night the boy carries the hand lamp: one warm pool in a dark blue forest
+    cast.lampHolder = envOut.lamp > 0.45 && p.mode === 'foot' ? 'davi' : null
+    cast.boyAnim = cast.lampHolder && p.speed < 0.2 ? 'lamp' : null
     // paddles for the paddlers
     pr.paddles[1].visible = false; pr.paddles[2].visible = false
     f.handPos('marta', ma.side > 0 ? 1 : 0, v); f.handPos('marta', ma.side > 0 ? 0 : 1, v2); v2.y -= 0.12; pr.holdPaddle(1, v, v2)

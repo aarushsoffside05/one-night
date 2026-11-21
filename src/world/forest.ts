@@ -48,8 +48,8 @@ export const barkColor = (seed: N, groundY: N) => {
   // pale lichen blotches and green moss near the foot
   col = mix(col, vec3(0.58, 0.58, 0.5), smoothstep(0.62, 0.78, blot).mul(0.45))
   const moss = smoothstep(0.45, 0.7, noise(pw.xz.mul(0.21).add(pw.y.mul(0.13))).g).mul(smoothstep(5.5, 0.5, pw.y.sub(groundY)))
-  col = mix(col, vec3(0.1, 0.19, 0.04), moss.mul(0.7))
-  col = mix(col, vec3(0.1, 0.17, 0.04), smoothstep(0.5, 0.75, noise(pw.xz.mul(0.33).sub(pw.y.mul(0.09))).r).mul(0.45))
+  col = mix(col, vec3(0.1, 0.17, 0.05), moss.mul(0.4))
+  col = mix(col, vec3(0.1, 0.15, 0.05), smoothstep(0.6, 0.8, noise(pw.xz.mul(0.33).sub(pw.y.mul(0.09))).r).mul(0.2))
   return floodStain(col, blot)
 }
 
@@ -261,7 +261,7 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
   sp('spFern', 'fern_A_near', PLANT_TEX.fern, 1.0); sp('spFern2', 'fern_C_near', PLANT_TEX.fern, 0.9); sp('spLeather', 'leatherfern_A_near', PLANT_TEX.leatherfern, 1.0)
   sp('spPalm', 'palm_A_near', PLANT_TEX.palm, 0.9, 60); sp('spFan', 'fanpalm_C_near', PLANT_TEX.fanpalm, 1.1, 60); sp('spBanana', 'banana_B_near', PLANT_TEX.banana, 1.0, 60); sp('spEar', 'elephantear_A_near', PLANT_TEX.elephantear, 0.9, 60)
   if (SG.fallentree_A_near) { const tm = scanPlantMaterial(PLANT_TEX.fallentree, 120, 1); tm.alphaTest = 0; tm.side = THREE.FrontSide; (tm as any).opacityNode = null; fields.push(mk('spTree' as any, [{ geometry: SG.fallentree_A_near, material: tm, near: 0, far: 120, shadow: true }], 50)) }
-  if (SG.driftwood_A_near) { const dm = scanPlantMaterial(PLANT_TEX.driftwood, 110, 1); dm.alphaTest = 0; dm.side = THREE.FrontSide; (dm as any).opacityNode = null; fields.push(mk('spDrift' as any, [{ geometry: SG.driftwood_A_far ?? SG.driftwood_A_near, material: dm, near: 0, far: 110 }])) }
+  if (SG.driftwood_A_near) { const dm = scanPlantMaterial(PLANT_TEX.driftwood, 110, 1); dm.alphaTest = 0; dm.side = THREE.FrontSide; (dm as any).opacityNode = null; fields.push(mk('spDrift' as any, [{ geometry: SG.driftwood_A_near, material: dm, near: 0, far: 110 }])) }
   if (SG.waterlily_A_near) fields.push(mk('floater', [{ geometry: SG.waterlily_A_near, material: scanPlantMaterial(PLANT_TEX.waterlily, 110, 1.3, true), near: 0, far: 110 }]))
   else fields.push(mk('floater', [{ geometry: G.floaterGeometry(), material: floaterMaterial(120), near: 0, far: 120 }]))
   return {
