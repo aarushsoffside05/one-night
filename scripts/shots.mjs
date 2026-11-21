@@ -48,7 +48,8 @@ for (let ci = 0; ci < meta.cams.length; ci++) {
   fs.writeFileSync(file, Buffer.from(sheet.split(',')[1], 'base64'))
   console.log(`${file} ${(fs.statSync(file).size / 1024).toFixed(0)} KB  (${((Date.now() - t0) / 1000).toFixed(0)} s)`)
 }
-fs.writeFileSync(`${out}/numbers.txt`, `backend ${meta.backend}, level ${meta.tier}\n` + rows.join('\n') + '\n')
+const counts = await page.evaluate(() => window.__ON.info().counts)
+fs.writeFileSync(`${out}/numbers.txt`, `backend ${meta.backend}, level ${meta.tier}\n` + rows.join('\n') + '\ninstances drawn at the last camera: ' + JSON.stringify(counts) + '\n')
 console.log(rows.join('\n'))
 if (errors.length) console.log(`PAGE ERRORS: ${errors.length}`)
 await browser.close()

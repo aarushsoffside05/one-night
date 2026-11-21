@@ -11,7 +11,7 @@ export const cellOf = (x: number, z: number) => {
   return cz * CELLS + cx
 }
 export type FieldData = { data: Float32Array; cellStart: Uint32Array }
-export const FIELD_NAMES = ['trunk', 'clump', 'spray', 'palm', 'sapling', 'broadleaf', 'tuft', 'log', 'root', 'vine', 'bankroot', 'floater', 'shaft', 'spFern', 'spFern2', 'spLeather', 'spPalm', 'spFan', 'spBanana', 'spEar'] as const
+export const FIELD_NAMES = ['trunk', 'clump', 'spray', 'palm', 'sapling', 'broadleaf', 'tuft', 'log', 'root', 'vine', 'bankroot', 'floater', 'shaft', 'spFern', 'spFern2', 'spLeather', 'spPalm', 'spFan', 'spBanana', 'spEar', 'spTree'] as const
 export type FieldName = (typeof FIELD_NAMES)[number]
 
 class Rec {
@@ -211,7 +211,8 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     const strand = kind.bank > 0.2 || (kind.dry > 0.15 && kind.dry < 0.7) || kind.sand > 0.3
     if (!strand && roll > 0.3) continue
     if (kind.channel > 0.12 && roll > 0.12) continue
-    R.log.push(x, h + rad * 0.5, z, len, rot, seed, rad, 0)
+    if (seed < 0.14 && len > 2.5) R.spTree.push(x, h - 0.05, z, len / 1.77, rot, seed, 1, rl())
+    else R.log.push(x, h + rad * 0.5, z, len, rot, seed, rad, 0)
   }
   // ---- hanging roots at the top of the channel banks and the lake's high bank
   const rb = rng('bankroots')

@@ -237,6 +237,7 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
   const sp = (name: any, mesh: string, tex: THREE.Texture, base: number, far = 46) => { if (SG[mesh]) fields.push(mk(name, [{ geometry: SG[mesh], material: scanPlantMaterial(tex, far, base), near: 0, far }])) }
   sp('spFern', 'fern_A_near', PLANT_TEX.fern, 1.0); sp('spFern2', 'fern_C_near', PLANT_TEX.fern, 0.9); sp('spLeather', 'leatherfern_A_near', PLANT_TEX.leatherfern, 1.0)
   sp('spPalm', 'palm_A_near', PLANT_TEX.palm, 0.9, 60); sp('spFan', 'fanpalm_C_near', PLANT_TEX.fanpalm, 1.1, 60); sp('spBanana', 'banana_B_near', PLANT_TEX.banana, 1.0, 60); sp('spEar', 'elephantear_A_near', PLANT_TEX.elephantear, 0.9, 60)
+  if (SG.fallentree_A_near) { const tm = scanPlantMaterial(PLANT_TEX.fallentree, 120, 1); tm.alphaTest = 0; tm.side = THREE.FrontSide; (tm as any).opacityNode = null; fields.push(mk('spTree' as any, [{ geometry: SG.fallentree_A_near, material: tm, near: 0, far: 120, shadow: true }], 50)) }
   if (SG.waterlily_A_near) fields.push(mk('floater', [{ geometry: SG.waterlily_A_near, material: scanPlantMaterial(PLANT_TEX.waterlily, 110, 1.3, true), near: 0, far: 110 }]))
   else fields.push(mk('floater', [{ geometry: G.floaterGeometry(), material: floaterMaterial(120), near: 0, far: 120 }]))
   return {

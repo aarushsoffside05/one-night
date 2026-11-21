@@ -70,7 +70,7 @@ export class Game {
     r.shadowMap.enabled = TIERS[this.tier].shadows
     this.camera.fov = 52; this.camera.near = 0.25; this.camera.far = 4000; this.camera.updateProjectionMatrix()
 
-    const [cooked] = await Promise.all([this.cook(), loadScans(() => {})])
+    const [cooked] = await Promise.all([this.cook(), loadScans((f) => { if (ui.get().loadPct < 0.6) ui.set({ loadStage: 'Unpacking bark, mud and leaves' }); void f })])
     ui.set({ loadStage: 'Raising the forest', loadPct: 0.7 })
     await nextFrame()
     this.world = buildWorld(cooked, this.scene, r, this.tier, this.backend)

@@ -8,7 +8,7 @@ export type Tier = 'high' | 'mid' | 'low'
 export const TIERS: Record<Tier, { startScale: number; minScale: number; maxScale: number; shadows: boolean; shadowSize: number; density: number; targetMs: number; far: number }> = {
   high: { startScale: 0.7, minScale: 0.5, maxScale: 1.0, shadows: true, shadowSize: 2048, density: 1, targetMs: 16.7, far: 1 },
   mid: { startScale: 0.7, minScale: 0.45, maxScale: 0.85, shadows: true, shadowSize: 1024, density: 0.7, targetMs: 16.7, far: 0.8 },
-  low: { startScale: 0.8, minScale: 0.5, maxScale: 0.8, shadows: false, shadowSize: 512, density: 0.4, targetMs: 33.3, far: 0.6 },
+  low: { startScale: 0.8, minScale: 0.5, maxScale: 0.8, shadows: false, shadowSize: 512, density: 0.3, targetMs: 33.3, far: 0.45 },
 }
 
 export function pickTier(backend: string, gpuDesc: string): Tier {
