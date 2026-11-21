@@ -1,0 +1,16 @@
+html, body, #root { margin: 0; height: 100%; background: #0d1210; overflow: hidden; }
+body { font-family: Georgia, 'Times New Roman', serif; color: #f3ead7; }
+canvas { display: block; }
+.shell { position: fixed; inset: 0; pointer-events: none; }
+.shell button { pointer-events: auto; }
+.error { position: fixed; left: 16px; bottom: 16px; background: #5a1d1d; padding: 10px 14px; border-radius: 6px; font: 14px system-ui; }
+.loading { position: absolute; inset: 0; background: #0d1210; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+.loading-title { font-size: 34px; letter-spacing: 0.02em; }
+.loading-stage { font: 15px system-ui; opacity: 0.75; min-height: 20px; }
+.bar { width: min(420px, 70vw); height: 4px; background: #26302b; border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; background: #e8b96a; transition: width 0.25s; }
+.dev { position: absolute; left: 8px; top: 8px; font: 12px ui-monospace, Menlo, monospace; color: #fff; background: rgba(0,0,0,0.55); padding: 6px 8px; border-radius: 4px; max-width: 92vw; }
+.dev-keys { opacity: 0.6; margin-top: 2px; }
+.dev-bench { margin-top: 8px; border-top: 1px solid #666; padding-top: 6px; }
+.dev-bench pre { margin: 0 0 6px; white-space: pre-wrap; }
+.dev-bench button { font: 12px system-ui; margin-right: 6px; padding: 4px 10px; }

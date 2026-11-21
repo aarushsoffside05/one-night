@@ -1,0 +1,9 @@
+backend webgpu, level low
+02 river mouth                   low water, late afternoon  draws    4  tris   262139
+02 river mouth                   high water, morning        draws    3  tris   262091
+02 river mouth                   night by lamp              draws    4  tris   262139
+02 river mouth                   sunrise                    draws    4  tris   262139
+11 lake high bank east           low water, late afternoon  draws    4  tris   262139
+11 lake high bank east           high water, morning        draws    3  tris   262091
+11 lake high bank east           night by lamp              draws    4  tris   262139
+11 lake high bank east           sunrise                    draws    4  tris   262139
