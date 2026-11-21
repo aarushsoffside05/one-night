@@ -42,7 +42,7 @@ export const U = {
   ripple: uniform(1), // water surface roughness (still lake at dawn = low) // low ground mist before dawn
 
   lampCol: uniform(new Color(1, 0.62, 0.28)),
-  orbCol: uniform(new Color(0.55, 0.85, 1)),
+  orbCol: uniform(new Color(0.5, 0.72, 0.8)),
   orbWater: uniform(-100), // the lent "way of seeing": a ghost sheet of water at this height
   orbMix: uniform(0),
   detail: uniform(1), // draw-distance scale from the quality controller

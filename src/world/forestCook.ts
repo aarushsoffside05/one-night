@@ -193,7 +193,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
   for (let z = -lim; z < lim; z += ts) for (let x = -lim; x < lim; x += ts) {
     const px = x + ru.range(0, ts), pz = z + ru.range(0, ts), roll = ru(), s = ru.range(0.6, 1.4), rot = ru() * 6.283, seed = ru()
     const n = fbm2(px / 9, pz / 9, S + 19, 2)
-    if (roll > (0.16 + 0.6 * smooth(0.35, 0.7, n)) * density) continue
+    if (roll > (0.05 + 0.3 * smooth(0.4, 0.7, n)) * density) continue
     const h = heightFormula(px, pz)
     if (h < 0.6 || kind.lake > 0.3 || kind.trail > 0.35) continue
     // on the bare banks and the beach only the odd tuft; none under the lowest water

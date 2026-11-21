@@ -123,7 +123,7 @@ function plantMaterial(far: number, kind: 'sapling' | 'broadleaf' | 'tuft' | 'pa
   m.colorNode = Fn(() => {
     const tint = ib.w, t = aux.x, rnd = aux.z
     let col: N
-    if (kind === 'tuft') col = mix(vec3(0.07, 0.15, 0.04), vec3(0.24, 0.3, 0.08), tint)
+    if (kind === 'tuft') col = mix(vec3(0.03, 0.075, 0.02), vec3(0.1, 0.15, 0.04), tint)
     else if (kind === 'palm') col = mix(vec3(0.06, 0.17, 0.05), vec3(0.2, 0.33, 0.07), tint.mul(0.6).add(rnd.mul(0.4)))
     else col = mix(vec3(0.02, 0.085, 0.03), vec3(0.08, 0.19, 0.035), tint.mul(0.55).add(rnd.mul(0.45)))
     // darker at the base, lighter at the tip, a pale midrib

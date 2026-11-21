@@ -191,7 +191,7 @@ function* s3(S: Story): Step {
   S.freeCam()
   { const a = raftPt(S, 1.6, -0.4); yield* S.reach(a.x, a.z, 1.5, 'Step onto the deck') }
   sound.knock()
-  g.cast.orbPower = 2.2
+  g.cast.orbPower = 1.1
   yield* S.say('Dona Socorro', 'Here. Where the hands are. Not in my eyes.')
   // hold 1: the light where her hands are, until this fish is done. Her hands only work while it is held.
   let done = 0
@@ -257,7 +257,7 @@ function* s4(S: Story): Step {
   const path = TRAIL.filter((_, i) => i % 2 === 0).map((p) => [p[0], p[1]])
   const iTrunk = path.findIndex((p) => p[1] < -58)
   S.put('caio', 36, 26, 1.0, 'carry'); S.put('tome', 44, 21, 1.0, 'lamp'); S.put('lia', 28, 31, 1.0, 'idle')
-  g.cast.lampHolder = 'tome'; g.cast.orbPower = 2.4
+  g.cast.lampHolder = 'tome'; g.cast.orbPower = 1.1
   S.placeBoy(32, 29.5, 1.0)
   S.shotOf('caio', 5, 1.5, 0.8)
   yield* S.fade(0, 1)

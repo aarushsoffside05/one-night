@@ -134,7 +134,7 @@ function* s6(S: Story): Step {
   const i1 = path.findIndex((p) => p[1] > -52)
   S.put('tome', path[0][0], path[0][1], 3.6, 'carry'); S.put('caio', path[0][0] + 3, path[0][1] + 4, 3.6, 'idle'); S.put('lia', path[0][0] - 2, path[0][1] - 1.5, 3.6, 'idle')
   S.placeBoy(path[0][0] - 1.2, path[0][1] + 1.2, 3.6)
-  g.cast.orbPower = 1.6
+  g.cast.orbPower = 0.9
   const fish = g.world.props.catchFish
   fish.visible = true; fish.scale.setScalar(0.72)
   S.spawn((function* () { for (;;) { yield; const t = S.fig('tome'); S.figs.handPos('tome', 1, v); fish.position.set(v.x, v.y + 0.12, v.z); fish.rotation.set(0.15, Math.PI - t.heading, 0, 'YXZ')
