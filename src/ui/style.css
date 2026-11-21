@@ -54,3 +54,44 @@ canvas { display: block; }
 .scene-title { padding: 0 8vw; }
 .title-scenes { margin: -8px 0 18px; font: 13px system-ui; color: #d7cdb6; }
 .title-scenes button { background: none; border: 1px solid rgba(246,236,212,0.3); color: #e9dfc8; border-radius: 3px; margin: 3px 4px 0 0; padding: 3px 7px; cursor: pointer; font: 12px system-ui; }
+
+/* ---- game shell */
+:root { --paper: #f6ecd4; --ink: #10160f; --gold: #e8b96a; --glass: rgba(12,18,14,0.62); }
+.key { display: inline-block; min-width: 22px; padding: 2px 8px; margin: 0 6px 0 2px; border-radius: 6px; background: var(--paper); color: var(--ink); font: 700 12px/18px ui-sans-serif, system-ui; text-align: center; box-shadow: 0 2px 0 #b7ab8c, 0 3px 8px rgba(0,0,0,0.35); letter-spacing: 0.02em; }
+.chapter { position: absolute; left: 20px; top: 16px; font: 600 12px ui-sans-serif, system-ui; letter-spacing: 0.14em; text-transform: uppercase; color: var(--paper); text-shadow: 0 1px 6px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 9px; opacity: 0.92; }
+.orb-dot { width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #e9fbff, #5fc3e6 60%, #1c6f8f); box-shadow: 0 0 10px #7fd8f5; }
+.objective { position: absolute; left: 20px; top: 44px; max-width: min(420px, 60vw); padding: 10px 14px 10px 12px; background: var(--glass); backdrop-filter: blur(6px); border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; font: 15px/1.35 ui-sans-serif, system-ui; color: var(--paper); display: flex; gap: 10px; align-items: flex-start; animation: slidein 0.35s ease-out; }
+.objective-mark { flex: none; width: 8px; height: 8px; margin-top: 6px; transform: rotate(45deg); background: var(--gold); }
+@keyframes slidein { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+.story .hint { display: none; }
+.story .caption { bottom: 7vh; background: linear-gradient(rgba(10,14,12,0.0), rgba(10,14,12,0.78) 22%); backdrop-filter: none; padding: 26px 34px 16px; border-radius: 10px; font-size: clamp(19px, 2.1vw, 26px); min-width: min(420px, 70vw); animation: capin 0.25s ease-out; }
+.story .caption b { font-size: 12px; letter-spacing: 0.16em; }
+@keyframes capin { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.story .prompt { display: flex; align-items: center; gap: 4px; bottom: 25vh; background: var(--glass); color: var(--paper); backdrop-filter: blur(6px); border: 1px solid rgba(246,236,212,0.35); padding: 9px 16px 9px 12px; border-radius: 999px; font: 600 15px ui-sans-serif, system-ui; animation: pulse 1.6s ease-in-out infinite; }
+.prompt-hold { font: 600 11px ui-sans-serif, system-ui; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.75; margin-right: 4px; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 7px rgba(232,185,106,0.16); } }
+.story .film { display: flex; align-items: center; gap: 2px; border-radius: 999px; background: rgba(190,36,28,0.9); letter-spacing: 0.08em; text-transform: uppercase; font-size: 13px; }
+.story .film::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: #fff; margin-right: 8px; animation: blink 0.8s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0.2; } }
+.hold-ring { width: 76px; height: 76px; position: relative; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); -webkit-mask: radial-gradient(circle, transparent 28px, #000 29px); mask: radial-gradient(circle, transparent 28px, #000 29px); background: conic-gradient(var(--gold) calc(var(--p) * 360deg), rgba(246,236,212,0.22) 0); }
+.story .hold { top: 74%; color: var(--paper); text-shadow: 0 1px 6px rgba(0,0,0,0.8); }
+.scene-title { top: 34%; font-size: clamp(34px, 5vw, 64px); letter-spacing: 0.01em; animation: titlein 2.6s ease-out; }
+.scene-title span { display: inline-block; padding-bottom: 14px; border-bottom: 1px solid rgba(246,236,212,0.6); }
+@keyframes titlein { 0% { opacity: 0; letter-spacing: 0.08em; } 25% { opacity: 1; } 100% { letter-spacing: 0.01em; } }
+.bar-top, .bar-bottom { position: absolute; left: 0; right: 0; height: 0; background: #060908; transition: height 0.6s ease; }
+.bar-top { top: 0; } .bar-bottom { bottom: 0; }
+.cine .bar-top, .cine .bar-bottom { height: 8.5vh; }
+.pause-btn { position: absolute; right: 16px; top: 14px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(246,236,212,0.4); background: var(--glass); color: var(--paper); font: 700 12px ui-sans-serif, system-ui; cursor: pointer; }
+.pause { position: absolute; inset: 0; background: rgba(6,10,8,0.66); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; pointer-events: auto; }
+.pause-card { width: min(520px, 90vw); background: rgba(16,24,19,0.94); border: 1px solid rgba(246,236,212,0.22); border-radius: 14px; padding: 26px 28px; color: var(--paper); font: 15px/1.5 ui-sans-serif, system-ui; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+.pause-card h2 { font: 500 30px Georgia, serif; margin: 0 0 14px; }
+.pause-card button { background: rgba(246,236,212,0.1); color: var(--paper); border: 1px solid rgba(246,236,212,0.35); border-radius: 6px; padding: 8px 14px; margin: 4px 6px 4px 0; cursor: pointer; font: inherit; min-height: 38px; }
+.pause-card button:hover, .pause-card button:focus-visible { background: rgba(232,185,106,0.3); border-color: var(--gold); outline: none; }
+.pause-card button.big { display: block; width: 100%; font-size: 18px; padding: 12px; margin-bottom: 14px; background: rgba(232,185,106,0.22); border-color: var(--gold); }
+.pause-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin: 6px 0 14px; font-size: 14px; }
+.pause-row { display: block; margin: 8px 0; }
+.roam-panel { backdrop-filter: blur(6px); border: 1px solid rgba(246,236,212,0.16); border-radius: 10px; bottom: 18px; left: 18px; }
+.roam-help { backdrop-filter: blur(6px); border-radius: 999px; }
+.orbmap { animation: capin2 0.3s ease-out; }
+@keyframes capin2 { from { opacity: 0; transform: scale(0.96); } }
+@media (prefers-reduced-motion: reduce) { .story *, .shell * { animation: none !important; transition: none !important; } }

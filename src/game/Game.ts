@@ -22,6 +22,10 @@ import { SCENES_A } from './scenesA'
 import { SCENES_B } from './scenesB'
 import { autoRoll } from '../world/life'
 import { loadScans } from '../world/scans'
+import { pass } from 'three/tsl'
+import { ao } from 'three/examples/jsm/tsl/display/GTAONode.js'
+import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js'
+import { gaussianBlur } from 'three/examples/jsm/tsl/display/GaussianBlurNode.js'
 
 const params = new URLSearchParams(location.search)
 export const DEV = params.get('dev') === '1'
@@ -39,6 +43,7 @@ export class Game {
   ready = false
   private lastRaf = 0; private lastRender = 0; private rafEma = 16.7; private flip = false
   frameMs = 16.7
+  capturing = false
   private statAcc = 0; private statN = 0; private statWorst = 0
   private bench: { t: number; times: Float32Array; n: number; draws: number; tris: number; per: string[]; li: number; ln: number; lacc: number; lworst: number } | null = null
   private freeCam: { i: number } | null = DEV ? { i: 0 } : null
@@ -48,6 +53,7 @@ export class Game {
   cast!: Cast
   roam!: Roam
   story!: Story
+  post: any = null // screen passes on the better levels: contact shading in creases and under leaves, a soft glow on bright light
   private snd = { dt: 0, night: 0, dawn: 0, forest: 0, waterNear: 0, onWater: false, rain: 0, lampNear: 0, speed: 0, wind: 0.4 }
   waterTarget = 0; todTarget = 0.0
   devCam = false // a fixed dev camera or the benchmark flight has the camera
@@ -63,7 +69,7 @@ export class Game {
     try { const a = await (navigator as any).gpu?.requestAdapter(); gpu = a ? `${a.info?.vendor || ''} ${a.info?.architecture || ''} ${a.info?.description || ''}` : '' } catch { /* none */ }
     this.tier = pickTier(this.backend, gpu)
     console.log(`[one-night] backend=${this.backend} gpu="${gpu.trim()}" tier=${this.tier} seed=${WORLD_SEED}`)
-    ui.set({ backend: this.backend, dev: DEV })
+    ui.set({ backend: this.backend, dev: DEV, tier: this.tier })
     this.quality = new QualityController(this.tier, r)
     r.info.autoReset = false // we reset once per rendered frame so counts cover every pass of that frame
     r.toneMapping = THREE.NeutralToneMapping
@@ -87,6 +93,19 @@ export class Game {
     this.world.update(0, this.camera, this.tod, this.camera.position)
     this.devCam = false
     await r.compileAsync(this.scene, this.camera)
+    if (this.backend === 'webgpu' && this.tier !== 'low' && params.get('post') !== '0') {
+      try {
+        const sp: any = (pass as any)(this.scene, this.camera)
+        const col = sp.getTextureNode('output'), depth = sp.getTextureNode('depth')
+        const aoN: any = (ao as any)(depth, null, this.camera)
+        aoN.resolutionScale = 0.5; aoN.radius.value = 0.7; aoN.thickness.value = 1.2; aoN.samples.value = this.tier === 'high' ? 12 : 8
+        const aoSoft = (gaussianBlur as any)(aoN.getTextureNode(), null, 2).r
+        const shaded = col.mul(aoSoft.mul(0.7).add(0.3))
+        const glow: any = (bloom as any)(shaded, 0.16, 0.5, 1.5)
+        this.post = new (THREE as any).RenderPipeline(r)
+        this.post.outputNode = shaded.add(glow)
+      } catch (e) { console.warn('[one-night] screen passes unavailable, drawing plain', e); this.post = null }
+    }
     ui.set({ loadStage: 'Ready', loadPct: 1, phase: 'title' })
     this.ready = true
     this.installDev()
@@ -112,16 +131,22 @@ export class Game {
     const d = t - this.lastRaf; this.lastRaf = t
     if (d > 0 && d < 100) this.rafEma += (d - this.rafEma) * 0.05
     if (this.rafEma < 11.5) { this.flip = !this.flip; if (this.flip) return }
+    if (this.frozen || this.capturing) return
     this.frameMs = Math.min(t - this.lastRender, 250); this.lastRender = t
     this.renderer.info.reset()
     advance(t)
     this.afterRender()
   }
 
+  // draw the frame: through the screen passes where they exist, plainly otherwise
+  render() { if (this.post) this.post.render(); else this.renderer.render(this.scene, this.camera) }
+
   // The single frame callback (called by R3F inside advance, before it renders).
   frame() {
     if (!this.ready) return
-    const dt = this.frozen ? 0 : Math.min(this.frameMs / 1000, 0.1)
+    if (input.pressed.has('Escape') && ui.get().phase === 'play' && !DEV) ui.set({ paused: !ui.get().paused })
+    if (input.pressed.has('m') && ui.get().phase === 'play' && ui.get().mode === 'roam') ui.set({ mapStage: ui.get().mapStage >= 0 ? -1 : 0 })
+    const dt = this.frozen || ui.get().paused ? 0 : Math.min(this.frameMs / 1000, 0.1)
     this.clock += dt
     pollInput()
     const phase = ui.get().phase
@@ -135,7 +160,7 @@ export class Game {
       if (phase === 'title') this.titleCamera(dt)
       else if (phase === 'play') {
         this.player.update(dt, waterYOf(this.water))
-        if (ui.get().mode === 'story') this.story.update(dt)
+        if (ui.get().mode === 'story' && dt > 0) { this.story.update(dt); const st = this.story; ui.set({ letterbox: st.camOn, chapter: st.scene >= 0 ? `Scene ${st.scene + 1} of 8 · ${st.scenes[st.scene].title}` : null }) }
         this.hooks.frame?.(dt)
         this.soundFrame(dt)
         if (!(ui.get().mode === 'story' && this.story.camOn)) this.player.updateCamera(dt, this.camera)
@@ -186,7 +211,7 @@ export class Game {
     ui.set({ phase: 'play', mode, fade: mode === 'story' ? 1 : 0, ended: false })
     this.player.frozen = false; this.cast.boyAnim = null; this.cast.rideIn = null; this.cast.onBoard = false
     if (mode === 'story') { this.story.start(scene) }
-    else { this.story.scene = -1; autoRoll.on = true; this.player.canSwitch = true; U.grey.value = 0; this.roam.enter(); this.waterTarget = this.water = 0; this.todTarget = this.tod = 0.02; this.player.place(PLACES.markedTree.x + 6, PLACES.markedTree.z + 4, -2.2) }
+    else { ui.set({ letterbox: false, chapter: 'Roam · Mamirauá, October' }); this.story.scene = -1; autoRoll.on = true; this.player.canSwitch = true; U.grey.value = 0; this.roam.enter(); this.waterTarget = this.water = 0; this.todTarget = this.tod = 0.02; this.player.place(PLACES.markedTree.x + 6, PLACES.markedTree.z + 4, -2.2) }
   }
 
   goTo(x: number, z: number, heading: number) {
@@ -280,7 +305,8 @@ export class Game {
         if (o.view) { g.devCam = true; g.camera.position.set(o.view[0], o.view[1], o.view[2]); g.camera.up.set(0, 1, 0); if (o.view[0] === o.view[3] && o.view[2] === o.view[5]) g.camera.up.set(0, 0, -1); g.camera.lookAt(o.view[3], o.view[4], o.view[5]); g.camera.up.set(0, 1, 0) }
       },
       // render one frame now and read it back (page screenshots of a WebGPU canvas come out blank headless)
-      cap(q = 0.85) { g.renderer.info.reset(); advance(performance.now()); return g.renderer.domElement.toDataURL('image/jpeg', q) },
+      // (async: the screen passes only redraw the scene once per display frame, so each picture waits for a new one)
+      async cap(q = 0.85) { await new Promise((r) => requestAnimationFrame(r)); g.capturing = true; g.renderer.info.reset(); advance(performance.now()); const d = g.renderer.domElement.toDataURL('image/jpeg', q); g.capturing = false; return d },
       info() { const i = g.renderer.info.render; return { draws: i.drawCalls, tris: i.triangles, counts: g.world.counts(), scale: g.quality.scale } },
       bench: () => g.startBench(),
       // ---- play checks (scripts/check-play.mjs): run game logic without drawing

@@ -32,12 +32,16 @@ export type UI = {
   ended: boolean
   audioOn: boolean
   pictures: number
+  paused: boolean
+  letterbox: boolean
+  chapter: string | null
+  tier: string
 }
 const state: UI = {
   phase: 'loading', loadStage: 'Starting', loadPct: 0, mode: null, backend: '?', dev: false, error: null,
   bench: null, benchRunning: false, devText: '', water: 0, tod: 0.1, caption: null, prompt: null, hint: null,
   filmGlow: false, hold: -1, onCanoe: false, orbView: false, sceneTitle: null, fade: 0, mapStage: -1, ended: false,
-  audioOn: true, pictures: -1,
+  audioOn: true, pictures: -1, paused: false, letterbox: false, chapter: null, tier: '',
 }
 let snap = { ...state }
 const subs = new Set<() => void>()

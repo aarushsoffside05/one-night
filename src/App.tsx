@@ -20,7 +20,8 @@ function WorldMount() {
     game = new Game(gl as unknown as THREE.WebGPURenderer, scene as unknown as THREE.Scene, camera as THREE.PerspectiveCamera)
     game.init().catch((e) => { console.error(e); ui.set({ error: String(e?.message || e) }) })
   }, [])
-  useFrame(() => { game?.frame() })
+  // priority 1: we draw the frame ourselves (so the screen passes can run); R3F does not draw a second time
+  useFrame(() => { if (game?.ready) { game.frame(); game.render() } }, 1)
   return null
 }
 

@@ -14,7 +14,7 @@ page.on('request', (r) => { if (!r.url().startsWith('file://') && !r.url().start
 await page.goto(file)
 try {
   await page.waitForFunction(() => window.__ON?.ready, null, { timeout: 300000 })
-  const r = await page.evaluate(() => ({ backend: window.__ON.backend, d: window.__ON.cap(0.8), info: window.__ON.info() }))
+  const r = await page.evaluate(async () => ({ backend: window.__ON.backend, d: await window.__ON.cap(0.8), info: window.__ON.info() }))
   fs.mkdirSync('shots', { recursive: true })
   fs.writeFileSync('shots/_file-check.jpg', Buffer.from(r.d.split(',')[1], 'base64'))
   console.log(`single file OK from ${file}\nbackend ${r.backend}, draws ${r.info.draws}, tris ${r.info.tris}, outside requests: ${reqs.length}, errors: ${errs.length}`)

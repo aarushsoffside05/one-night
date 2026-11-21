@@ -25,8 +25,8 @@ for (let ci = 0; ci < meta.cams.length; ci++) {
   for (const s of STATES) {
     const r = await page.evaluate(async ({ ci, s }) => {
       window.__ON.set({ water: s.water, tod: s.tod, frozen: true, clock: 20, cam: ci })
-      window.__ON.cap() // settle culling + shadow before the kept frame
-      const d = window.__ON.cap(0.9)
+      await window.__ON.cap() // settle culling + shadow before the kept frame
+      const d = await window.__ON.cap(0.9)
       return { d, info: window.__ON.info() }
     }, { ci, s })
     shots.push(r.d)

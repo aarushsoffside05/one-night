@@ -8,10 +8,11 @@ const { browser, page } = await open((process.argv.find((a) => a.startsWith('--u
 const list = views.split(';')
 for (let i = 0; i < list.length; i++) {
   const v = list[i] === 'map' ? [0, 760, 0, 0, 0, 0] : list[i].startsWith('cam') ? null : list[i].split(',').map(Number)
-  const r = await page.evaluate(({ v, cam, water, tod }) => {
+  const r = await page.evaluate(async ({ v, cam, water, tod }) => {
     window.__ON.set({ water, tod, frozen: true, clock: 20, ...(v ? { view: v } : { cam }) })
-    window.__ON.cap(); window.__ON.cap()
-    return { d: window.__ON.cap(0.9), info: window.__ON.info() }
+    await window.__ON.cap(); await window.__ON.cap()
+    const d = await window.__ON.cap(0.9)
+    return { d, info: window.__ON.info() }
   }, { v, cam: v ? 0 : Number(list[i].slice(3)) - 1, water: Number(water), tod: Number(tod) })
   const f = list.length > 1 ? out.replace(/\.jpg$/, `-${i}.jpg`) : out
   fs.writeFileSync(f, Buffer.from(r.d.split(',')[1], 'base64'))

@@ -45,21 +45,32 @@ function OrbMap({ stage }: { stage: number }) {
   )
 }
 
+const Key = ({ k }: { k: string }) => <kbd className="key">{k}</kbd>
+// "Hold Space: take the line" -> a keycap and the words
+function Prompt({ text }: { text: string }) {
+  const m = text.match(/^(Hold )?(Space|F|E|W|M)\s*:\s*(.*)$/)
+  if (!m) return <div className="prompt">{text}</div>
+  return <div className="prompt">{m[1] && <span className="prompt-hold">hold</span>}<Key k={m[2]} /><span>{m[3]}</span></div>
+}
+
 export function StoryHud() {
   const caption = useUI((s) => s.caption), prompt = useUI((s) => s.prompt), hint = useUI((s) => s.hint)
   const film = useUI((s) => s.filmGlow), hold = useUI((s) => s.hold), title = useUI((s) => s.sceneTitle)
   const orb = useUI((s) => s.orbView), map = useUI((s) => s.mapStage), ended = useUI((s) => s.ended)
+  const chapter = useUI((s) => s.chapter), letterbox = useUI((s) => s.letterbox)
   return (
-    <div className="story">
-      {title && <div className="scene-title">{title}</div>}
+    <div className={'story' + (letterbox ? ' cine' : '')}>
+      <div className="bar-top" /><div className="bar-bottom" />
+      {chapter && !letterbox && <div className="chapter"><span className="orb-dot" />{chapter}</div>}
+      {hint && <div className="objective"><span className="objective-mark" />{hint}</div>}
+      {title && <div className="scene-title"><span>{title}</span></div>}
       {orb && <div className="orb-frame"><span>A way of seeing, lent to him: where the river stands in a flood</span></div>}
-      {film && <div className="film">F · film</div>}
-      {hold >= 0 && <div className="hold"><div className="hold-ring" style={{ ['--p' as any]: hold }} /><span>holding</span></div>}
-      {prompt && <div className="prompt">{prompt}</div>}
-      {hint && <div className="hint">{hint}</div>}
+      {film && <div className="film"><Key k="F" /> film</div>}
+      {hold >= 0 && <div className="hold"><div className="hold-ring" style={{ ['--p' as any]: hold }}><div className="hold-core" /></div><span>holding</span></div>}
+      {prompt && <Prompt text={prompt} />}
       {map >= 0 && <OrbMap stage={map} />}
       {ended && <div className="ended"><button onClick={() => { ui.set({ phase: 'title', mode: null, fade: 0, ended: false }); void getGame }}>Back to the start</button></div>}
-      {caption && <div className="caption">{caption.who && <b>{caption.who}</b>}{caption.text}</div>}
+      {caption && <div className="caption">{caption.who && <b>{caption.who}</b>}<span>{caption.text}</span></div>}
     </div>
   )
 }

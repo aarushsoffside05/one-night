@@ -171,25 +171,33 @@ export function leafClumpGeometry(leaves: number, leafSize: number, coreDetail: 
     if (id === undefined) { const s = rad(v.x, v.y, v.z) * 0.8; id = g.v(v.x * s, (v.y < 0 ? v.y * 0.7 : v.y) * s, v.z * s, v.x, v.y + 0.2, v.z, 0.5, v.y, 0); map.set(key, id) }
     g.idx.push(id)
   }
-  const d = new THREE.Vector3(), t1 = new THREE.Vector3(), t2 = new THREE.Vector3(), n = new THREE.Vector3()
-  for (let i = 0; i < leaves; i++) {
-    // more leaves on top and round the sides than underneath
+  // leaves grow in sprays: a twig leaves the mass, and five or six leaves sit along it in pairs, all hanging
+  // the same way. Sprays read as foliage; single scattered leaves read as confetti.
+  const d = new THREE.Vector3(), t1 = new THREE.Vector3(), t2 = new THREE.Vector3(), n = new THREE.Vector3(), tw = new THREE.Vector3(), side = new THREE.Vector3(), ld = new THREE.Vector3()
+  const sprays = Math.max(1, Math.round(leaves / 5))
+  for (let i = 0; i < sprays; i++) {
     d.set(r.range(-1, 1), r.range(-0.75, 1), r.range(-1, 1)); if (d.y < -0.2 && r() < 0.55) d.y = -d.y; d.normalize()
-    const s = rad(d.x, d.y, d.z) * r.range(0.86, 1.08)
-    const px = d.x * s, py = (d.y < 0 ? d.y * 0.7 : d.y) * s, pz = d.z * s
-    // the leaf lies near the surface, pointing outwards and drooping, turned at random
+    const s = rad(d.x, d.y, d.z) * r.range(0.84, 1.02)
+    const bx = d.x * s, by = (d.y < 0 ? d.y * 0.7 : d.y) * s, bz = d.z * s
     t1.set(r.range(-1, 1), r.range(-1, 1), r.range(-1, 1)).cross(d).normalize()
-    t2.crossVectors(d, t1).normalize()
-    const len = leafSize * r.range(0.8, 1.2), wid = len * r.range(0.42, 0.58), tilt = r.range(0.25, 0.7), droop = r.range(0.15, 0.55)
-    const ax = t1.x * Math.cos(tilt) + d.x * Math.sin(tilt), ay = t1.y * Math.cos(tilt) + d.y * Math.sin(tilt) - droop, az = t1.z * Math.cos(tilt) + d.z * Math.sin(tilt)
-    n.set(d.x, d.y + 0.35, d.z).normalize()
-    n.x = n.x * 0.72 + (t2.y * az - t2.z * ay) * 0.28 * 0; n.normalize()
-    const rnd = r()
-    const a = g.v(px - ax * len * 0.15, py - ay * len * 0.15, pz - az * len * 0.15, n.x, n.y, n.z, rnd, d.y, 1)
-    const b = g.v(px + ax * len * 0.42 + t2.x * wid, py + ay * len * 0.42 + t2.y * wid, pz + az * len * 0.42 + t2.z * wid, n.x + t2.x * 0.3, n.y + t2.y * 0.3, n.z + t2.z * 0.3, rnd, d.y, 1)
-    const c = g.v(px + ax * len, py + ay * len, pz + az * len, n.x + ax * 0.25, n.y + ay * 0.25, n.z + az * 0.25, rnd, d.y, 1.6)
-    const e = g.v(px + ax * len * 0.42 - t2.x * wid, py + ay * len * 0.42 - t2.y * wid, pz + az * len * 0.42 - t2.z * wid, n.x - t2.x * 0.3, n.y - t2.y * 0.3, n.z - t2.z * 0.3, rnd, d.y, 1)
-    g.quad(a, b, c, e)
+    // the twig runs along the surface and a little outwards, sagging under its leaves
+    tw.copy(t1).multiplyScalar(0.8).addScaledVector(d, 0.45).normalize(); tw.y -= r.range(0.1, 0.4); tw.normalize()
+    side.crossVectors(tw, d).normalize()
+    const twigLen = leafSize * r.range(1.6, 2.4), rnd = r()
+    n.set(d.x, d.y + 0.45, d.z).normalize()
+    for (let k = 0; k < 5; k++) {
+      const t = (k + 0.5) / 5, sg = k % 2 ? 1 : -1
+      const px = bx + tw.x * twigLen * t, py = by + tw.y * twigLen * t - t * t * leafSize * 0.35, pz = bz + tw.z * twigLen * t
+      // each leaf angles forward off the twig and droops
+      ld.copy(side).multiplyScalar(sg * (k === 4 ? 0.15 : 0.8)).addScaledVector(tw, 0.65).normalize(); ld.y -= 0.35; ld.normalize()
+      t2.crossVectors(ld, n).normalize()
+      const len = leafSize * r.range(0.85, 1.2) * (1 - t * 0.25), wid = len * 0.3
+      const a = g.v(px, py, pz, n.x, n.y, n.z, rnd, d.y, 1)
+      const b = g.v(px + ld.x * len * 0.45 + t2.x * wid, py + ld.y * len * 0.45 + t2.y * wid + wid * 0.25, pz + ld.z * len * 0.45 + t2.z * wid, n.x + t2.x * 0.35, n.y + 0.1, n.z + t2.z * 0.35, rnd, d.y, 1.15)
+      const c = g.v(px + ld.x * len, py + ld.y * len, pz + ld.z * len, n.x + ld.x * 0.3, n.y, n.z + ld.z * 0.3, rnd, d.y, 1.6)
+      const e = g.v(px + ld.x * len * 0.45 - t2.x * wid, py + ld.y * len * 0.45 - t2.y * wid + wid * 0.25, pz + ld.z * len * 0.45 - t2.z * wid, n.x - t2.x * 0.35, n.y + 0.1, n.z - t2.z * 0.35, rnd, d.y, 1.15)
+      g.quad(a, b, c, e)
+    }
   }
   return g.build()
 }

@@ -68,10 +68,33 @@ function RoamHud() {
           <button onClick={() => place(-124, 224, 1.2)}>Beach</button>
         </div>
       </div>
-      {help && <div className="roam-help">W A S D or arrows to move · drag (or two fingers) to look · Shift to go faster · wade in and you take the canoe{onCanoe ? '' : ''}</div>}
+      {help && <div className="roam-help"><kbd className="key">W A S D</kbd> move <kbd className="key">drag</kbd> look <kbd className="key">Shift</kbd> faster <kbd className="key">M</kbd> map <kbd className="key">Esc</kbd> pause · {onCanoe ? 'paddle to the bank and keep pushing to step out' : 'wade in and you take the canoe'}</div>}
     </div>
   )
 }
+
+function Pause() {
+  const audioOn = useUI((s) => s.audioOn), tier = useUI((s) => s.tier), backend = useUI((s) => s.backend)
+  const setQ = (q: string) => { const u = new URL(location.href); if (q) u.searchParams.set('q', q); else u.searchParams.delete('q'); location.href = u.toString() }
+  return (
+    <div className="pause">
+      <div className="pause-card">
+        <h2>Paused</h2>
+        <button className="big" onClick={() => ui.set({ paused: false })}>Carry on</button>
+        <div className="pause-grid">
+          <div><Key2 k="W A S D" /> walk · paddle</div><div><Key2 k="drag" /> look round</div>
+          <div><Key2 k="Shift" /> faster</div><div><Key2 k="Space" /> take hold (hold it down)</div>
+          <div><Key2 k="F" /> film</div><div><Key2 k="M" /> the orb's map (Roam)</div>
+          <div><Key2 k="Enter" /> next line</div><div><Key2 k="Esc" /> pause</div>
+        </div>
+        <label className="pause-row"><input type="checkbox" checked={audioOn} onChange={(e) => { ui.set({ audioOn: e.target.checked }); import('../audio/sound').then((m) => m.sound.setEnabled(e.target.checked)) }} /> Sound</label>
+        <div className="pause-row">Picture quality: now <b>{tier}</b> ({backend}). Change (reloads): <button onClick={() => setQ('')}>auto</button><button onClick={() => setQ('low')}>low</button><button onClick={() => setQ('mid')}>medium</button><button onClick={() => setQ('high')}>high</button></div>
+        <button onClick={() => { ui.set({ paused: false, phase: 'title', mode: null, fade: 0, caption: null, prompt: null, hint: null, mapStage: -1, orbView: false, letterbox: false }) }}>Back to the title</button>
+      </div>
+    </div>
+  )
+}
+const Key2 = ({ k }: { k: string }) => <kbd className="key">{k}</kbd>
 
 function DevPanel() {
   const text = useUI((s) => s.devText), bench = useUI((s) => s.bench), running = useUI((s) => s.benchRunning)
@@ -97,12 +120,15 @@ function DevPanel() {
 }
 
 export function Shell() {
-  const phase = useUI((s) => s.phase), dev = useUI((s) => s.dev), mode = useUI((s) => s.mode), fade = useUI((s) => s.fade)
+  const phase = useUI((s) => s.phase), dev = useUI((s) => s.dev), mode = useUI((s) => s.mode), fade = useUI((s) => s.fade), paused = useUI((s) => s.paused)
   return (
     <div className="shell">
       {phase === 'play' && mode === 'roam' && <RoamHud />}
       {phase === 'play' && mode === 'story' && <StoryHud />}
+      {phase === 'play' && mode === 'roam' && <StoryHud />}
       <div className="fade" style={{ opacity: fade }} />
+      {phase === 'play' && paused && <Pause />}
+      {phase === 'play' && !paused && <button className="pause-btn" aria-label="Pause" onClick={() => ui.set({ paused: true })}>II</button>}
       {phase === 'title' && <Title />}
       {phase === 'loading' && <Loading />}
       {dev && phase !== 'loading' && <DevPanel />}
