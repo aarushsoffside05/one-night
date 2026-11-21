@@ -292,7 +292,7 @@ function* s8(S: Story): Step {
   S.setTime(0.97)
   yield* S.fade(0, 0.8)
   const point = function* (prompt: string): Step { S.prompt(prompt); let t = 0; while (!(input.pressed.has(' ') || input.pressed.has('e') || (S.bot && t > 0.1))) t += yield; S.prompt(null); sound.chime('orb') }
-  ui.set({ mapStage: 0 })
+  ui.set({ mapStage: 0, places: 127 })
   yield* point('Space: point at the lake')
   yield* S.say('Lia', 'That is where you let it go.')
   yield* S.say('Lia', 'Pirarucu.')
