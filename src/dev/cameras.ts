@@ -13,8 +13,8 @@ export const CAMS: Cam[] = [
   { name: '07 marked tree', x: 19, z: 23, up: 1.5, lx: PLACES.markedTree.x, lz: PLACES.markedTree.z, lup: 2.6 },
   { name: '08 trail', x: 55, z: 12, up: 1.7, lx: 80, lz: -14, lup: 2.5 },
   { name: '09 dry bed crossing', x: 82, z: -22, up: 1.7, lx: 118, lz: -36, lup: 1 },
-  { name: '10 giant trunk', x: 104, z: -52, up: 1.7, lx: PLACES.giantTrunk.x, lz: PLACES.giantTrunk.z, lup: 7 },
-  { name: '11 lake high bank east', x: 117, z: -122, up: 1.7, lx: 200, lz: -132, lup: 2.5 },
+  { name: '10 giant trunk', x: 110, z: -53.5, up: 1.6, lx: PLACES.giantTrunk.x, lz: PLACES.giantTrunk.z, lup: 7 },
+  { name: '11 lake high bank east', x: 121.5, z: -123.5, up: 2.3, lx: 165, lz: -130, lup: 0.2 },
   { name: '12 deep forest', x: 72, z: -86, up: 1.7, lx: 96, lz: -112, lup: 4 },
 ]
 // Benchmark flight: a fixed loop through the densest places. Flown once per water level, 20 s each.

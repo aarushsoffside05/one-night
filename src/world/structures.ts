@@ -239,8 +239,8 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
       const flare = Math.exp(-y / 4.2)
       for (let i = 0; i < sides; i++) {
         const th = (i / sides) * Math.PI * 2
-        const fin = Math.pow(0.5 + 0.5 * Math.cos(th * fins + Math.sin(th * 2) * 0.8), 14)
-        const rr = R0 * (1 + 0.06 * Math.sin(th * 13 + y * 0.3)) + flare * (0.5 + 7.5 * fin)
+        const fin = Math.pow(0.5 + 0.5 * Math.cos(th * fins + Math.sin(th * 2) * 0.8), 7)
+        const rr = R0 * (1 + 0.06 * Math.sin(th * 13 + y * 0.3)) + flare * (0.7 + 6.2 * fin)
         g.v(Math.cos(th) * rr, y, Math.sin(th) * rr, Math.cos(th), flare * 0.5, Math.sin(th), 0, v, 0)
       }
     }

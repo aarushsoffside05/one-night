@@ -2,7 +2,7 @@
 // (8 floats each: x, y, z, s, rot, seed, a, b) sorted by 50 m cell so the main thread can cull per cell.
 import { rng, noise2, fbm2, seedInt } from './rng'
 import { Heightfield, heightFormula, kind } from './terrain'
-import { CHANNEL, DRYBED, TRAIL, YARDPATH, COMMUNITY, PLACES, CORE, distPoly, LAKE_LEVEL } from './layout'
+import { CHANNEL, DRYBED, TRAIL, YARDPATH, COMMUNITY, PLACES, CORE, distPoly, LAKE_LEVEL, polyAt } from './layout'
 
 export const CELLS = 14, CELL_M = 50, CELL_ORIGIN = -350
 export const cellOf = (x: number, z: number) => {
@@ -214,15 +214,21 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     if (seed < 0.14 && len > 2.5) R.spTree.push(x, h - 0.05, z, len / 1.77, rot, seed, 1, rl())
     else R.log.push(x, h + rad * 0.5, z, len, rot, seed, rad, 0)
   }
-  // ---- hanging roots at the top of the channel banks and the lake's high bank
+  // ---- hanging roots and fallen trunks along the top of the channel banks, both sides, all the way up
   const rb = rng('bankroots')
-  for (let i = 0; i < 9000 * density; i++) {
-    const x = rb.range(-140, 20), z = rb.range(-340, 250), len = rb.range(1.5, 5.5), seed = rb(), w = rb.range(0.6, 1.4)
+  const cp = { x: 0, z: 0 }
+  for (let i = 0; i < 5200 * density; i++) {
+    const t = rb.range(0.12, 0.98), sgn = rb() < 0.5 ? -1 : 1, off = rb.range(13, 26), len = rb.range(1.5, 5.5), seed = rb(), w = rb.range(0.6, 1.4), roll = rb()
+    polyAt(CHANNEL, t, cp); const ax = cp.x, az = cp.z
+    polyAt(CHANNEL, t + 0.003, cp)
+    const dx = cp.x - ax, dz = cp.z - az, dl = Math.hypot(dx, dz) || 1
+    const x = ax + (-dz / dl) * off * sgn, z = az + (dx / dl) * off * sgn
     const h = heightFormula(x, z)
-    if (kind.channel < 0.02 || kind.channel > 0.3 || h < 6.5) continue
+    if (kind.channel < 0.01 || kind.channel > 0.5 || h < 5.5) continue
     const e = 1.5
     const gxn = heightFormula(x + e, z) - heightFormula(x - e, z), gzn = heightFormula(x, z + e) - heightFormula(x, z - e)
-    R.bankroot.push(x, h + 0.25, z, w, Math.atan2(-gxn, -gzn), seed, len, 0)
+    if (roll < 0.06) R.spTree.push(x, h - 0.2, z, rb.range(2, 3.6), Math.atan2(-gzn, -gxn), seed, 1, rb())
+    else R.bankroot.push(x, h + 0.25, z, w, Math.atan2(-gxn, -gzn), seed, len, 0)
   }
   // ---- floating plants: candidates all down the slopes; the shader shows only those the water's edge has reached
   const rf = rng('floaters')

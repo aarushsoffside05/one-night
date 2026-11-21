@@ -97,7 +97,7 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
       const lp = positionLocal.mul(ia.w)
       const rp = vec3(lp.x.mul(cos(ib.x)).sub(lp.z.mul(sin(ib.x))), lp.y.add(lp.x.mul(ib.z.sub(0.5)).mul(0.35)), lp.x.mul(sin(ib.x)).add(lp.z.mul(cos(ib.x))))
       const fade = smoothstep(box * 0.5, box * 0.36, length(xz.sub(U.eye.xz)))
-      return rp.mul(dry).mul(fade).mul(smoothstep(0.15, 0.5, cover.add(ib.w.mul(0.3)))).add(vec3(xz.x, bed.add(0.025), xz.y))
+      return rp.mul(dry).mul(fade).mul(smoothstep(-0.2, 0.4, cover.add(ib.w.mul(0.5)))).add(vec3(xz.x, bed.add(0.025), xz.y))
     })()
     m.colorNode = Fn(() => mix(mix(vec3(0.11, 0.055, 0.025), vec3(0.24, 0.13, 0.05), ib.y), vec3(0.3, 0.22, 0.09), smoothstep(0.8, 0.97, ib.z)).mul(mix(float(0.75), float(1.1), aux.x)))()
     add(new THREE.Mesh(geo, m))

@@ -79,7 +79,7 @@ export class Cast {
     if (this.lampHolder) {
       figures.handPos(this.lampHolder, 1, v1)
       props.lamp.visible = true; props.lamp.position.copy(v1)
-      U.lamp2.value.set(v1.x, v1.y - 0.15, v1.z, (0.4 + night * 4.2) * (0.9 + 0.1 * Math.sin(clock * 9)))
+      U.lamp2.value.set(v1.x, v1.y - 0.15, v1.z, (0.3 + night * 2.2) * (0.9 + 0.1 * Math.sin(clock * 9)))
     } else { props.lamp.visible = false; U.lamp2.value.w = 0 }
   }
 }
