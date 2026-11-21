@@ -29,7 +29,7 @@ export const floodStain = (col: N, wobble: N) => {
   // below the line the bark is washed pale with silt; at the line a dark band about a hand's width
   const below = smoothstep(0.05, -0.25, fl)
   const band = smoothstep(0.22, 0.06, fl).mul(smoothstep(-0.6, -0.25, fl))
-  const pale = mix(col, col.mul(0.45).add(vec3(0.3, 0.26, 0.2)), below.mul(0.75))
+  const pale = mix(col, col.mul(0.55).add(vec3(0.15, 0.125, 0.095)), below.mul(0.7))
   const wet = smoothstep(0.7, 0.0, positionWorld.y.sub(U.water))
   return mix(pale, vec3(0.05, 0.035, 0.025), band.mul(0.9)).mul(mix(float(1), float(0.5), wet))
 }
@@ -97,7 +97,7 @@ function clumpMaterial(far: number) {
     col = col.add(vec3(0.07, 0.1, 0.01).mul(smoothstep(0.56, 0.74, dab2)).mul(top))
     // each leaf its own tone (some yellowing, some deep), lighter towards its tip; the inner mass stays dark
     const leaf = smoothstep(0.5, 1.0, aux.z), rnd = aux.x
-    col = mix(col.mul(0.32), col.mul(mix(float(0.7), float(1.45), rnd)), leaf)
+    col = mix(col.mul(0.6), col.mul(mix(float(0.7), float(1.45), rnd)), leaf)
     col = mix(col, col.mul(vec3(1.5, 1.35, 0.6)), leaf.mul(smoothstep(0.82, 0.97, rnd)).mul(0.7))
     col = col.mul(mix(float(1), float(1.35), smoothstep(1.0, 1.6, aux.z)))
     // crowns standing in the flood: stained like the trunks
@@ -189,7 +189,9 @@ function scanPlantMaterial(tex: THREE.Texture, far: number, base: number, floati
     if (floating) {
       const wy = mix(U.water, U.lake, ib.z)
       const depth = wy.sub(ia.y)
-      const show = smoothstep(-0.02, 0.1, depth).mul(smoothstep(1.5, 0.9, depth))
+      // at the edge always; out on the flood in drifting mats (about a third of them)
+      const mat = smoothstep(0.62, 0.7, ib.y).mul(smoothstep(5.0, 7.5, U.water))
+      const show = smoothstep(-0.02, 0.1, depth).mul(max(smoothstep(1.5, 0.9, depth), mat))
       return p.mul(show).mul(shrink(far)).add(vec3(ia.x, wy.add(0.015), ia.z))
     }
     return p.mul(shrink(far)).add(ia.xyz)

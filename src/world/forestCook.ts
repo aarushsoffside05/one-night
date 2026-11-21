@@ -204,7 +204,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
 
   // ---- fallen wood: scattered on the floor, and stranded in lines where the flood left it (bank tops, dry bed edges)
   const rl = rng('logs')
-  for (let i = 0; i < 2600 * density; i++) {
+  for (let i = 0; i < 4200 * density; i++) {
     const x = rl.range(-lim, lim), z = rl.range(-lim, lim), len = rl.range(1.2, 6) * (rl() < 0.12 ? 2 : 1), rad = rl.range(0.07, 0.28), rot = rl() * 6.283, seed = rl(), roll = rl()
     const h = heightFormula(x, z)
     if (kind.lake > 0.2 || kind.trail > 0.3 || h < 0.3) continue

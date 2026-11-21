@@ -25,6 +25,7 @@ for (let ci = 0; ci < meta.cams.length; ci++) {
   for (const s of STATES) {
     const r = await page.evaluate(async ({ ci, s }) => {
       window.__ON.set({ water: s.water, tod: s.tod, frozen: true, clock: 20, cam: ci })
+      if (ci === 10 && s.tod > 0.7 && s.tod < 0.9) { window.__ON.set({ frozen: false }); window.__ON.game.world.life.fishRoll(131, -127, 1.2); window.__ON.step(1 / 30, 48); window.__ON.set({ frozen: true }) }
       await window.__ON.cap() // settle culling + shadow before the kept frame
       const d = await window.__ON.cap(0.9)
       return { d, info: window.__ON.info() }

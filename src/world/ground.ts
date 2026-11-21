@@ -39,7 +39,7 @@ export function groundMaterial(): THREE.Material {
     // sand, rippled
     const rip = sin(pw.x.mul(0.7).add(pw.z.mul(2.3)).add(n2.mul(6))).mul(0.5).add(0.5)
     const drift2 = smoothstep(0.45, 0.6, noise(pw.xz.mul(vec2(0.03, 0.11))).a)
-    let sand: any = mix(vec3(0.5, 0.41, 0.27), vec3(0.74, 0.65, 0.46), smoothstep(0.3, 0.7, rip.mul(0.35).add(n1.mul(0.65))))
+    let sand: any = mix(vec3(0.34, 0.27, 0.17), vec3(0.55, 0.47, 0.32), smoothstep(0.3, 0.7, rip.mul(0.35).add(n1.mul(0.65))))
     sand = mix(sand, vec3(0.4, 0.32, 0.21), drift2.mul(0.5))
     sand = mix(sand, vec3(0.3, 0.25, 0.18), smoothstep(0.7, 0.76, n3.mul(0.5).add(n4.mul(0.5))).mul(0.7))
     const earth = mix(vec3(0.11, 0.075, 0.045), vec3(0.2, 0.14, 0.085), smoothstep(0.35, 0.6, n2.mul(0.6).add(n3.mul(0.4))))

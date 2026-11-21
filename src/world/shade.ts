@@ -122,7 +122,7 @@ export function makeFog() {
   const colorNode = Fn(() => {
     const view = positionWorld.sub(cameraPosition).normalize()
     const s = max(dot(view, U.sunDir), 0)
-    return mix(U.fogCol, U.fogSun, s.mul(s).mul(s))
+    return mix(U.fogCol, U.fogSun, s.mul(s).mul(s).mul(s).mul(s).mul(0.8))
   })()
   const factor = Fn(() => {
     const dist = positionView.z.negate()

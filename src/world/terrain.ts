@@ -72,7 +72,8 @@ export function heightFormula(x: number, z: number): number {
   const bedY = mix(-3.4, -0.7, ss(0.12, 1, s)) + (n2 - 0.5) * 0.7
   const wb = mix(12.5, 6.5, ss(0.2, 1, s)) + 2.5 * (noise2(s * 26, 1, S + 2) - 0.5)
   const run = mix(10.5, 8, s) + 3 * (noise2(x / 18, z / 18, S + 44) - 0.5)
-  const p = ss(wb, wb + run, dc)
+  const slump = (fbm2(x / 9, z / 9, S + 61, 3) - 0.5) * 5.5 + (noise2(x / 3.1, z / 3.1, S + 62) - 0.5) * 1.4
+  const p = ss(wb, wb + run, dc + slump)
   // banks slump in steps: terraces left by the falling river
   // a gentle silt foot, then a steep cut face, then the lip; slumped in steps left by the falling river
   const face = 0.3 * ss(0, 0.62, p) + 0.7 * ss(0.6, 0.9, p)

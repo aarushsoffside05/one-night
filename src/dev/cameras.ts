@@ -7,14 +7,14 @@ export const CAMS: Cam[] = [
   { name: '01 beach to mouth', x: -128, z: 226, up: 1.7, lx: -40, lz: 190, lup: 5 },
   { name: '02 river mouth', x: -42, z: 262, up: 1.4, lx: -50, lz: 170, lup: 4 },
   { name: '03 channel under banks', x: -47, z: 168, up: 1.4, lx: -30, lz: 110, lup: 5 },
-  { name: '04 landing and floating house', x: -40, z: 94, up: 1.5, lx: -28, lz: 62, lup: 4 },
+  { name: '04 landing and floating house', x: -21, z: 59, up: 3.2, lx: -31, lz: 70, lup: 1.4 },
   { name: '05 bank steps from top', x: -4, z: 47, up: 1.7, lx: -34, lz: 66, lup: -4 },
   { name: '06 yard and house on legs', x: 4, z: 30, up: 1.7, lx: 25, lz: 56, lup: 3.2 },
   { name: '07 marked tree', x: 19, z: 23, up: 1.5, lx: PLACES.markedTree.x, lz: PLACES.markedTree.z, lup: 2.6 },
   { name: '08 trail', x: 55, z: 12, up: 1.7, lx: 80, lz: -14, lup: 2.5 },
   { name: '09 dry bed crossing', x: 82, z: -22, up: 1.7, lx: 118, lz: -36, lup: 1 },
-  { name: '10 giant trunk', x: 108, z: -50, up: 1.7, lx: PLACES.giantTrunk.x, lz: PLACES.giantTrunk.z, lup: 7 },
-  { name: '11 lake high bank east', x: 116, z: -119, up: 1.7, lx: 190, lz: -140, lup: 0.5 },
+  { name: '10 giant trunk', x: 104, z: -52, up: 1.7, lx: PLACES.giantTrunk.x, lz: PLACES.giantTrunk.z, lup: 7 },
+  { name: '11 lake high bank east', x: 117, z: -122, up: 1.7, lx: 200, lz: -132, lup: 2.5 },
   { name: '12 deep forest', x: 72, z: -86, up: 1.7, lx: 96, lz: -112, lup: 4 },
 ]
 // Benchmark flight: a fixed loop through the densest places. Flown once per water level, 20 s each.
