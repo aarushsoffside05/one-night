@@ -65,3 +65,9 @@ Playwright and Chromium are the ones already installed on the build machine. The
 - **Not used:** the leaf litter, mossy bark and corrugated sheet came as object atlases rather than repeating surfaces.
 - **Size.** The single file is now about 4.2 MB (2.0 MB gzipped): over the brief's 3 MB aim, under its 8 MB ceiling, and Aarush lifted the cap.
 - **People kit rebuild stopped part way** (the helper was stopped from outside). The game uses the newer file because it has every part and reads better than the first one; this is unjudged.
+
+## People, third try (Aarush: "creepy", then "try getting realistic people")
+
+- **A3. Downloaded people.** Our own kit figures are out. Interim: Quaternius "Animated Men" and "Animated Women" bodies (CC0 1.0, public domain; fetched from the author's public folder, no login), converted by `tools/people/export_people.py` into small binaries (`src/assets/models/p_*.bin`, about 100 KB each). Being built: realistic avatars from Microsoft Rocketbox (MIT licence) by `tools/people/make_rocketbox.py`.
+- **How any body is animated.** Every vertex is bound to one or two of eleven body segments (hips, torso, head, upper arms, forearms, thighs, calves). Our own code poses the segments (walk, paddle, hold, carry...), so any rigged body can be dropped in without its own animations. Still one skinned mesh for everybody: one draw, one shadow draw.
+- **Scanned plants (Megascans, from Aarush)** are converted by `scripts/make-plants.py` into `src/assets/models/scans.glb` and `src/assets/tex/scan_*.webp`. They are alpha cut-outs, which the brief warned about on Apple chips; with the brief's ban lifted they are used near the eye only (46 to 60 m) in seven instanced draws. This must be watched on the benchmark flight.

@@ -11,7 +11,7 @@ export const cellOf = (x: number, z: number) => {
   return cz * CELLS + cx
 }
 export type FieldData = { data: Float32Array; cellStart: Uint32Array }
-export const FIELD_NAMES = ['trunk', 'clump', 'spray', 'palm', 'sapling', 'broadleaf', 'tuft', 'log', 'root', 'vine', 'bankroot', 'floater', 'shaft'] as const
+export const FIELD_NAMES = ['trunk', 'clump', 'spray', 'palm', 'sapling', 'broadleaf', 'tuft', 'log', 'root', 'vine', 'bankroot', 'floater', 'shaft', 'spFern', 'spFern2', 'spLeather', 'spPalm', 'spFan', 'spBanana', 'spEar'] as const
 export type FieldName = (typeof FIELD_NAMES)[number]
 
 class Rec {
@@ -185,7 +185,9 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     const h = heightFormula(px, pz)
     if (h < 6.9 || kind.lake > 0.02 || kind.channel > 0.12 || kind.sand > 0.2 || kind.trail > 0.25 || kind.dry > 0.55) continue
     if (kind.high > 0.5 && n < 0.6) continue
-    R.broadleaf.push(px, h, pz, s, rot, seed, ru.range(0.8, 1.25), ru())
+    // most of the understory is now the scanned plants; a few of our own broad-leaf plants stay in the mix
+    const pick = seed < 0.26 ? R.spFern : seed < 0.46 ? R.spFern2 : seed < 0.6 ? R.spLeather : seed < 0.7 ? R.spPalm : seed < 0.78 ? R.spFan : seed < 0.86 ? R.spBanana : seed < 0.93 ? R.spEar : R.broadleaf
+    pick.push(px, h, pz, s, rot, seed, ru.range(0.8, 1.25), ru())
   }
   const ts = 1.0
   for (let z = -lim; z < lim; z += ts) for (let x = -lim; x < lim; x += ts) {

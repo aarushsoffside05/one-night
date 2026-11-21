@@ -7,7 +7,10 @@ import { Field } from './instanced'
 import type { ForestCook, FieldName } from './forestCook'
 import * as G from './geom'
 import { WATER_RANGE } from './layout'
-import { detailUpright } from './scans'
+import { detailUpright, PLANT_TEX } from './scans'
+import { texture, uv } from './tsl'
+import scansUrl from '../assets/models/scans.glb?inline'
+import { b64ToBytes, parseGlb } from './glb'
 
 type N = any
 const ia: N = attribute('ia', 'vec4'), ib: N = attribute('ib', 'vec4'), aux: N = attribute('aux', 'vec3')
@@ -170,6 +173,33 @@ function floaterMaterial(far: number) {
   return m
 }
 
+// Scanned plants (Megascans): real leaf shapes cut out of their photo atlas. Cut-outs cost more on Apple
+// chips, so they are only drawn near the eye and kept to a few thousand.
+function scanPlantMaterial(tex: THREE.Texture, far: number, base: number, floating = false) {
+  const m = new PaintedMaterial({ wrap: 0.7, back: 0.3, pools: true })
+  m.side = THREE.DoubleSide
+  m.alphaTest = 0.45
+  m.positionNode = Fn(() => {
+    const s = ia.w.mul(base), rot = ib.x, seed = ib.y
+    const p = rotX(positionLocal.mul(s), rot).toVar()
+    const w = positionLocal.y.clamp(0, 2).mul(s).mul(U.wind)
+    p.x.addAssign(sin(U.time.mul(1.4).add(seed.mul(40)).add(positionLocal.x.mul(3))).mul(0.03).mul(w))
+    p.z.addAssign(sin(U.time.mul(1.1).add(seed.mul(17))).mul(0.02).mul(w))
+    normalLocal.assign(rotX(normalLocal, rot))
+    if (floating) {
+      const wy = mix(U.water, U.lake, ib.z)
+      const depth = wy.sub(ia.y)
+      const show = smoothstep(-0.02, 0.1, depth).mul(smoothstep(1.5, 0.9, depth))
+      return p.mul(show).mul(shrink(far)).add(vec3(ia.x, wy.add(0.015), ia.z))
+    }
+    return p.mul(shrink(far)).add(ia.xyz)
+  })()
+  const t = texture(tex, uv())
+  m.colorNode = Fn(() => floodStain(t.rgb.mul(mix(float(0.8), float(1.15), ib.w)), ib.w))()
+  m.opacityNode = t.a
+  return m
+}
+
 export type Forest = { fields: Field[]; update(detail: number): void; count(): Record<string, number> }
 
 export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
@@ -203,7 +233,12 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
   fields.push(mk('root', [{ geometry: G.rootGeometry(), material: woodMaterial(90, 'root'), near: 0, far: 90 }]))
   fields.push(mk('vine', [{ geometry: G.vineGeometry(), material: woodMaterial(110, 'vine'), near: 0, far: 110 }]))
   fields.push(mk('bankroot', [{ geometry: G.bankrootGeometry(), material: woodMaterial(170, 'bankroot'), near: 0, far: 170 }]))
-  fields.push(mk('floater', [{ geometry: G.floaterGeometry(), material: floaterMaterial(120), near: 0, far: 120 }]))
+  const SG = parseGlb(b64ToBytes(scansUrl))
+  const sp = (name: any, mesh: string, tex: THREE.Texture, base: number, far = 46) => { if (SG[mesh]) fields.push(mk(name, [{ geometry: SG[mesh], material: scanPlantMaterial(tex, far, base), near: 0, far }])) }
+  sp('spFern', 'fern_A_near', PLANT_TEX.fern, 1.0); sp('spFern2', 'fern_C_near', PLANT_TEX.fern, 0.9); sp('spLeather', 'leatherfern_A_near', PLANT_TEX.leatherfern, 1.0)
+  sp('spPalm', 'palm_A_near', PLANT_TEX.palm, 0.9, 60); sp('spFan', 'fanpalm_C_near', PLANT_TEX.fanpalm, 1.1, 60); sp('spBanana', 'banana_B_near', PLANT_TEX.banana, 1.0, 60); sp('spEar', 'elephantear_A_near', PLANT_TEX.elephantear, 0.9, 60)
+  if (SG.waterlily_A_near) fields.push(mk('floater', [{ geometry: SG.waterlily_A_near, material: scanPlantMaterial(PLANT_TEX.waterlily, 110, 1.3, true), near: 0, far: 110 }]))
+  else fields.push(mk('floater', [{ geometry: G.floaterGeometry(), material: floaterMaterial(120), near: 0, far: 120 }]))
   return {
     fields,
     update(detail) { for (const f of fields) f.update(detail) },

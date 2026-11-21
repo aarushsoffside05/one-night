@@ -73,7 +73,7 @@ export function buildWorld(c: CookResult, scene: THREE.Scene, renderer: THREE.We
   solids.set(c.forest.solids); solids.set(structures.solids, c.forest.solids.length)
 
   const props = new Props(group)
-  const figures = new Figures(props.kit, group)
+  const figures = new Figures(props.kit, props.bodies, group)
   const life = buildLife(group, TIERS[tier].density, props.fishGeo)
   setLifeHeight((x, z) => hf.at(x, z))
 

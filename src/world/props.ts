@@ -6,6 +6,13 @@ import boatsUrl from '../assets/models/boats.glb?inline'
 import fishUrl from '../assets/models/fish.glb?inline'
 import peopleUrl from '../assets/models/people.glb?inline'
 import { b64ToBytes, parseGlb, mergeGeos } from './glb'
+import peopleMeta from '../assets/models/people.json'
+import bManTee from '../assets/models/p_man_tee.bin?inline'
+import bManShirt from '../assets/models/p_man_shirt.bin?inline'
+import bManLong from '../assets/models/p_man_long.bin?inline'
+import bWomanTee from '../assets/models/p_woman_tee.bin?inline'
+import bWomanDress from '../assets/models/p_woman_dress.bin?inline'
+import type { BodyData } from './figures'
 import { PaintedMaterial, noise } from './shade'
 import { U } from './uniforms'
 import { envUniforms } from './env'
@@ -15,6 +22,7 @@ export type Boat = { kind: string; mesh: THREE.Mesh; x: number; z: number; y: nu
 
 export class Props {
   kit: Record<string, THREE.BufferGeometry>
+  bodies: Record<string, BodyData> = {}
   fishGeo: THREE.BufferGeometry
   boats: Boat[] = []
   paddles: THREE.Mesh[] = []
@@ -32,6 +40,8 @@ export class Props {
   constructor(private group: THREE.Object3D) {
     this.geo = parseGlb(b64ToBytes(boatsUrl))
     this.kit = parseGlb(b64ToBytes(peopleUrl))
+    const bins: Record<string, string> = { man_tee: bManTee, man_shirt: bManShirt, man_long: bManLong, woman_tee: bWomanTee, woman_dress: bWomanDress }
+    for (const k in bins) this.bodies[k] = { bin: b64ToBytes(bins[k]), meta: (peopleMeta as any)[k] }
     this.fishGeo = parseGlb(b64ToBytes(fishUrl)).fish
     // skiff and its outboard become one mesh
     if (this.geo.skiff && this.geo.outboard) { const o = this.geo.outboard.clone(); o.translate(0, 0.42, -3.085); this.geo.skiff = mergeGeos([this.geo.skiff, o]) }

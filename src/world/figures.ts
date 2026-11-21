@@ -9,19 +9,21 @@ import { mergeGeos } from './glb'
 // Joint numbers of the kit for the 1.70 m reference figure (from tools/blender/README.md).
 export const J = { shoulderX: 0.18, shoulderY: 0.45, neckY: 0.5, hipX: 0.09, hipY: -0.07, upperArm: 0.28, forearm: 0.37, thigh: 0.42, shin: 0.45, waist: 0.94 }
 
-export type CharDef = { id: string; name: string; height: number; child: number; skin: number[]; shirt: number[]; bottom: number[]; hair: number[]; hairPart: string; hat?: string; hatCol?: number[]; skirt?: boolean; legs?: 'shoe' | 'boot' | 'trousers' | 'trousers_boot'; shoe?: number[] }
+export type Body = 'man_tee' | 'man_shirt' | 'man_long' | 'woman_tee' | 'woman_dress'
+export type BodyData = { bin: Uint8Array; meta: { verts: number; tris: number; posScale: number; materials: string[]; joints: Record<string, number[]> } }
+export type CharDef = { body?: Body; id: string; name: string; height: number; child: number; skin: number[]; shirt: number[]; bottom: number[]; hair: number[]; hairPart: string; hat?: string; hatCol?: number[]; skirt?: boolean; legs?: 'shoe' | 'boot' | 'trousers' | 'trousers_boot'; shoe?: number[] }
 const SKIN_A = [0.62, 0.4, 0.27], SKIN_B = [0.5, 0.31, 0.2], SKIN_C = [0.7, 0.48, 0.34]
 export const CHARS: CharDef[] = [
-  { id: 'davi', name: 'Davi', height: 1.5, child: 0.6, skin: SKIN_C, shirt: [0.16, 0.42, 0.42], bottom: [0.1, 0.1, 0.11], hair: [0.07, 0.045, 0.03], hairPart: 'hair_tuft', legs: 'shoe' },
-  { id: 'tome', name: 'Tomé', height: 1.7, child: 0, skin: SKIN_B, shirt: [0.4, 0.48, 0.32], bottom: [0.3, 0.24, 0.17], hair: [0.08, 0.07, 0.06], hairPart: 'hair_short', hat: 'hat_straw', hatCol: [0.72, 0.6, 0.36], legs: 'trousers_boot', shoe: [0.1, 0.12, 0.1] },
-  { id: 'caio', name: 'Caio', height: 1.75, child: 0, skin: SKIN_A, shirt: [0.55, 0.15, 0.13], bottom: [0.09, 0.09, 0.1], hair: [0.05, 0.04, 0.04], hairPart: 'hair_short' },
-  { id: 'lia', name: 'Lia', height: 1.53, child: 0.45, skin: SKIN_A, shirt: [0.93, 0.74, 0.22], bottom: [0.12, 0.4, 0.42], hair: [0.05, 0.04, 0.04], hairPart: 'hair_long' },
-  { id: 'nino', name: 'Nino', height: 1.17, child: 1, skin: SKIN_A, shirt: [0.3, 0.62, 0.86], bottom: [0.7, 0.16, 0.13], hair: [0.06, 0.05, 0.04], hairPart: 'hair_tuft' },
-  { id: 'socorro', name: 'Dona Socorro', height: 1.55, child: 0, skin: SKIN_B, shirt: [0.66, 0.56, 0.74], bottom: [0.16, 0.2, 0.4], hair: [0.62, 0.61, 0.6], hairPart: 'hair_bun', skirt: true },
-  { id: 'marta', name: 'Marta', height: 1.62, child: 0, skin: SKIN_A, shirt: [0.9, 0.9, 0.85], bottom: [0.2, 0.36, 0.24], hair: [0.07, 0.05, 0.04], hairPart: 'hair_bun', skirt: true },
-  { id: 'rafa', name: 'Rafa', height: 1.78, child: 0, skin: SKIN_C, shirt: [0.85, 0.83, 0.75], bottom: [0.4, 0.4, 0.42], hair: [0.12, 0.08, 0.05], hairPart: 'hair_short', legs: 'shoe' },
-  { id: 'mae', name: 'Davi\'s mother', height: 1.64, child: 0, skin: SKIN_C, shirt: [0.9, 0.5, 0.45], bottom: [0.85, 0.82, 0.74], hair: [0.12, 0.08, 0.05], hairPart: 'hair_long' },
-  { id: 'pai', name: 'Davi\'s father', height: 1.77, child: 0, skin: SKIN_C, shirt: [0.55, 0.68, 0.85], bottom: [0.25, 0.27, 0.22], hair: [0.1, 0.07, 0.05], hairPart: 'hair_short', hat: 'hat_cap', hatCol: [0.2, 0.25, 0.4], legs: 'trousers' },
+  { body: 'man_tee', id: 'davi', name: 'Davi', height: 1.5, child: 0.6, skin: SKIN_C, shirt: [0.16, 0.42, 0.42], bottom: [0.1, 0.1, 0.11], hair: [0.07, 0.045, 0.03], hairPart: 'hair_tuft', legs: 'shoe' },
+  { body: 'man_shirt', id: 'tome', name: 'Tomé', height: 1.7, child: 0, skin: SKIN_B, shirt: [0.4, 0.48, 0.32], bottom: [0.3, 0.24, 0.17], hair: [0.08, 0.07, 0.06], hairPart: 'hair_short', hat: 'hat_straw', hatCol: [0.72, 0.6, 0.36], legs: 'trousers_boot', shoe: [0.1, 0.12, 0.1] },
+  { body: 'man_tee', id: 'caio', name: 'Caio', height: 1.75, child: 0, skin: SKIN_A, shirt: [0.55, 0.15, 0.13], bottom: [0.09, 0.09, 0.1], hair: [0.05, 0.04, 0.04], hairPart: 'hair_short' },
+  { body: 'woman_tee', id: 'lia', name: 'Lia', height: 1.53, child: 0.45, skin: SKIN_A, shirt: [0.93, 0.74, 0.22], bottom: [0.12, 0.4, 0.42], hair: [0.05, 0.04, 0.04], hairPart: 'hair_long' },
+  { body: 'man_tee', id: 'nino', name: 'Nino', height: 1.17, child: 1, skin: SKIN_A, shirt: [0.3, 0.62, 0.86], bottom: [0.7, 0.16, 0.13], hair: [0.06, 0.05, 0.04], hairPart: 'hair_tuft' },
+  { body: 'woman_dress', id: 'socorro', name: 'Dona Socorro', height: 1.55, child: 0, skin: SKIN_B, shirt: [0.66, 0.56, 0.74], bottom: [0.16, 0.2, 0.4], hair: [0.62, 0.61, 0.6], hairPart: 'hair_bun', skirt: true },
+  { body: 'woman_tee', id: 'marta', name: 'Marta', height: 1.62, child: 0, skin: SKIN_A, shirt: [0.9, 0.9, 0.85], bottom: [0.2, 0.36, 0.24], hair: [0.07, 0.05, 0.04], hairPart: 'hair_bun', skirt: true },
+  { body: 'man_tee', id: 'rafa', name: 'Rafa', height: 1.78, child: 0, skin: SKIN_C, shirt: [0.85, 0.83, 0.75], bottom: [0.4, 0.4, 0.42], hair: [0.12, 0.08, 0.05], hairPart: 'hair_short', legs: 'shoe' },
+  { body: 'woman_tee', id: 'mae', name: 'Davi\'s mother', height: 1.64, child: 0, skin: SKIN_C, shirt: [0.9, 0.5, 0.45], bottom: [0.85, 0.82, 0.74], hair: [0.12, 0.08, 0.05], hairPart: 'hair_long' },
+  { body: 'man_long', id: 'pai', name: 'Davi\'s father', height: 1.77, child: 0, skin: SKIN_C, shirt: [0.55, 0.68, 0.85], bottom: [0.25, 0.27, 0.22], hair: [0.1, 0.07, 0.05], hairPart: 'hair_short', hat: 'hat_cap', hatCol: [0.2, 0.25, 0.4], legs: 'trousers' },
 ]
 export const charIndex = (id: string) => CHARS.findIndex((c) => c.id === id)
 
@@ -36,6 +38,7 @@ export type Fig = {
   pose: Float32Array; target: Float32Array
   tx: number; tz: number; moving: boolean; arrive: number // walk-to target
   k: number
+  j: { waistY: number; waistZ: number; neckY: number; neckZ: number; shX: number; shY: number; shZ: number; ua: number; fa: number; hipX: number; hipY: number; hipZ: number; th: number; sh: number; rest: number[][] }
 }
 
 const BONES = ['hips', 'torso', 'head', 'uaL', 'faL', 'uaR', 'faR', 'thL', 'shL', 'thR', 'shR'] as const
@@ -46,54 +49,51 @@ export class Figures {
   mesh: THREE.SkinnedMesh
   private bones: THREE.Bone[] = []
   private m0 = new THREE.Matrix4(); private m1 = new THREE.Matrix4(); private m2 = new THREE.Matrix4(); private t = new THREE.Matrix4()
-  private e = new THREE.Euler(); private s = new THREE.Vector3(); private hand = new THREE.Matrix4()
+  private e = new THREE.Euler(); private s = new THREE.Vector3(); private hand = new THREE.Matrix4(); private o = new THREE.Matrix4()
+  private fore = [new THREE.Matrix4(), new THREE.Matrix4()]
+  private foreM = CHARS.flatMap(() => [new THREE.Matrix4(), new THREE.Matrix4()]); private headM = CHARS.map(() => new THREE.Matrix4())
 
-  constructor(kit: Record<string, THREE.BufferGeometry>, group: THREE.Object3D) {
+  constructor(kit: Record<string, THREE.BufferGeometry>, bodies: Record<string, BodyData>, group: THREE.Object3D) {
     const geos: THREE.BufferGeometry[] = []
     CHARS.forEach((def, ci) => {
-      const part = (name: string, bone: number, cloth: number[], hairCol: number[], mirror = false) => {
-        const src = kit[name]
-        if (!src) { console.warn('[one-night] people kit is missing part', name); return }
-        const g = src.clone()
-        if (mirror) { g.scale(-1, 1, 1); const idx = g.index!; for (let i = 0; i < idx.count; i += 3) { const a = idx.getX(i); idx.setX(i, idx.getX(i + 1)); idx.setX(i + 1, a) } }
-        const n = g.attributes.position.count, col = g.attributes.color.array as Float32Array
-        const out = new Float32Array(n * 3)
-        for (let i = 0; i < n; i++) {
-          const r = col[i * 3], gr = col[i * 3 + 1], b = col[i * 3 + 2]
-          const white = Math.min(r, gr, b), w = Math.max(0, 1 - white)
-          for (let c = 0; c < 3; c++) out[i * 3 + c] = Math.min(1, (def.skin[c] * r + cloth[c] * gr + hairCol[c] * b) * w + white * 0.9 + (r + gr + b < 0.15 ? 0.05 : 0))
-        }
-        g.setAttribute('color', new THREE.BufferAttribute(out, 3))
-        const si = new Uint16Array(n * 4), sw = new Float32Array(n * 4)
-        for (let i = 0; i < n; i++) { si[i * 4] = ci * NB + bone; sw[i * 4] = 1 }
-        g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(si, 4)); g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(sw, 4))
-        geos.push(g)
+      const B = bodies[def.body ?? 'man_tee'], M = B.meta, J = M.joints
+      // region colours: the body files name their regions; each character paints them its own way
+      const shoe = def.shoe ?? (def.id === 'davi' ? [0.8, 0.78, 0.7] : [0.1, 0.08, 0.07])
+      const barefoot = ['tome', 'caio', 'lia', 'nino', 'socorro'].includes(def.id)
+      const colOf = (m: string): number[] => m === 'Skin' ? def.skin : m === 'Eyes' ? [0.03, 0.025, 0.02] : m.startsWith('Hair') ? def.hair : m === 'Shirt' || m === 'Dress' ? def.shirt : m === 'Shirt2' ? def.shirt.map((c) => c * 0.75) : m === 'Pants' ? def.bottom : m === 'Socks' ? (barefoot ? def.skin : [0.75, 0.73, 0.68]) : barefoot ? def.skin.map((c) => c * 0.9) : shoe
+      const cols = M.materials.map(colOf)
+      const n = M.verts, dv = new DataView(B.bin.buffer, B.bin.byteOffset, B.bin.byteLength)
+      const pos = new Float32Array(n * 3), nrm = new Float32Array(n * 3), col = new Float32Array(n * 3), si = new Uint16Array(n * 4), sw = new Float32Array(n * 4)
+      for (let i = 0; i < n; i++) {
+        const o = i * 13
+        for (let c = 0; c < 3; c++) { pos[i * 3 + c] = (dv.getInt16(o + c * 2, true) / 32767) * M.posScale; nrm[i * 3 + c] = dv.getInt8(o + 6 + c) / 127; col[i * 3 + c] = cols[dv.getUint8(o + 9)][c] }
+        const wa = dv.getUint8(o + 12) / 255
+        si[i * 4] = ci * NB + dv.getUint8(o + 10); si[i * 4 + 1] = ci * NB + dv.getUint8(o + 11); sw[i * 4] = wa; sw[i * 4 + 1] = 1 - wa
       }
-      part(def.skirt ? 'hips_skirt' : 'hips_shorts', 0, def.bottom, def.hair)
-      part('torso', 1, def.shirt, def.hair)
-      if (def.id === 'davi' && kit.backpack) part('backpack', 1, [0.62, 0.42, 0.1], def.hair)
-      else if (def.id === 'davi') {
-        const bp = new THREE.BoxGeometry(0.25, 0.3, 0.13, 2, 2, 1).translate(0, 0.27, -0.16) as unknown as THREE.BufferGeometry
-        const n = bp.attributes.position.count, c = new Float32Array(n * 3)
-        for (let i = 0; i < n; i++) { c[i * 3] = 0; c[i * 3 + 1] = 1; c[i * 3 + 2] = 0 }
-        bp.setAttribute('color', new THREE.BufferAttribute(c, 3)); bp.deleteAttribute('uv')
-        kit.__pack = bp
-        part('__pack', 1, [0.62, 0.42, 0.1], def.hair)
+      const g = new THREE.BufferGeometry()
+      g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3))
+      g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(si, 4)); g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(sw, 4))
+      g.setIndex(new THREE.BufferAttribute(new Uint16Array(B.bin.buffer.slice(B.bin.byteOffset + n * 13, B.bin.byteOffset + n * 13 + M.tris * 6)), 1))
+      geos.push(g)
+      // hats and the backpack come from our own kit, fixed rigidly to the head or the torso
+      const rigid = (name: string, seg: number, c: number[], ox: number, oy: number, oz: number, sc: number) => {
+        const src = kit[name]; if (!src) return
+        const h = src.clone(); h.scale(sc, sc, sc); h.translate(ox, oy, oz)
+        const m2 = h.attributes.position.count, cc = new Float32Array(m2 * 3), mask = h.attributes.color.array as Float32Array
+        for (let i = 0; i < m2; i++) { const w = Math.min(mask[i * 3], mask[i * 3 + 1], mask[i * 3 + 2]); for (let q = 0; q < 3; q++) cc[i * 3 + q] = c[q] * (1 - w) + w * 0.85 }
+        h.setAttribute('color', new THREE.BufferAttribute(cc, 3))
+        const hi = new Uint16Array(m2 * 4), hw = new Float32Array(m2 * 4)
+        for (let i = 0; i < m2; i++) { hi[i * 4] = ci * NB + seg; hw[i * 4] = 1 }
+        h.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(hi, 4)); h.setAttribute('skinWeight', new THREE.Float32BufferAttribute(hw, 4))
+        if (h.attributes.aux) h.deleteAttribute('aux')
+        geos.push(h)
       }
-      part('head', 2, def.shirt, def.hair)
-      part(def.hairPart, 2, def.hair, def.hair)
-      if (def.hat) part(def.hat, 2, def.hatCol!, def.hatCol!)
-      part('upperarm', 3, def.shirt, def.hair); part('forearm', 4, def.shirt, def.hair)
-      part('upperarm', 5, def.shirt, def.hair, true); part('forearm', 6, def.shirt, def.hair, true)
-      const has = (n: string) => !!kit[n]
-      const tr = (def.legs === 'trousers' || def.legs === 'trousers_boot') && has('thigh_trousers')
-      const th = tr ? 'thigh_trousers' : def.skirt || !has('thigh_shorts') ? 'thigh' : 'thigh_shorts'
-      const want = def.legs === 'shoe' ? 'shin_shoe' : def.legs === 'boot' ? 'shin_boot' : def.legs === 'trousers' ? 'shin_trousers' : def.legs === 'trousers_boot' ? 'shin_trousers_boot' : 'shin'
-      const sh = has(want) ? want : 'shin'
-      const shoeCol = def.shoe ?? def.hair
-      part(th, 7, def.bottom, def.hair); part(sh, 8, def.bottom, shoeCol)
-      part(th, 9, def.bottom, def.hair, true); part(sh, 10, def.bottom, shoeCol, true)
-      this.figs.push({ def, active: false, x: 0, y: -50, z: 0, heading: 0, anim: 'idle', phase: ci * 1.7, speed: 0, side: 1, look: 0, pose: new Float32Array(NP), target: new Float32Array(NP), tx: 0, tz: 0, moving: false, arrive: 0, k: def.height / 1.72 })
+      if (def.hat) rigid(def.hat, 2, def.hatCol!, J.Head[0], J.Head[1] - 0.125, J.Head[2] + 0.035, 0.94)
+      if (def.id === 'davi') rigid('backpack', 1, [0.62, 0.42, 0.1], 0, J.Abdomen[1] + 0.05, J.Abdomen[2] + 0.035, 0.9)
+      const W = J.Abdomen, sh = J['UpperArm.L'], el = J['LowerArm.L'], pa = J['Palm.L'], hp = J['UpperLeg.L'], kn = J['LowerLeg.L']
+      const j = { waistY: W[1], waistZ: W[2], neckY: J.Head[1] - W[1], neckZ: J.Head[2] - W[2], shX: sh[0], shY: sh[1] - W[1], shZ: sh[2] - W[2], ua: el[0] - sh[0], fa: pa[0] - el[0] + 0.07, hipX: hp[0], hipY: hp[1] - W[1], hipZ: hp[2] - W[2], th: hp[1] - kn[1], sh: kn[1],
+        rest: [[0, W[1], W[2]], [0, W[1], W[2]], J.Head, sh, el, [-sh[0], sh[1], sh[2]], [-el[0], el[1], el[2]], hp, kn, [-hp[0], hp[1], hp[2]], [-kn[0], kn[1], kn[2]]] }
+      this.figs.push({ def, active: false, x: 0, y: -50, z: 0, heading: 0, anim: 'idle', phase: ci * 1.7, speed: 0, side: 1, look: 0, pose: new Float32Array(NP), target: new Float32Array(NP), tx: 0, tz: 0, moving: false, arrive: 0, k: def.height / 1.7, j })
     })
     const geo = mergeGeos(geos)
     const mat = new PaintedMaterial({ wrap: 0.55, pools: true })
@@ -192,47 +192,53 @@ export class Figures {
   private setBone(ci: number, b: number, m: THREE.Matrix4) { const bone = this.bones[ci * NB + b]; bone.matrix.copy(m); bone.matrixWorldNeedsUpdate = true }
   private rot(x: number, y: number, z: number) { this.e.set(x, y, z, 'YXZ'); return this.t.makeRotationFromEuler(this.e) }
 
+  // Each body segment gets one matrix: where its joint frame is now, times the inverse of where it was at rest
+  // (arms rest straight out to the sides in these models, so their rest frame is turned a quarter turn).
+  private put(ci: number, seg: number, frame: THREE.Matrix4, f: Fig, sx: number, sy: number, arm = 0) {
+    const r = f.j.rest[seg]
+    this.o.copy(frame).scale(this.s.set(sx, sy, sx))
+    if (arm) this.o.multiply(this.t.makeRotationZ(-arm * Math.PI / 2))
+    this.o.multiply(this.t.makeTranslation(-r[0], -r[1], -r[2]))
+    this.setBone(ci, seg, this.o)
+  }
   private solve(ci: number, f: Fig) {
-    const p = f.pose, k = f.k, ch = f.def.child
-    const limb = k * (1 - ch * 0.05), headS = k * (1 + ch * 0.22)
-    // pelvis frame
-    const waist = (J.waist + p[P.dy]) * limb
+    const p = f.pose, k = f.k, ch = f.def.child, j = f.j
+    const limb = k * (1 - ch * 0.05), headS = k * (1 + ch * 0.2)
+    const waist = (j.waistY + p[P.dy]) * limb
     this.m0.makeRotationY(Math.PI - f.heading).setPosition(f.x, f.y + waist, f.z)
     this.m0.multiply(this.rot(p[P.tilt], 0, p[P.roll]))
-    this.m1.copy(this.m0).scale(this.s.set(k, limb, k)); this.setBone(ci, 0, this.m1)
-    // torso
+    this.put(ci, 0, this.m0, f, k, limb)
     this.m1.copy(this.m0).multiply(this.rot(p[P.lean], p[P.twist], p[P.side]))
     const torso = this.m2.copy(this.m1)
-    this.m1.scale(this.s.set(k, k, k)); this.setBone(ci, 1, this.m1)
-    // head
-    this.m1.copy(torso).multiply(this.t.makeTranslation(0, J.neckY * k, 0)).multiply(this.rot(p[P.headPitch] - p[P.lean] * 0.6, p[P.headYaw], 0)).scale(this.s.set(headS, headS, headS))
-    this.setBone(ci, 2, this.m1)
-    // arms
+    this.put(ci, 1, torso, f, k, k)
+    this.m1.copy(torso).multiply(this.t.makeTranslation(0, j.neckY * k, j.neckZ * k)).multiply(this.rot(p[P.headPitch] - p[P.lean] * 0.6, p[P.headYaw], 0))
+    this.put(ci, 2, this.m1, f, headS, headS)
     for (let sd = 0; sd < 2; sd++) {
       const sg = sd === 0 ? 1 : -1, o = sd === 0 ? P.aLs : P.aRs
-      this.m1.copy(torso).multiply(this.t.makeTranslation(sg * J.shoulderX * k, J.shoulderY * k, 0)).multiply(this.rot(-p[o], 0, sg * p[o + 1]))
-      const ua = this.hand.copy(this.m1)
-      this.m1.scale(this.s.set(k, limb, k)); this.setBone(ci, 3 + sd * 2, this.m1)
-      this.m1.copy(ua).multiply(this.t.makeTranslation(0, -J.upperArm * limb, 0)).multiply(this.rot(-p[o + 2], 0, 0)).scale(this.s.set(k, limb, k))
-      this.setBone(ci, 4 + sd * 2, this.m1)
+      this.m1.copy(torso).multiply(this.t.makeTranslation(sg * j.shX * k, j.shY * k, j.shZ * k)).multiply(this.rot(-p[o], 0, sg * p[o + 1]))
+      this.hand.copy(this.m1)
+      this.put(ci, 3 + sd * 2, this.m1, f, k, k, sg)
+      this.m1.copy(this.hand).multiply(this.t.makeTranslation(0, -j.ua * k, 0)).multiply(this.rot(-p[o + 2], 0, 0))
+      this.fore[sd].copy(this.m1)
+      this.put(ci, 4 + sd * 2, this.m1, f, k, k, sg)
     }
-    // legs
     for (let sd = 0; sd < 2; sd++) {
       const sg = sd === 0 ? 1 : -1, o = sd === 0 ? P.lLh : P.lRh
-      this.m1.copy(this.m0).multiply(this.t.makeTranslation(sg * J.hipX * k, J.hipY * limb, 0)).multiply(this.rot(-p[o], 0, sg * p[P.spread]))
-      const th = this.hand.copy(this.m1)
-      this.m1.scale(this.s.set(k, limb, k)); this.setBone(ci, 7 + sd * 2, this.m1)
-      this.m1.copy(th).multiply(this.t.makeTranslation(0, -J.thigh * limb, 0)).multiply(this.rot(p[o + 1], 0, 0)).scale(this.s.set(k, limb, k))
-      this.setBone(ci, 8 + sd * 2, this.m1)
+      this.m1.copy(this.m0).multiply(this.t.makeTranslation(sg * j.hipX * k, j.hipY * limb, j.hipZ * k)).multiply(this.rot(-p[o], 0, sg * p[P.spread]))
+      this.hand.copy(this.m1)
+      this.put(ci, 7 + sd * 2, this.m1, f, k, limb)
+      this.m1.copy(this.hand).multiply(this.t.makeTranslation(0, -j.th * limb, 0)).multiply(this.rot(p[o + 1], 0, 0))
+      this.put(ci, 8 + sd * 2, this.m1, f, k, limb)
     }
+    this.headM[ci].copy(this.m2).multiply(this.t.makeTranslation(0, (j.neckY + 0.12) * k, 0))
+    this.foreM[ci * 2].copy(this.fore[0]); this.foreM[ci * 2 + 1].copy(this.fore[1])
   }
 
   // world position of a hand (side: 0 = left, 1 = right), for props held in it
   handPos(id: string, side: number, out: THREE.Vector3) {
     const ci = charIndex(id), f = this.figs[ci]
-    const m = this.bones[ci * NB + 4 + side * 2].matrix
-    return out.set(0, -J.forearm * 0.92, 0.02).applyMatrix4(m), f
+    return out.set(0, -f.j.fa * f.k * 0.95, 0.02).applyMatrix4(this.foreM[ci * 2 + side]), f
   }
-  headPos(id: string, out: THREE.Vector3) { const ci = charIndex(id); return out.set(0, 0.2, 0).applyMatrix4(this.bones[ci * NB + 2].matrix) }
+  headPos(id: string, out: THREE.Vector3) { return out.set(0, 0, 0).applyMatrix4(this.headM[charIndex(id)]) }
   walkTo(id: string, x: number, z: number, speed = 1.3, arrive = 0.15, anim: Anim = 'walk') { const f = this.get(id); f.tx = x; f.tz = z; f.speed = speed; f.moving = true; f.arrive = arrive; f.anim = anim; return f }
 }

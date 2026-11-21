@@ -85,7 +85,7 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
     g.v(-0.5, 0.0, 0, 0, 1, 0, 0, 0, 0); g.v(0.05, 0.05, 0.3, 0.2, 1, 0.3, 0.5, 0, 0); g.v(0.5, 0.02, 0, 0, 1, 0, 1, 0, 0); g.v(0.05, 0.05, -0.3, 0.2, 1, -0.3, 0.5, 0, 0)
     g.quad(0, 1, 2, 3)
     const n = Math.round(9000 * density)
-    const geo = instanced(g.build(), n, (_i, a, b) => { a[0] = r(); a[1] = r(); a[2] = r(); a[3] = r.range(0.14, 0.34); b[0] = r() * 6.283; b[1] = r(); b[2] = r(); b[3] = r() })
+    const geo = instanced(g.build(), n, (_i, a, b) => { a[0] = r(); a[1] = r(); a[2] = r(); a[3] = r.range(0.08, 0.2); b[0] = r() * 6.283; b[1] = r(); b[2] = r(); b[3] = r() })
     const m = new PaintedMaterial({ wrap: 0.6, pools: true })
     m.side = THREE.DoubleSide
     m.positionNode = Fn(() => {
@@ -99,7 +99,7 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
       const fade = smoothstep(box * 0.5, box * 0.36, length(xz.sub(U.eye.xz)))
       return rp.mul(dry).mul(fade).mul(smoothstep(0.15, 0.5, cover.add(ib.w.mul(0.3)))).add(vec3(xz.x, bed.add(0.025), xz.y))
     })()
-    m.colorNode = Fn(() => mix(mix(vec3(0.2, 0.09, 0.035), vec3(0.42, 0.22, 0.07), ib.y), vec3(0.5, 0.38, 0.14), smoothstep(0.75, 0.95, ib.z)).mul(mix(float(0.75), float(1.1), aux.x)))()
+    m.colorNode = Fn(() => mix(mix(vec3(0.11, 0.055, 0.025), vec3(0.24, 0.13, 0.05), ib.y), vec3(0.3, 0.22, 0.09), smoothstep(0.8, 0.97, ib.z)).mul(mix(float(0.75), float(1.1), aux.x)))()
     add(new THREE.Mesh(geo, m))
   }
 

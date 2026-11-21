@@ -1,0 +1,1672 @@
+{
+ "info": {
+  "generator": "scripts/make-plants.py",
+  "units": "metres",
+  "up": "+Y",
+  "uv": "glTF convention (v = 0 is the TOP row of the image): load the .webp with texture.flipY = false",
+  "alpha": "alpha: true \u2192 alpha-test at 0.5, render double-sided; colour is bled under the transparent texels (alpha there is 1/255, never 0)",
+  "tiles": "tiles: true \u2192 UVs leave 0..1, use RepeatWrapping",
+  "origin": "ground plants: root at the origin; water plants: y = 0 is the water surface; hanging: top attachment at the origin; solids: resting on y = 0, centred in X/Z, logs along X",
+  "glb_bytes": 863712
+ },
+ "textures": [
+  {
+   "file": "scan_palm.webp",
+   "asset": "palm",
+   "width": 768,
+   "height": 768,
+   "alpha": true,
+   "bytes": 267068,
+   "source_pack": "tropical_palm_rkqjj_ue_low",
+   "megascans_id": "rkqjj",
+   "source": "T_rkqjj_1K_B-O.png"
+  },
+  {
+   "file": "scan_fanpalm.webp",
+   "asset": "fanpalm",
+   "width": 768,
+   "height": 768,
+   "alpha": true,
+   "bytes": 330060,
+   "source_pack": "chinese_fan_palm_ud4geejja_ue_low",
+   "megascans_id": "ud4geejja",
+   "source": "T_ud4geejja_1K_B-O.png"
+  },
+  {
+   "file": "scan_fern.webp",
+   "asset": "fern",
+   "width": 768,
+   "height": 768,
+   "alpha": true,
+   "bytes": 208698,
+   "source_pack": "common_fern_rhdso_ue_low",
+   "megascans_id": "rhdso",
+   "source": "T_rhDso_1K_B.jpg + R of T_rhDso_1K_ORT.jpg"
+  },
+  {
+   "file": "scan_leatherfern.webp",
+   "asset": "leatherfern",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "bytes": 138106,
+   "source_pack": "leather_fern_tkytbjdia_ue_low",
+   "megascans_id": "tkytbjdia",
+   "source": "T_tkytbjdia_1K_B-O.png"
+  },
+  {
+   "file": "scan_canna.webp",
+   "asset": "canna",
+   "width": 768,
+   "height": 768,
+   "alpha": true,
+   "bytes": 321150,
+   "source_pack": "canna_lily_ud0mcinia_ue_low",
+   "megascans_id": "ud0mcinia",
+   "source": "T_ud0mcinia_1K_B-O.png"
+  },
+  {
+   "file": "scan_waterlily.webp",
+   "asset": "waterlily",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "bytes": 129558,
+   "source_pack": "carolana_water_lily_uc2jdibia_ue_low",
+   "megascans_id": "uc2jdibia",
+   "source": "T_uc2jdibia_1K_B-O.png"
+  },
+  {
+   "file": "scan_banana.webp",
+   "asset": "banana",
+   "width": 1024,
+   "height": 512,
+   "alpha": true,
+   "bytes": 56848,
+   "source_pack": "huge_banana_leaf_slpmfhp_4k_ue_high",
+   "megascans_id": "slpmfhp",
+   "source": "T_slpmfhp_4K_B-O.png (cropped to the leaf)"
+  },
+  {
+   "file": "scan_elephantear.webp",
+   "asset": "elephantear",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "bytes": 21506,
+   "source_pack": "elephant_ear_qfxkv2_1k",
+   "megascans_id": "qfxkv2",
+   "source": "BaseColor.jpg + Opacity.jpg"
+  },
+  {
+   "file": "scan_vine.webp",
+   "asset": "vine",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "bytes": 179984,
+   "source_pack": "hanging_vine_tfwoxsh_1k_ue_low",
+   "megascans_id": "tfwoxsh",
+   "source": "T_tfwoxsh_1K_B-O.png"
+  },
+  {
+   "file": "scan_root.webp",
+   "asset": "root",
+   "width": 512,
+   "height": 512,
+   "alpha": false,
+   "bytes": 76402,
+   "source_pack": "buttress_root_wdbncfq_1k_ue_low",
+   "megascans_id": "wdbncfq",
+   "source": "T_wdbncfq_1K_B.jpg"
+  },
+  {
+   "file": "scan_trunk.webp",
+   "asset": "trunk",
+   "width": 768,
+   "height": 768,
+   "alpha": false,
+   "bytes": 75880,
+   "source_pack": "ficus_microcarpa_tree_trunk_wdjqbag_gltf_low",
+   "megascans_id": "wdjqbag",
+   "source": "albedo"
+  },
+  {
+   "file": "scan_log.webp",
+   "asset": "log",
+   "width": 512,
+   "height": 512,
+   "alpha": false,
+   "bytes": 46732,
+   "source_pack": "mossy_log_tjrtcibda_gltf_low",
+   "megascans_id": "tjrtcibda",
+   "source": "albedo"
+  },
+  {
+   "file": "scan_driftwood.webp",
+   "asset": "driftwood",
+   "width": 512,
+   "height": 512,
+   "alpha": false,
+   "bytes": 28418,
+   "source_pack": "coast_african_debris_driftwood_s_01_xlnndfv_gltf_mid",
+   "megascans_id": "xlnndfv",
+   "source": "albedo"
+  },
+  {
+   "file": "scan_oar.webp",
+   "asset": "oar",
+   "width": 512,
+   "height": 512,
+   "alpha": false,
+   "bytes": 23158,
+   "source_pack": "historic_medieval_harbour_oar_wood_old_01_xivobjn_gltf_mid",
+   "megascans_id": "xivobjn",
+   "source": "albedo"
+  },
+  {
+   "file": "scan_canoe.webp",
+   "asset": "canoe",
+   "width": 768,
+   "height": 768,
+   "alpha": false,
+   "bytes": 58668,
+   "source_pack": "residential_europeanrural_canoe_wood_worn_vejjfcqaw_gltf_mid",
+   "megascans_id": "vejjfcqaw",
+   "source": "albedo"
+  },
+  {
+   "file": "scan_liana.webp",
+   "asset": "liana",
+   "width": 512,
+   "height": 512,
+   "alpha": false,
+   "bytes": 39186,
+   "source_pack": "long_liana_stem_wdoicd0_low",
+   "megascans_id": "wdoicd0",
+   "source": "BaseColor.jpg"
+  },
+  {
+   "file": "scan_fallentree.webp",
+   "asset": "fallentree",
+   "width": 512,
+   "height": 512,
+   "alpha": false,
+   "bytes": 66784,
+   "source_pack": "fallen_tree_rgzon_low",
+   "megascans_id": "rgzon",
+   "source": "BaseColor.jpg"
+  },
+  {
+   "file": "scan_debris.webp",
+   "asset": "debris",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "bytes": 41580,
+   "source_pack": "jungle_debris_slci2uh_2k_ue_mid",
+   "megascans_id": "slci2uh",
+   "source": "colour + opacity"
+  },
+  {
+   "file": "scan_leaflitter.webp",
+   "asset": "leaflitter",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "bytes": 32426,
+   "source_pack": "dry_leaf_scatter_pbdiw2_2k",
+   "megascans_id": "pbdiw2",
+   "source": "colour + opacity"
+  }
+ ],
+ "findings": [
+  "palm (tropical_palm_rkqjj_ue_low): glTF data is centimetres with \u2212Z up (raw bounds [-178, -175, -177] .. [149, 174, 3]); every node carries rotation +90\u00b0 about X and scale 0.01, which gives +Y up in metres. Pivot = root of the plant.",
+  "fanpalm (chinese_fan_palm_ud4geejja_ue_low): glTF data is centimetres with \u2212Z up (raw bounds [-125, -123, -116] .. [115, 135, 1]); every node carries rotation +90\u00b0 about X and scale 0.01, which gives +Y up in metres. Pivot = root of the plant.",
+  "fern (common_fern_rhdso_ue_low): glTF data is centimetres with \u2212Z up (raw bounds [-71, -70, -62] .. [64, 72, 5]); every node carries rotation +90\u00b0 about X and scale 0.01, which gives +Y up in metres. Pivot = root of the plant.",
+  "leatherfern (leather_fern_tkytbjdia_ue_low): glTF data is centimetres with \u2212Z up (raw bounds [-63, -63, -50] .. [84, 66, 1]); every node carries rotation +90\u00b0 about X and scale 0.01, which gives +Y up in metres. Pivot = root of the plant.",
+  "canna (canna_lily_ud0mcinia_ue_low): glTF data is centimetres with \u2212Z up (raw bounds [-67, -48, -238] .. [59, 54, 1]); every node carries rotation +90\u00b0 about X and scale 0.01, which gives +Y up in metres. Pivot = root of the plant.",
+  "waterlily (carolana_water_lily_uc2jdibia_ue_low): glTF data is centimetres with \u2212Z up (raw bounds [-47, -64, -2] .. [42, 52, 67]); every node carries rotation +90\u00b0 about X and scale 0.01, which gives +Y up in metres. Pivot = root of the plant.",
+  "banana (huge_banana_leaf_slpmfhp_4k_ue_high): NOT a mesh. The glTF is a 2\u00d72 unit placeholder plane; the pack is a leaf atlas (4096\u00d71024 px = 2\u00d70.5 m scan, one leaf). Leaf clumps are built by this script from bent cards.",
+  "elephantear (elephant_ear_qfxkv2_1k): NOT a mesh, a texture atlas (0.86\u00d70.86 m scan: two leaf blades and five stalks; BaseColor + separate Opacity). Plants are built by this script from cards.",
+  "vine (hanging_vine_tfwoxsh_1k_ue_low): NOT a mesh. The glTF is a 2\u00d72 unit placeholder plane; the pack is a tileable 2\u00d72 m ivy-leaf decal atlas with opacity. Hanging ribbons / a curtain are built by this script.",
+  "root (buttress_root_wdbncfq_1k_ue_low): NOT a mesh. The glTF is a 2\u00d72 unit placeholder plane; the pack is a tileable 2\u00d72 m bark SURFACE of a buttress root. The buttress shape is PROCEDURAL (made by this script), only its texture is the scan.",
+  "trunk (ficus_microcarpa_tree_trunk_wdjqbag_gltf_low): glTF raw data is centimetres, already +Y up (raw bounds [-61.8, -0.3, -60.0] .. [64.2, 187.2, 37.8]). The two wrapper nodes (Z-up\u2192Y-up, then 0.01 scale with Y-up\u2192Z-up) cancel to a plain \u00d70.01, giving +Y up in metres. One LOD only (4018 triangles).",
+  "log (mossy_log_tjrtcibda_gltf_low): glTF raw data is centimetres, already +Y up (raw bounds [-22.5, -1.5, -7.0] .. [23.7, 11.1, 7.4]). The two wrapper nodes (Z-up\u2192Y-up, then 0.01 scale with Y-up\u2192Z-up) cancel to a plain \u00d70.01, giving +Y up in metres. One LOD only (1090 triangles).",
+  "driftwood (coast_african_debris_driftwood_s_01_xlnndfv_gltf_mid): glTF raw data is centimetres, already +Y up (raw bounds [-41.2, -0.0, -7.1] .. [41.2, 12.7, 7.5]). The two wrapper nodes (Z-up\u2192Y-up, then 0.01 scale with Y-up\u2192Z-up) cancel to a plain \u00d70.01, giving +Y up in metres. One LOD only (4370 triangles).",
+  "oar (historic_medieval_harbour_oar_wood_old_01_xivobjn_gltf_mid): glTF raw data is centimetres, already +Y up (raw bounds [-118.8, -0.2, -5.3] .. [118.8, 7.7, 5.1]). The two wrapper nodes (Z-up\u2192Y-up, then 0.01 scale with Y-up\u2192Z-up) cancel to a plain \u00d70.01, giving +Y up in metres. One LOD only (3870 triangles).",
+  "canoe (residential_europeanrural_canoe_wood_worn_vejjfcqaw_gltf_mid): glTF raw data is centimetres, already +Y up (raw bounds [-217.1, -1.3, -41.1] .. [231.8, 36.9, 35.9]). The two wrapper nodes (Z-up\u2192Y-up, then 0.01 scale with Y-up\u2192Z-up) cancel to a plain \u00d70.01, giving +Y up in metres. One LOD only (2782 triangles).",
+  "liana (long_liana_stem_wdoicd0_low): FBX only, read with Blender. Raw mesh is centimetres (wdoicd0_LOD0_TIER3_000: [-11, -1, -16] .. [11, 231, 16]) under a 0.01-scale / +90\u00b0 X root; Blender gives Z-up metres, converted to +Y up. One LOD (1458 triangles).",
+  "fallentree (fallen_tree_rgzon_low): FBX only, read with Blender. Raw mesh is centimetres (rgzoN_LOD0_TIER3_000: [-97, -6, -46] .. [79, 41, 43]) under a 0.01-scale / +90\u00b0 X root; Blender gives Z-up metres, converted to +Y up. One LOD (1631 triangles).",
+  "debris (jungle_debris_slci2uh_2k_ue_mid): NOT a mesh, a 2\u00d72 m decal atlas with opacity (scattered dry palm litter and twigs, tileable). Exported as one flat ground quad.",
+  "leaflitter (dry_leaf_scatter_pbdiw2_2k): NOT a mesh, a 1\u00d71 m decal atlas with opacity (about 50 separate dry leaves). Exported as one flat ground quad."
+ ],
+ "skipped": [],
+ "meshes": [
+  {
+   "name": "palm_A_near",
+   "asset": "palm",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 530,
+   "vertices": 400,
+   "bounds": {
+    "min": [
+     -1.751,
+     -0.026,
+     -1.793
+    ],
+    "max": [
+     1.558,
+     1.602,
+     1.817
+    ]
+   },
+   "texture": "scan_palm.webp",
+   "alpha": true,
+   "kind": "palm-crown",
+   "tiles": false,
+   "note": "understory palm (Areca): fronds radiate from the origin; use on the ground or on top of a trunk; source VarA LOD1"
+  },
+  {
+   "name": "palm_B_near",
+   "asset": "palm",
+   "variant": "B",
+   "lod": "near",
+   "triangles": 530,
+   "vertices": 400,
+   "bounds": {
+    "min": [
+     -1.409,
+     -0.021,
+     -1.215
+    ],
+    "max": [
+     1.175,
+     1.116,
+     1.193
+    ]
+   },
+   "texture": "scan_palm.webp",
+   "alpha": true,
+   "kind": "palm-crown",
+   "tiles": false,
+   "note": "understory palm (Areca): fronds radiate from the origin; use on the ground or on top of a trunk; source VarB LOD1"
+  },
+  {
+   "name": "palm_C_near",
+   "asset": "palm",
+   "variant": "C",
+   "lod": "near",
+   "triangles": 424,
+   "vertices": 320,
+   "bounds": {
+    "min": [
+     -1.465,
+     -0.022,
+     -1.299
+    ],
+    "max": [
+     1.961,
+     1.452,
+     2.075
+    ]
+   },
+   "texture": "scan_palm.webp",
+   "alpha": true,
+   "kind": "palm-crown",
+   "tiles": false,
+   "note": "understory palm (Areca): fronds radiate from the origin; use on the ground or on top of a trunk; source VarC LOD1"
+  },
+  {
+   "name": "fanpalm_A_near",
+   "asset": "fanpalm",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 321,
+   "vertices": 395,
+   "bounds": {
+    "min": [
+     -1.183,
+     -0.009,
+     -1.123
+    ],
+    "max": [
+     1.446,
+     1.507,
+     1.311
+    ]
+   },
+   "texture": "scan_fanpalm.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "fan palm fronds from a ground rosette; source VarB LOD2"
+  },
+  {
+   "name": "fanpalm_B_near",
+   "asset": "fanpalm",
+   "variant": "B",
+   "lod": "near",
+   "triangles": 667,
+   "vertices": 771,
+   "bounds": {
+    "min": [
+     -1.293,
+     -0.015,
+     -1.237
+    ],
+    "max": [
+     1.31,
+     1.006,
+     1.264
+    ]
+   },
+   "texture": "scan_fanpalm.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "fan palm fronds from a ground rosette; source VarC LOD1"
+  },
+  {
+   "name": "fanpalm_C_near",
+   "asset": "fanpalm",
+   "variant": "C",
+   "lod": "near",
+   "triangles": 409,
+   "vertices": 491,
+   "bounds": {
+    "min": [
+     -0.73,
+     -0.014,
+     -0.645
+    ],
+    "max": [
+     0.71,
+     1.11,
+     0.836
+    ]
+   },
+   "texture": "scan_fanpalm.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "fan palm fronds from a ground rosette; source VarG LOD1"
+  },
+  {
+   "name": "fern_A_near",
+   "asset": "fern",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 360,
+   "vertices": 327,
+   "bounds": {
+    "min": [
+     -0.714,
+     -0.048,
+     -0.702
+    ],
+    "max": [
+     0.638,
+     0.619,
+     0.717
+    ]
+   },
+   "texture": "scan_fern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "fern clump; source VarA LOD0"
+  },
+  {
+   "name": "fern_A_far",
+   "asset": "fern",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 128,
+   "vertices": 166,
+   "bounds": {
+    "min": [
+     -0.714,
+     -0.046,
+     -0.702
+    ],
+    "max": [
+     0.646,
+     0.624,
+     0.717
+    ]
+   },
+   "texture": "scan_fern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "fern clump; source VarA LOD2"
+  },
+  {
+   "name": "fern_B_near",
+   "asset": "fern",
+   "variant": "B",
+   "lod": "near",
+   "triangles": 516,
+   "vertices": 459,
+   "bounds": {
+    "min": [
+     -0.981,
+     -0.044,
+     -0.716
+    ],
+    "max": [
+     0.745,
+     0.642,
+     0.774
+    ]
+   },
+   "texture": "scan_fern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "fern clump; source VarB LOD0"
+  },
+  {
+   "name": "fern_C_near",
+   "asset": "fern",
+   "variant": "C",
+   "lod": "near",
+   "triangles": 384,
+   "vertices": 342,
+   "bounds": {
+    "min": [
+     -0.835,
+     -0.113,
+     -0.672
+    ],
+    "max": [
+     0.812,
+     0.635,
+     1.026
+    ]
+   },
+   "texture": "scan_fern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "fern clump; source VarC LOD0"
+  },
+  {
+   "name": "fern_C_far",
+   "asset": "fern",
+   "variant": "C",
+   "lod": "far",
+   "triangles": 130,
+   "vertices": 166,
+   "bounds": {
+    "min": [
+     -0.858,
+     -0.096,
+     -0.683
+    ],
+    "max": [
+     0.834,
+     0.639,
+     1.055
+    ]
+   },
+   "texture": "scan_fern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "fern clump; source VarC LOD2"
+  },
+  {
+   "name": "leatherfern_A_near",
+   "asset": "leatherfern",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 442,
+   "vertices": 419,
+   "bounds": {
+    "min": [
+     -0.626,
+     -0.009,
+     -0.626
+    ],
+    "max": [
+     0.843,
+     0.495,
+     0.659
+    ]
+   },
+   "texture": "scan_leatherfern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "leather fern, low spreading clump; source VarA LOD0"
+  },
+  {
+   "name": "leatherfern_B_near",
+   "asset": "leatherfern",
+   "variant": "B",
+   "lod": "near",
+   "triangles": 370,
+   "vertices": 353,
+   "bounds": {
+    "min": [
+     -0.526,
+     -0.011,
+     -0.671
+    ],
+    "max": [
+     0.552,
+     0.327,
+     0.552
+    ]
+   },
+   "texture": "scan_leatherfern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "leather fern, low spreading clump; source VarC LOD0"
+  },
+  {
+   "name": "leatherfern_B_far",
+   "asset": "leatherfern",
+   "variant": "B",
+   "lod": "far",
+   "triangles": 125,
+   "vertices": 173,
+   "bounds": {
+    "min": [
+     -0.516,
+     -0.011,
+     -0.693
+    ],
+    "max": [
+     0.552,
+     0.317,
+     0.552
+    ]
+   },
+   "texture": "scan_leatherfern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "leather fern, low spreading clump; source VarC LOD2"
+  },
+  {
+   "name": "leatherfern_C_near",
+   "asset": "leatherfern",
+   "variant": "C",
+   "lod": "near",
+   "triangles": 300,
+   "vertices": 325,
+   "bounds": {
+    "min": [
+     -0.388,
+     -0.003,
+     -0.447
+    ],
+    "max": [
+     0.403,
+     0.171,
+     0.342
+    ]
+   },
+   "texture": "scan_leatherfern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "leather fern, low spreading clump; source VarD LOD0"
+  },
+  {
+   "name": "leatherfern_C_far",
+   "asset": "leatherfern",
+   "variant": "C",
+   "lod": "far",
+   "triangles": 110,
+   "vertices": 168,
+   "bounds": {
+    "min": [
+     -0.388,
+     -0.003,
+     -0.453
+    ],
+    "max": [
+     0.403,
+     0.161,
+     0.342
+    ]
+   },
+   "texture": "scan_leatherfern.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "leather fern, low spreading clump; source VarD LOD2"
+  },
+  {
+   "name": "canna_A_near",
+   "asset": "canna",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 624,
+   "vertices": 656,
+   "bounds": {
+    "min": [
+     -0.661,
+     -0.009,
+     -0.479
+    ],
+    "max": [
+     0.593,
+     2.381,
+     0.539
+    ]
+   },
+   "texture": "scan_canna.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "canna lily (A tall with flower, D and E medium; the other variants are wilted or over budget); source VarA LOD2"
+  },
+  {
+   "name": "canna_B_near",
+   "asset": "canna",
+   "variant": "B",
+   "lod": "near",
+   "triangles": 592,
+   "vertices": 495,
+   "bounds": {
+    "min": [
+     -0.506,
+     -0.021,
+     -0.475
+    ],
+    "max": [
+     0.583,
+     1.697,
+     0.594
+    ]
+   },
+   "texture": "scan_canna.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "canna lily (A tall with flower, D and E medium; the other variants are wilted or over budget); source VarD LOD1"
+  },
+  {
+   "name": "canna_C_near",
+   "asset": "canna",
+   "variant": "C",
+   "lod": "near",
+   "triangles": 327,
+   "vertices": 401,
+   "bounds": {
+    "min": [
+     -0.891,
+     -0.043,
+     -0.473
+    ],
+    "max": [
+     0.766,
+     1.697,
+     0.546
+    ]
+   },
+   "texture": "scan_canna.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "canna lily (A tall with flower, D and E medium; the other variants are wilted or over budget); source VarE LOD2"
+  },
+  {
+   "name": "waterlily_A_near",
+   "asset": "waterlily",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 263,
+   "vertices": 227,
+   "bounds": {
+    "min": [
+     -0.474,
+     -0.04,
+     -0.637
+    ],
+    "max": [
+     0.417,
+     0.022,
+     0.335
+    ]
+   },
+   "texture": "scan_waterlily.webp",
+   "alpha": true,
+   "kind": "water-plant",
+   "tiles": false,
+   "note": "pads float at y=0 (water surface); submerged stems below \u22124 cm were cut off; source VarA LOD0"
+  },
+  {
+   "name": "waterlily_A_far",
+   "asset": "waterlily",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 90,
+   "vertices": 117,
+   "bounds": {
+    "min": [
+     -0.52,
+     -0.04,
+     -0.661
+    ],
+    "max": [
+     0.384,
+     0.022,
+     0.329
+    ]
+   },
+   "texture": "scan_waterlily.webp",
+   "alpha": true,
+   "kind": "water-plant",
+   "tiles": false,
+   "note": "pads float at y=0 (water surface); submerged stems below \u22124 cm were cut off; source VarA LOD2"
+  },
+  {
+   "name": "waterlily_B_near",
+   "asset": "waterlily",
+   "variant": "B",
+   "lod": "near",
+   "triangles": 516,
+   "vertices": 385,
+   "bounds": {
+    "min": [
+     -0.605,
+     -0.04,
+     -0.798
+    ],
+    "max": [
+     0.725,
+     0.154,
+     0.634
+    ]
+   },
+   "texture": "scan_waterlily.webp",
+   "alpha": true,
+   "kind": "water-plant",
+   "tiles": false,
+   "note": "pads float at y=0 (water surface); submerged stems below \u22124 cm were cut off; source VarC LOD0"
+  },
+  {
+   "name": "waterlily_C_near",
+   "asset": "waterlily",
+   "variant": "C",
+   "lod": "near",
+   "triangles": 496,
+   "vertices": 809,
+   "bounds": {
+    "min": [
+     -0.697,
+     -0.04,
+     -0.482
+    ],
+    "max": [
+     0.601,
+     0.114,
+     0.58
+    ]
+   },
+   "texture": "scan_waterlily.webp",
+   "alpha": true,
+   "kind": "water-plant",
+   "tiles": false,
+   "note": "pads float at y=0 (water surface); submerged stems below \u22124 cm were cut off; source VarG LOD1"
+  },
+  {
+   "name": "banana_A_near",
+   "asset": "banana",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 224,
+   "vertices": 189,
+   "bounds": {
+    "min": [
+     -1.583,
+     0.0,
+     -1.661
+    ],
+    "max": [
+     1.509,
+     2.342,
+     1.421
+    ]
+   },
+   "texture": "scan_banana.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (scan leaf is 1.06 m long; scaled up). large clump of 7 arching leaves about 2.6 m long"
+  },
+  {
+   "name": "banana_A_far",
+   "asset": "banana",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 42,
+   "vertices": 56,
+   "bounds": {
+    "min": [
+     -1.591,
+     0.008,
+     -1.669
+    ],
+    "max": [
+     1.499,
+     2.359,
+     1.426
+    ]
+   },
+   "texture": "scan_banana.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (scan leaf is 1.06 m long; scaled up). large clump of 7 arching leaves about 2.6 m long (flat 6-triangle leaves)"
+  },
+  {
+   "name": "banana_B_near",
+   "asset": "banana",
+   "variant": "B",
+   "lod": "near",
+   "triangles": 128,
+   "vertices": 108,
+   "bounds": {
+    "min": [
+     -0.533,
+     0.0,
+     -1.116
+    ],
+    "max": [
+     0.778,
+     1.466,
+     0.736
+    ]
+   },
+   "texture": "scan_banana.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (scan leaf is 1.06 m long; scaled up). young plant, 4 leaves about 1.7 m long"
+  },
+  {
+   "name": "banana_B_far",
+   "asset": "banana",
+   "variant": "B",
+   "lod": "far",
+   "triangles": 24,
+   "vertices": 32,
+   "bounds": {
+    "min": [
+     -0.521,
+     0.01,
+     -1.116
+    ],
+    "max": [
+     0.763,
+     1.474,
+     0.733
+    ]
+   },
+   "texture": "scan_banana.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (scan leaf is 1.06 m long; scaled up). young plant, 4 leaves about 1.7 m long (flat 6-triangle leaves)"
+  },
+  {
+   "name": "banana_C_near",
+   "asset": "banana",
+   "variant": "C",
+   "lod": "near",
+   "triangles": 32,
+   "vertices": 27,
+   "bounds": {
+    "min": [
+     -0.097,
+     0.0,
+     -0.429
+    ],
+    "max": [
+     1.609,
+     1.92,
+     0.578
+    ]
+   },
+   "texture": "scan_banana.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (scan leaf is 1.06 m long; scaled up). single arching 2.6 m leaf heading +X, to hang on a stem or wall"
+  },
+  {
+   "name": "banana_C_far",
+   "asset": "banana",
+   "variant": "C",
+   "lod": "far",
+   "triangles": 6,
+   "vertices": 8,
+   "bounds": {
+    "min": [
+     -0.097,
+     0.009,
+     -0.429
+    ],
+    "max": [
+     1.616,
+     1.948,
+     0.578
+    ]
+   },
+   "texture": "scan_banana.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (scan leaf is 1.06 m long; scaled up). single arching 2.6 m leaf heading +X, to hang on a stem or wall (flat 6-triangle leaves)"
+  },
+  {
+   "name": "elephantear_A_near",
+   "asset": "elephantear",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 168,
+   "vertices": 196,
+   "bounds": {
+    "min": [
+     -1.287,
+     -0.011,
+     -0.943
+    ],
+    "max": [
+     0.969,
+     1.508,
+     1.06
+    ]
+   },
+   "texture": "scan_elephantear.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (blades 0.59 m and 0.34 m long on the scan; scaled). big clump, 7 leaves on stalks"
+  },
+  {
+   "name": "elephantear_A_far",
+   "asset": "elephantear",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 28,
+   "vertices": 56,
+   "bounds": {
+    "min": [
+     -1.295,
+     0.0,
+     -0.945
+    ],
+    "max": [
+     0.971,
+     1.47,
+     1.065
+    ]
+   },
+   "texture": "scan_elephantear.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (blades 0.59 m and 0.34 m long on the scan; scaled). big clump, 7 leaves on stalks (2-triangle blades)"
+  },
+  {
+   "name": "elephantear_B_near",
+   "asset": "elephantear",
+   "variant": "B",
+   "lod": "near",
+   "triangles": 96,
+   "vertices": 112,
+   "bounds": {
+    "min": [
+     -0.792,
+     -0.007,
+     -0.704
+    ],
+    "max": [
+     0.998,
+     1.011,
+     0.739
+    ]
+   },
+   "texture": "scan_elephantear.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (blades 0.59 m and 0.34 m long on the scan; scaled). small clump, 4 leaves"
+  },
+  {
+   "name": "elephantear_B_far",
+   "asset": "elephantear",
+   "variant": "B",
+   "lod": "far",
+   "triangles": 16,
+   "vertices": 32,
+   "bounds": {
+    "min": [
+     -0.794,
+     0.0,
+     -0.708
+    ],
+    "max": [
+     1.002,
+     0.979,
+     0.741
+    ]
+   },
+   "texture": "scan_elephantear.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "built from the leaf atlas (blades 0.59 m and 0.34 m long on the scan; scaled). small clump, 4 leaves (2-triangle blades)"
+  },
+  {
+   "name": "vine_A_near",
+   "asset": "vine",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 96,
+   "vertices": 81,
+   "bounds": {
+    "min": [
+     -0.294,
+     -3.6,
+     -0.308
+    ],
+    "max": [
+     0.294,
+     0.0,
+     0.284
+    ]
+   },
+   "texture": "scan_vine.webp",
+   "alpha": true,
+   "kind": "hanging",
+   "tiles": true,
+   "note": "built from the tileable ivy atlas (2 m per repeat); top attachment at the origin, hangs toward \u2212Y. 3 crossed ribbons 3.6 m long. V runs 0..1.8: needs RepeatWrapping"
+  },
+  {
+   "name": "vine_A_far",
+   "asset": "vine",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 12,
+   "vertices": 16,
+   "bounds": {
+    "min": [
+     -0.294,
+     -3.6,
+     -0.294
+    ],
+    "max": [
+     0.294,
+     0.0,
+     0.294
+    ]
+   },
+   "texture": "scan_vine.webp",
+   "alpha": true,
+   "kind": "hanging",
+   "tiles": true,
+   "note": "built from the tileable ivy atlas (2 m per repeat); top attachment at the origin, hangs toward \u2212Y. 2 crossed ribbons. V runs 0..1.8: needs RepeatWrapping"
+  },
+  {
+   "name": "vine_B_near",
+   "asset": "vine",
+   "variant": "B",
+   "lod": "near",
+   "triangles": 60,
+   "vertices": 42,
+   "bounds": {
+    "min": [
+     -1.0,
+     -2.0,
+     -0.217
+    ],
+    "max": [
+     1.0,
+     -0.0,
+     0.234
+    ]
+   },
+   "texture": "scan_vine.webp",
+   "alpha": true,
+   "kind": "hanging",
+   "tiles": false,
+   "note": "built from the tileable ivy atlas (2 m per repeat); top attachment at the origin, hangs toward \u2212Y. wavy curtain 2 m wide \u00d7 2 m, top edge along X (exactly one texture repeat)"
+  },
+  {
+   "name": "vine_B_far",
+   "asset": "vine",
+   "variant": "B",
+   "lod": "far",
+   "triangles": 8,
+   "vertices": 9,
+   "bounds": {
+    "min": [
+     -1.0,
+     -2.0,
+     -0.165
+    ],
+    "max": [
+     1.0,
+     -0.0,
+     0.213
+    ]
+   },
+   "texture": "scan_vine.webp",
+   "alpha": true,
+   "kind": "hanging",
+   "tiles": false,
+   "note": "built from the tileable ivy atlas (2 m per repeat); top attachment at the origin, hangs toward \u2212Y. curtain, 8 triangles"
+  },
+  {
+   "name": "vine_C_near",
+   "asset": "vine",
+   "variant": "C",
+   "lod": "near",
+   "triangles": 40,
+   "vertices": 36,
+   "bounds": {
+    "min": [
+     -0.245,
+     -1.6,
+     -0.245
+    ],
+    "max": [
+     0.247,
+     0.0,
+     0.245
+    ]
+   },
+   "texture": "scan_vine.webp",
+   "alpha": true,
+   "kind": "hanging",
+   "tiles": false,
+   "note": "built from the tileable ivy atlas (2 m per repeat); top attachment at the origin, hangs toward \u2212Y. short tuft, 2 crossed ribbons 1.6 m"
+  },
+  {
+   "name": "vine_C_far",
+   "asset": "vine",
+   "variant": "C",
+   "lod": "far",
+   "triangles": 8,
+   "vertices": 12,
+   "bounds": {
+    "min": [
+     -0.245,
+     -1.6,
+     -0.245
+    ],
+    "max": [
+     0.245,
+     0.0,
+     0.245
+    ]
+   },
+   "texture": "scan_vine.webp",
+   "alpha": true,
+   "kind": "hanging",
+   "tiles": false,
+   "note": "built from the tileable ivy atlas (2 m per repeat); top attachment at the origin, hangs toward \u2212Y. short tuft, 8 triangles"
+  },
+  {
+   "name": "root_A_near",
+   "asset": "root",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 1080,
+   "vertices": 610,
+   "bounds": {
+    "min": [
+     -1.328,
+     0.0,
+     -1.467
+    ],
+    "max": [
+     1.309,
+     3.0,
+     1.139
+    ]
+   },
+   "texture": "scan_root.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": true,
+   "note": "PROCEDURAL buttress flare (5 fins, 3 m tall, trunk axis at the origin so it is not bbox-centred, open top: put a 0.75 m wide trunk on it); textured with the tileable buttress-root bark scan. U runs 0..3 and V 0..1.5: needs RepeatWrapping"
+  },
+  {
+   "name": "root_A_far",
+   "asset": "root",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 240,
+   "vertices": 155,
+   "bounds": {
+    "min": [
+     -1.328,
+     0.0,
+     -1.467
+    ],
+    "max": [
+     1.309,
+     3.0,
+     1.124
+    ]
+   },
+   "texture": "scan_root.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": true,
+   "note": "PROCEDURAL buttress flare (5 fins, 3 m tall, trunk axis at the origin so it is not bbox-centred, open top: put a 0.75 m wide trunk on it); textured with the tileable buttress-root bark scan. U runs 0..3 and V 0..1.5: needs RepeatWrapping"
+  },
+  {
+   "name": "trunk_A_near",
+   "asset": "trunk",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 1500,
+   "vertices": 1532,
+   "bounds": {
+    "min": [
+     -0.629,
+     0.0,
+     -0.489
+    ],
+    "max": [
+     0.629,
+     1.877,
+     0.489
+    ]
+   },
+   "texture": "scan_trunk.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "ficus trunk base with roots, 1.9 m tall stump; source 4018 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "trunk_A_far",
+   "asset": "trunk",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 442,
+   "vertices": 662,
+   "bounds": {
+    "min": [
+     -0.622,
+     0.0,
+     -0.455
+    ],
+    "max": [
+     0.622,
+     1.881,
+     0.455
+    ]
+   },
+   "texture": "scan_trunk.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "ficus trunk base with roots, 1.9 m tall stump; source 4018 triangles, decimated with Blender (collapse); OVER the 300 budget: the holes between the roots stop the collapse here"
+  },
+  {
+   "name": "log_A_near",
+   "asset": "log",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 1090,
+   "vertices": 917,
+   "bounds": {
+    "min": [
+     -0.231,
+     0.0,
+     -0.072
+    ],
+    "max": [
+     0.231,
+     0.126,
+     0.072
+    ]
+   },
+   "texture": "scan_log.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "small mossy log, only 0.46 m long at true scale: scale it up in the game for a big log; source 1090 triangles"
+  },
+  {
+   "name": "log_A_far",
+   "asset": "log",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 300,
+   "vertices": 368,
+   "bounds": {
+    "min": [
+     -0.23,
+     0.0,
+     -0.069
+    ],
+    "max": [
+     0.23,
+     0.126,
+     0.069
+    ]
+   },
+   "texture": "scan_log.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "small mossy log, only 0.46 m long at true scale: scale it up in the game for a big log; source 1090 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "driftwood_A_near",
+   "asset": "driftwood",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 1500,
+   "vertices": 1012,
+   "bounds": {
+    "min": [
+     -0.412,
+     0.0,
+     -0.074
+    ],
+    "max": [
+     0.412,
+     0.127,
+     0.074
+    ]
+   },
+   "texture": "scan_driftwood.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "driftwood branch, 0.82 m; source 4370 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "driftwood_A_far",
+   "asset": "driftwood",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 300,
+   "vertices": 261,
+   "bounds": {
+    "min": [
+     -0.412,
+     0.0,
+     -0.073
+    ],
+    "max": [
+     0.412,
+     0.127,
+     0.073
+    ]
+   },
+   "texture": "scan_driftwood.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "driftwood branch, 0.82 m; source 4370 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "oar_A_near",
+   "asset": "oar",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 1500,
+   "vertices": 1042,
+   "bounds": {
+    "min": [
+     -1.188,
+     0.0,
+     -0.052
+    ],
+    "max": [
+     1.188,
+     0.078,
+     0.052
+    ]
+   },
+   "texture": "scan_oar.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "old wooden oar, 2.4 m, lying flat along X; source 3870 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "oar_A_far",
+   "asset": "oar",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 300,
+   "vertices": 281,
+   "bounds": {
+    "min": [
+     -1.186,
+     0.0,
+     -0.052
+    ],
+    "max": [
+     1.186,
+     0.075,
+     0.052
+    ]
+   },
+   "texture": "scan_oar.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "old wooden oar, 2.4 m, lying flat along X; source 3870 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "canoe_A_near",
+   "asset": "canoe",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 1500,
+   "vertices": 1014,
+   "bounds": {
+    "min": [
+     -2.245,
+     0.0,
+     -0.385
+    ],
+    "max": [
+     2.245,
+     0.379,
+     0.385
+    ]
+   },
+   "texture": "scan_canoe.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "worn wooden canoe, 4.5 m, keel resting on y=0, bow/stern along X; source 2782 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "canoe_A_far",
+   "asset": "canoe",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 300,
+   "vertices": 287,
+   "bounds": {
+    "min": [
+     -2.238,
+     0.0,
+     -0.383
+    ],
+    "max": [
+     2.238,
+     0.377,
+     0.383
+    ]
+   },
+   "texture": "scan_canoe.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "worn wooden canoe, 4.5 m, keel resting on y=0, bow/stern along X; source 2782 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "liana_A_near",
+   "asset": "liana",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 1458,
+   "vertices": 1162,
+   "bounds": {
+    "min": [
+     -0.128,
+     -2.322,
+     -0.192
+    ],
+    "max": [
+     0.09,
+     0.0,
+     0.119
+    ]
+   },
+   "texture": "scan_liana.webp",
+   "alpha": false,
+   "kind": "hanging",
+   "tiles": false,
+   "note": "woody liana stem, 2.3 m piece: stack or stretch for longer runs; source 1458 triangles"
+  },
+  {
+   "name": "liana_A_far",
+   "asset": "liana",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 299,
+   "vertices": 369,
+   "bounds": {
+    "min": [
+     -0.13,
+     -2.321,
+     -0.197
+    ],
+    "max": [
+     0.083,
+     0.0,
+     0.122
+    ]
+   },
+   "texture": "scan_liana.webp",
+   "alpha": false,
+   "kind": "hanging",
+   "tiles": false,
+   "note": "woody liana stem, 2.3 m piece: stack or stretch for longer runs; source 1458 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "fallentree_A_near",
+   "asset": "fallentree",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 1500,
+   "vertices": 1327,
+   "bounds": {
+    "min": [
+     -0.883,
+     0.0,
+     -0.445
+    ],
+    "max": [
+     0.883,
+     0.475,
+     0.445
+    ]
+   },
+   "texture": "scan_fallentree.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "fallen mossy tree piece with roots, 1.8 m; source 1631 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "fallentree_A_far",
+   "asset": "fallentree",
+   "variant": "A",
+   "lod": "far",
+   "triangles": 299,
+   "vertices": 398,
+   "bounds": {
+    "min": [
+     -0.879,
+     0.0,
+     -0.445
+    ],
+    "max": [
+     0.879,
+     0.385,
+     0.445
+    ]
+   },
+   "texture": "scan_fallentree.webp",
+   "alpha": false,
+   "kind": "solid",
+   "tiles": false,
+   "note": "fallen mossy tree piece with roots, 1.8 m; source 1631 triangles, decimated with Blender (collapse)"
+  },
+  {
+   "name": "debris_A_near",
+   "asset": "debris",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 2,
+   "vertices": 4,
+   "bounds": {
+    "min": [
+     -1.0,
+     0.02,
+     -1.0
+    ],
+    "max": [
+     1.0,
+     0.02,
+     1.0
+    ]
+   },
+   "texture": "scan_debris.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "flat 2\u00d72 m ground decal quad lying 2 cm above y=0, facing up: scattered dry palm litter and twigs, tileable"
+  },
+  {
+   "name": "leaflitter_A_near",
+   "asset": "leaflitter",
+   "variant": "A",
+   "lod": "near",
+   "triangles": 2,
+   "vertices": 4,
+   "bounds": {
+    "min": [
+     -0.5,
+     0.02,
+     -0.5
+    ],
+    "max": [
+     0.5,
+     0.02,
+     0.5
+    ]
+   },
+   "texture": "scan_leaflitter.webp",
+   "alpha": true,
+   "kind": "ground-plant",
+   "tiles": false,
+   "note": "flat 1\u00d71 m ground decal quad lying 2 cm above y=0, facing up: about 50 separate dry leaves"
+  }
+ ]
+}

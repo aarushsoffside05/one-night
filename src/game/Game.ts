@@ -288,6 +288,7 @@ export class Game {
       play(mode: 'roam' | 'story', scene = 0) { g.startPlay(mode, scene) },
       // run a scene with the bot until its log shows a line containing `mark` (plus some seconds), then stop there for a picture
       sceneUntil(i: number, mark: string, extra = 0.5) {
+        g.frozen = false
         const S = g.story; S.bot = true; S.botHold = 'right'; S.log = []
         g.startPlay('story', i)
         let t = 0, hit = -1; const dt = 1 / 30
@@ -297,6 +298,7 @@ export class Game {
       },
       // run one story scene with the bot at the controls; returns its log
       runScene(i: number, how: 'right' | 'rush' | 'film' = 'right', maxSeconds = 900) {
+        g.frozen = false
         const S = g.story; S.bot = true; S.botHold = how; S.log = []
         g.startPlay('story', i)
         let t = 0; const dt = 1 / 30

@@ -45,6 +45,7 @@ export function parseGlb(bytes: Uint8Array): Record<string, THREE.BufferGeometry
       const col = new Float32Array(P.count * 3).fill(1)
       if (prim.attributes.COLOR_0 !== undefined) { const C = acc(prim.attributes.COLOR_0); for (let i = 0; i < P.count; i++) for (let c = 0; c < 3; c++) col[i * 3 + c] = C.data[i * C.comps + c] }
       g.setAttribute('color', new THREE.BufferAttribute(col, 3))
+      if (prim.attributes.TEXCOORD_0 !== undefined) g.setAttribute('uv', new THREE.BufferAttribute(acc(prim.attributes.TEXCOORD_0).data, 2))
       if (prim.indices !== undefined) { const I = acc(prim.indices); g.setIndex(new THREE.BufferAttribute(P.count > 65535 ? Uint32Array.from(I.data) : Uint16Array.from(I.data), 1)) }
       if (!g.attributes.normal) g.computeVertexNormals()
       geos.push(g)

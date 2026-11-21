@@ -16,6 +16,17 @@ import planks from '../assets/tex/planks.jpg?inline'
 import paint from '../assets/tex/paint.jpg?inline'
 import thatch from '../assets/tex/thatch.jpg?inline'
 
+import sFern from '../assets/tex/scan_fern.webp?inline'
+import sLeather from '../assets/tex/scan_leatherfern.webp?inline'
+import sPalm from '../assets/tex/scan_palm.webp?inline'
+import sFan from '../assets/tex/scan_fanpalm.webp?inline'
+import sBanana from '../assets/tex/scan_banana.webp?inline'
+import sEar from '../assets/tex/scan_elephantear.webp?inline'
+import sLily from '../assets/tex/scan_waterlily.webp?inline'
+import sCanna from '../assets/tex/scan_canna.webp?inline'
+
+export const PLANT_URLS = { fern: sFern, leatherfern: sLeather, palm: sPalm, fanpalm: sFan, banana: sBanana, elephantear: sEar, waterlily: sLily, canna: sCanna }
+export const PLANT_TEX = {} as Record<keyof typeof PLANT_URLS, THREE.Texture>
 const URLS = { floor, floor2, mud, crack, sand, soil, kapok, banyan, planks, paint, thatch }
 export type ScanName = keyof typeof URLS
 export const SCAN = {} as Record<ScanName, THREE.Texture>
@@ -23,6 +34,12 @@ export const SCAN = {} as Record<ScanName, THREE.Texture>
 export async function loadScans(onProgress: (f: number) => void) {
   const names = Object.keys(URLS) as ScanName[]
   let done = 0
+  await Promise.all((Object.keys(PLANT_URLS) as (keyof typeof PLANT_URLS)[]).map(async (n) => {
+    const img = new Image(); img.src = PLANT_URLS[n]; await img.decode()
+    const t = new THREE.Texture(img); t.flipY = false; t.colorSpace = THREE.SRGBColorSpace
+    t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.generateMipmaps = true; t.anisotropy = 4; t.needsUpdate = true
+    PLANT_TEX[n] = t
+  }))
   await Promise.all(names.map(async (n) => {
     const img = new Image(); img.src = URLS[n]; await img.decode()
     const t = new THREE.Texture(img)
