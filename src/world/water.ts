@@ -6,6 +6,7 @@ import * as T from 'three/tsl';
 import { U } from './uniforms';
 import { waterYAt } from './worldmat';
 import * as L from './layout';
+import { rippleHeight } from './ripples';
 
 const t: any = T;
 
@@ -40,7 +41,7 @@ export function makeWater(hooks: WaterHooks = {}): THREE.Mesh {
   const wave = (p: any) => t.sin(p.x.mul(0.9).add(U.time.mul(1.1))).mul(t.cos(p.y.mul(0.7).sub(U.time.mul(0.8))))
     .add(t.sin(p.x.mul(0.31).sub(p.y.mul(0.43)).add(U.time.mul(0.6))).mul(1.4))
     .add(t.sin(p.x.mul(2.3).add(p.y.mul(1.9)).add(U.time.mul(1.9))).mul(0.35));
-  const hgt = wave(xz).mul(amp).add(hooks.ripple ? hooks.ripple(xz) : 0);
+  const hgt = wave(xz).mul(amp).add(rippleHeight(xz));
   const wy = waterYAt(xz);
   m.positionNode = t.vec3(xz.x, wy.add(hgt), xz.y);
 
@@ -49,7 +50,7 @@ export function makeWater(hooks: WaterHooks = {}): THREE.Mesh {
   const dx = t.dFdx(wp), dy = t.dFdy(wp);
   const nRaw = t.cross(dx, dy).normalize();
   const nUp = t.select(nRaw.y.lessThan(0.0), nRaw.negate(), nRaw);
-  const nW = t.vec3(nUp.x.mul(2.4), nUp.y, nUp.z.mul(2.4)).normalize();
+  const nW = t.vec3(nUp.x.mul(1.5), nUp.y, nUp.z.mul(1.5)).normalize();
   m.normalNode = t.transformNormalToView(nW);
 
   const view = t.cameraPosition.sub(wp).normalize();

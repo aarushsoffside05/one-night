@@ -22,6 +22,8 @@ import { Player, bindInput, type Solid } from './player';
 import { buildCanoe } from './props';
 import { Quality, markLoading } from './quality';
 import { Particles } from './particles';
+import { Animals } from './animals';
+import { addRipple } from './ripples';
 import { Bench } from './bench';
 import { bus } from '../state';
 import * as L from './layout';
@@ -55,6 +57,8 @@ export class Engine {
   cover!: Cover;
   people!: People;
   particles!: Particles;
+  animals!: Animals;
+  wakeAt = 0;
   player!: Player;
   solids: Solid[] = [];
   lampSpot = new THREE.SpotLight(0xffc27a, 0, 26, 0.95, 0.6, 1.4);
@@ -96,6 +100,7 @@ export class Engine {
     if (params.cam) this.setFixedCam(params.cam);
     const pp = new URLSearchParams(location.search).get('p');
     if (pp) { const [x, z, yaw] = pp.split(',').map(Number); this.player.place(x, z, yaw || 0); }
+    if (new URLSearchParams(location.search).has('roll')) { const pl = this.player; this.animals.triggerRoll(pl.pos.x + Math.sin(pl.yaw + 0.35) * 5.5, pl.pos.z + Math.cos(pl.yaw + 0.35) * 5.5, pl.yaw + 1.4); sim.time += 2.1; }
     this.updateEnv(0);
     setUI({ loading: { stage: 'Warming the light', f: 0.6 } });
     this.cover.update(r, this.camera); // run every compute pass once before play
@@ -144,6 +149,7 @@ export class Engine {
     scene.background = null;
     // free the cook's scratch arrays that were uploaded
     (c.terrain as any).mesh = null;
+    this.animals = new Animals(this.tex); scene.add(this.animals.group);
     // people and the kid
     this.people = new People(this.tex); scene.add(this.people.group);
     const kidLook: Look = { height: 1.5, skin: 'skinB', hair: 'hair', shirt: 'shirtYellow', shorts: 'shortsDark', shoe: 'shoe', sleeves: true, longLegs: false, pack: 'paintTeal' };
@@ -231,6 +237,14 @@ export class Engine {
     }
     this.camera.updateMatrixWorld();
     this.people.update(sim.time);
+    this.animals.update(this.focus, (x, z) => this.groundAt(x, z));
+    // the canoe leaves rings behind it
+    if (sim.onWater && Math.abs(this.player.speed) > 0.4 && sim.time > this.wakeAt) { this.wakeAt = sim.time + 0.55; addRipple(this.player.pos.x - Math.sin(this.player.yaw) * 1.6, this.player.pos.z - Math.cos(this.player.yaw) * 1.6, sim.time, 0.045); }
+    // Roam: at first light on the lake the giant fish rolls near the kid now and then
+    if (sim.mode === 'roam' && sim.tod > 0.64 && sim.tod < 0.86 && sim.onWater && sim.time > this.animals.nextRoll && Math.hypot(this.player.pos.x - L.LAKE[0], this.player.pos.z - L.LAKE[1]) < 90) {
+      this.animals.nextRoll = sim.time + 16; const a = this.player.yaw + 0.5;
+      this.animals.triggerRoll(this.player.pos.x + Math.sin(a) * 6, this.player.pos.z + Math.cos(a) * 6, this.player.yaw + 1.3);
+    }
     this.updateLamp();
     this.updateEnv(dt);
     this.forest.update(this.camera, this.focus, this.detail, U.shadowR.value as number);

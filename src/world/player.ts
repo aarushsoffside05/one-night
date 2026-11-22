@@ -164,7 +164,7 @@ export class Player {
       const working = Math.abs(fwd) > 0 || Math.abs(steer) > 0;
       f.pose = working ? 'paddle' : 'sit'; if (working) f.phase += dt * 3.4;
       f.holdsPaddle = true; f.holdsLamp = false;
-      f.pos.set(this.pos.x - Math.sin(this.yaw) * 0.55, this.pos.y - 0.12, this.pos.z - Math.cos(this.yaw) * 0.55); f.yaw = this.yaw;
+      f.pos.set(this.pos.x - Math.sin(this.yaw) * 0.55, this.pos.y - 0.36, this.pos.z - Math.cos(this.yaw) * 0.55); f.yaw = this.yaw;
       // drift the camera behind the boat
       let d = this.canoeYaw - this.camYaw; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2;
       if (sim.time - lastLook > 1.2) this.camYaw += d * Math.min(1, dt * 1.6);
