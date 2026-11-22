@@ -1,5 +1,6 @@
 // Placement by rule, in the worker: trees, crowns, palms and all small cover, as flat instance records
 // (8 floats each: x, y, z, s, rot, seed, a, b) sorted by 50 m cell so the main thread can cull per cell.
+import { CAMS } from '../dev/cameras'
 import { rng, noise2, fbm2, seedInt } from './rng'
 import { Heightfield, heightFormula, kind } from './terrain'
 import { CHANNEL, DRYBED, TRAIL, YARDPATH, COMMUNITY, PLACES, CORE, distPoly, LAKE_LEVEL, polyAt } from './layout'
@@ -236,6 +237,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     const h = heightFormula(px, pz)
     if (h < 6.9 || kind.lake > 0.02 || kind.channel > 0.12 || kind.sand > 0.2 || kind.trail > 0.25 || kind.dry > 0.55) continue
     if (kind.high > 0.5 && n < 0.6) continue
+    if (CAMS.some((c) => Math.hypot(px - c.x, pz - c.z) < 4)) continue // nothing grows where the fixed viewpoints stand
     // most of the understory is now the scanned plants; a few of our own broad-leaf plants stay in the mix
     const pick = seed < 0.26 ? R.spFern : seed < 0.46 ? R.spFern2 : seed < 0.6 ? R.spLeather : seed < 0.7 ? R.spPalm : seed < 0.78 ? R.spFan : seed < 0.86 ? R.spBanana : seed < 0.93 ? R.spEar : R.broadleaf
     pick.push(px, h, pz, s, rot, seed, ru.range(0.8, 1.25), ru())

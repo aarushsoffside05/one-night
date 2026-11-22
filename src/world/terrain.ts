@@ -68,6 +68,9 @@ export function heightFormula(x: number, z: number): number {
   const riverBed = -5.5 + (n1 - 0.5) * 1.5
   h = mix(h, riverBed, ss(-3, 46, dr))
 
+  // the lip of the bank is not level: here and there it has caved and stands a man's height lower
+  h -= 2.3 * ss(0.56, 0.8, noise2(x / 10, z / 10, S + 91)) * ss(46, 22, dc) * (1 - high) * ss(0.1, 0.2, s)
+
   // the low-water channel: a trench with bare banks taller than a house
   const bedY = mix(-3.4, -0.7, ss(0.12, 1, s)) + (n2 - 0.5) * 0.7
   const wb = mix(12.5, 6.5, ss(0.2, 1, s)) + 2.5 * (noise2(s * 26, 1, S + 2) - 0.5)
@@ -76,7 +79,10 @@ export function heightFormula(x: number, z: number): number {
   const p = ss(wb, wb + run, dc + slump * ss(0.13, 0.22, s))
   // banks slump in steps: terraces left by the falling river
   // a gentle silt foot, then a steep cut face, then the lip; slumped in steps left by the falling river
-  const face = 0.3 * ss(0, 0.62, p) + 0.7 * ss(0.6, 0.9, p)
+  const steepF = 0.3 * ss(0, 0.62, p) + 0.7 * ss(0.6, 0.9, p)
+  // in places the face has slipped and left a shelf two-thirds of the way up; elsewhere it is one clean cut
+  const shelfF = 0.3 * ss(0, 0.62, p) + 0.3 * ss(0.6, 0.7, p) + 0.4 * ss(0.84, 0.98, p)
+  const face = mix(steepF, shelfF, ss(0.42, 0.62, noise2(x / 13, z / 13, S + 93)))
   const terr = face + 0.035 * Math.sin(p * 21) * p * (1 - p) * 4
   const carved = mix(bedY, h, Math.min(Math.max(terr, 0), 1))
   kind.channel = 1 - p

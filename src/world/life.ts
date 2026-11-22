@@ -290,7 +290,7 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
   })()
   fishMat.colorNode = Fn(() => {
     // the modelled fish carries its painted colour; add a wet shine along the back
-    return attribute('color', 'vec3').mul(0.13).add(U.skyHor.mul(0.3).mul(smoothstep(0.1, 0.19, positionLocal.y)))
+    return vec3(0.04, 0.055, 0.05).add(U.skyHor.mul(0.22).mul(smoothstep(0.1, 0.19, positionLocal.y)))
   })()
   const fishMesh = new THREE.Mesh(fishGeo, fishMat)
   fishMesh.visible = false
