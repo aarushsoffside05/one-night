@@ -222,9 +222,13 @@ def export(name, origin=(0, 0, 0), ao_dist=0.9, ao_strength=0.75, ground=None):
             try: nf = big.faces.new([vmap[v] for v in f.verts])
             except ValueError: continue
             for l, nl in zip(f.loops, nf.loops):
+                # hardened normals: the biggest faces round a corner own its normal, so chamfers
+                # carry the highlight, big faces stay flat, and corners stay shared (small files)
+                cand = [g for g in l.vert.link_faces if g.normal.dot(f.normal) >= cs]
+                amax = max(area[g] for g in cand) if cand else 0.0
                 n = Vector((0, 0, 0))
-                for g in l.vert.link_faces:
-                    if g.normal.dot(f.normal) >= cs: n += g.normal * area[g]
+                for g in cand:
+                    if area[g] >= 0.5 * amax: n += g.normal * area[g]
                 if n.length < 1e-9: n = f.normal.copy()
                 n.normalize()
                 nl[ln] = n

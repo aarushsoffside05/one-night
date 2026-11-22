@@ -61,6 +61,7 @@ export class Engine {
   particles!: Particles;
   animals!: Animals;
   wakeAt = 0;
+  canoeKit: KitMesh | null = null;
   player!: Player;
   solids: Solid[] = [];
   lampSpot = new THREE.SpotLight(0xffc27a, 0, 26, 0.95, 0.6, 1.4);
@@ -99,6 +100,7 @@ export class Engine {
     setUI({ loading: { stage: 'Unpacking the Blender pieces', f: 0.1 } });
     const crafted = new Map<number, [KitMesh, KitMesh]>();
     await Promise.all(TREE_KINDS.map(async (name, k) => { const [a, b] = await Promise.all([loadKit(`tree_${name}_0`), loadKit(`tree_${name}_1`)]); if (a && b) crafted.set(k, [a, b]); }));
+    this.canoeKit = await loadKit('canoe');
     this.build(cooked, crafted);
     if (params.water !== null) sim.water = sim.waterTarget = params.water;
     if (params.tod !== null) sim.tod = sim.todTarget = params.tod;
@@ -159,7 +161,7 @@ export class Engine {
     this.people = new People(this.tex); scene.add(this.people.group);
     const kidLook: Look = { height: 1.5, skin: 'skinB', hair: 'hair', shirt: 'shirtYellow', shorts: 'shortsDark', shoe: 'shoe', sleeves: true, longLegs: false, pack: 'paintTeal' };
     const kid = this.people.add(kidLook);
-    const canoe = new THREE.Mesh(makeKitGeometry(buildCanoe()), this.worldMat);
+    const canoe = this.canoeKit ? new THREE.Mesh(makeKitGeometry(this.canoeKit), makeWorldMaterial(this.tex, { asset: true, wind: false })) : new THREE.Mesh(makeKitGeometry(buildCanoe()), this.worldMat);
     canoe.castShadow = true; canoe.receiveShadow = true; canoe.name = 'canoe'; scene.add(canoe);
     this.player = new Player(kid, canoe, { groundAt: (x, z) => this.groundAt(x, z), forest: c.forest, solids: this.solids });
     this.player.place(L.BANK_TOP[0] + 8, L.BANK_TOP[1] + 12, 2.0);

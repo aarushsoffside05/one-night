@@ -15,3 +15,4 @@ pack/
 05-technique/
 06-bar/
 07-studio/
+__pycache__/
