@@ -256,9 +256,11 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
       const a = age()
       const d = length(uv().sub(0.5)).mul(2)
       // two or three concentric bands, thinning as they spread
-      const bands = smoothstep(0.2, 0.0, abs(d.sub(0.9))).add(smoothstep(0.1, 0.0, abs(d.sub(0.62))).mul(0.6)).add(smoothstep(0.08, 0.0, abs(d.sub(0.34))).mul(0.35))
+      const q = uv().sub(0.5)
+      const wob = sin(q.x.mul(9).add(ib.x)).mul(sin(q.y.mul(7).sub(ib.x.mul(1.7)))).mul(0.5).add(0.5)
+      const bands = smoothstep(0.045, 0.0, abs(d.sub(0.84))).add(smoothstep(0.035, 0.0, abs(d.sub(0.6))).mul(0.75)).add(smoothstep(0.028, 0.0, abs(d.sub(0.36))).mul(0.55)).mul(wob.mul(0.6).add(0.4))
       const fade = smoothstep(ib.y, 0.0, a)
-      const al = bands.mul(fade).mul(0.85)
+      const al = bands.mul(fade).mul(0.5)
       return vec4(mix(U.skyHor, vec3(1, 1, 1), 0.3).mul(U.amb.add(U.sunCol.mul(U.sunI).mul(0.3)).add(0.05)), al)
     })()
     m.colorNode = body.rgb; m.opacityNode = body.a

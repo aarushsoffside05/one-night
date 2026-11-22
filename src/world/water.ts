@@ -50,25 +50,38 @@ export function waterMaterial(useSceneDepth: boolean): THREE.Material {
     const hl = max(Rs.xz.length(), 0.001)
     const dir2 = Rs.xz.div(hl)
     const slope = max(Rs.y, 0.0).div(hl)
-    const jit = r2.mul(0.5).add(r3.mul(0.3)).add(0.6)
+    const jit = r2.mul(0.28).add(r1.mul(0.18)).add(0.77)
     let wall: any = float(0)
     for (const d0 of [5, 12, 26, 52, 100]) {
       const d = jit.mul(d0)
       const q = pw.xz.add(dir2.mul(d)).add(340).div(680)
       const top = texture(TEX.height, q).r.add(smoothstep(0.05, 0.5, texture(TEX.cover, q).r).mul(24))
-      wall = max(wall, smoothstep(-1.5, 5.0, top.sub(pw.y.add(slope.mul(d)))))
+      wall = max(wall, smoothstep(-3.0, 7.0, top.sub(pw.y.add(slope.mul(d)))))
     }
-    const forestCol = mix(vec3(0.035, 0.05, 0.02), vec3(0.09, 0.12, 0.04), r2).mul(U.amb.add(U.sunCol.mul(U.sunI).mul(0.3)))
-    refl = mix(refl, mix(forestCol, refl.mul(0.35), 0.3), wall.mul(0.92))
+    const lightF = U.amb.add(U.sunCol.mul(U.sunI).mul(0.3))
+    const forestCol = mix(vec3(0.035, 0.05, 0.02), vec3(0.09, 0.12, 0.04), r2).mul(lightF)
+    // under the trees the water mirrors what stands over it: the lit canopy in blotches, holes of sky,
+    // and every trunk as a dark streak running towards the eye
+    const here = texture(TEX.cover, worldUV()).r
+    const under = smoothstep(0.25, 0.7, here)
+    const rel = pw.xz.sub(cameraPosition.xz)
+    const ang = rel.x.div(rel.length().add(0.001))
+    const ang2 = rel.y.div(rel.length().add(0.001))
+    const streakN = noise(vec2(ang.mul(5.1).add(ang2.mul(3.3)).add(r2.sub(0.5).mul(0.05).mul(U.ripple)), rel.length().mul(0.006))).a
+    const trunkStreak = smoothstep(0.52, 0.66, streakN)
+    const blotch = noise(pw.xz.mul(0.035).add(Rs.xz.mul(2.0))).g
+    const holes = smoothstep(0.56, 0.86, noise(pw.xz.mul(0.021).add(Rs.xz.mul(3.0)).add(5.3)).r)
+    let canopy: any = mix(vec3(0.05, 0.085, 0.025), vec3(0.13, 0.2, 0.055), smoothstep(0.3, 0.7, blotch)).mul(lightF)
+    canopy = mix(canopy, refl.mul(0.75), holes.mul(0.85))
+    canopy = mix(canopy, vec3(0.03, 0.028, 0.02).mul(lightF), trunkStreak.mul(0.8))
+    const land = mix(mix(forestCol, refl.mul(0.35), 0.3), canopy, under)
+    refl = mix(refl, land, max(wall.mul(0.92), under.mul(0.9)))
     // a broad soft sheen under the sun or the moon
-    refl = refl.add(U.discCol.mul(pow(sd, 18)).mul(0.05).mul(wall.oneMinus()))
+    refl = refl.add(U.discCol.mul(pow(sd, 18)).mul(0.05).mul(wall.oneMinus()).mul(under.oneMinus()))
     // lamps lay a long warm path on the water
     const lampGlint = (L: any) => { const d = L.xyz.sub(pw); const dn = d.normalize(); return U.lampCol.mul(pow(max(dot(R, dn), 0), 40)).mul(L.w).mul(0.35).div(d.length().mul(d.length()).mul(0.012).add(1)) }
     refl = refl.add(lampGlint(U.lamp0)).add(lampGlint(U.lamp1)).add(lampGlint(U.lamp2))
-    // under the canopy the water lies in shade
-    const here = texture(TEX.cover, worldUV()).r
-    refl = refl.mul(mix(float(1), float(0.45), smoothstep(0.3, 0.8, here)))
-    const fres = pow(dot(view.negate(), n).oneMinus().clamp(), 3.2).mul(0.86).add(0.05)
+    const fres = pow(dot(view.negate(), n).oneMinus().clamp(), 3.2).mul(0.86).add(0.05).add(under.mul(0.12))
     // a pale line where water meets land, and drifting foam strokes
     const edge = smoothstep(0.16, 0.0, vdepth).mul(0.5)
     const outCol = mix(col, refl, fres).add(vec3(0.5, 0.48, 0.4).mul(edge).mul(U.amb))

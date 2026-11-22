@@ -77,7 +77,7 @@ export class Cast {
     U.raft.value.y += (dip + this.swell - U.raft.value.y) * Math.min(1, dt * 5); p.raftDip = U.raft.value.y
     // the hand lamp, if someone carries it
     if (this.lampHolder) {
-      if (this.lampHolder === 'bow') v1.set(p.x + Math.sin(p.heading) * 2.0, p.waterY + 0.62, p.z - Math.cos(p.heading) * 2.0)
+      if (this.lampHolder === 'bow') v1.set(p.x + Math.sin(p.heading) * 2.0, p.y + 0.62, p.z - Math.cos(p.heading) * 2.0)
       else figures.handPos(this.lampHolder, 1, v1)
       props.lamp.visible = true; props.lamp.position.copy(v1)
       U.lamp2.value.set(v1.x, v1.y - 0.15, v1.z, (0.3 + night * 5.5) * (0.92 + 0.08 * Math.sin(clock * 9)))

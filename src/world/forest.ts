@@ -27,13 +27,13 @@ const FLOOD_Y = WATER_RANGE
 export const floodStain = (col: N, wobble: N) => {
   const fl = positionWorld.y.sub(float(FLOOD_Y).add(wobble.sub(0.5).mul(0.3)))
   // below the line the bark is washed pale with silt; at the line a dark band about a hand's width
-  const below = smoothstep(0.05, -0.25, fl)
+  const below = smoothstep(0.05, -0.9, fl)
   const band = smoothstep(0.22, 0.06, fl).mul(smoothstep(-0.6, -0.25, fl))
-  const pale = mix(col, col.mul(0.55).add(vec3(0.15, 0.125, 0.095)), below.mul(0.7))
+  const pale = mix(col, col.mul(0.55).add(vec3(0.15, 0.125, 0.095)), below.mul(0.45))
   const wet = smoothstep(0.7, 0.0, positionWorld.y.sub(U.water))
   // under the water everything goes dark: nothing pale shows through the surface
-  const sunk = smoothstep(0.0, -0.5, positionWorld.y.sub(U.water))
-  return mix(pale, vec3(0.05, 0.035, 0.025), band.mul(0.9)).mul(mix(float(1), float(0.5), wet)).mul(mix(float(1), float(0.35), sunk))
+  const sunk = smoothstep(0.02, -0.25, positionWorld.y.sub(U.water))
+  return mix(pale, vec3(0.05, 0.035, 0.025), band.mul(0.9)).mul(mix(float(1), float(0.5), wet)).mul(mix(float(1), float(0.14), sunk))
 }
 export const barkColor = (seed: N, groundY: N) => {
   const pw = positionWorld

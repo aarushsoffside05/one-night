@@ -67,7 +67,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     const y = hf.at(x, z)
     const h = (type === 0 ? r.range(34, 46) : type === 1 ? r.range(19, 30) : type === 2 ? r.range(10, 18) : type === 3 ? r.range(6, 12) : type === 5 ? r.range(11, 20) : type === 7 ? r.range(9, 22) : r.range(2.8, 5.5)) * scale
     const rad = (type === 0 ? r.range(0.85, 1.4) : type === 1 ? r.range(0.24, 0.6) : type === 2 ? r.range(0.11, 0.28) : type === 3 ? r.range(0.05, 0.11) : type === 5 ? r.range(0.09, 0.16) : type === 7 ? r.range(0.15, 0.4) : r.range(0.03, 0.055)) * scale
-    const lean = forceLean >= 0 ? forceLean : type === 5 ? r.range(0.03, 0.2) : r() * r() * 0.16
+    const lean = forceLean >= 0 ? forceLean : type === 5 ? r.range(0.03, 0.2) : type >= 2 && r() < 0.18 ? r.range(0.2, 0.42) : r() * r() * 0.26
     const rot = forceLean >= 0 ? leanDir : r() * 6.283
     // bark tone by kind: giants and candelabra trees are pale, others run from dark to mid
     const seed = type === 0 ? r.range(0.8, 1) : type === 5 ? r.range(0.88, 1) : type === 7 ? r.range(0.5, 0.75) : r() * r() * 0.75
@@ -145,7 +145,7 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
       const cd = Math.hypot(x - COMMUNITY.x, (z - COMMUNITY.z) * 0.9) / COMMUNITY.r
       if (cd < 0.62) continue // the yard is open ground; its few trees are placed by hand below
       if (Math.hypot(x - PLACES.giantTrunk.x, z - PLACES.giantTrunk.z) < 17) continue
-      const dens = 0.3 + 0.62 * smooth(0.3, 0.68, fbm2(x / 38, z / 38, S + 3, 3))
+      const dens = 0.1 + 0.9 * smooth(0.3, 0.66, fbm2(x / 30, z / 30, S + 3, 3))
       if (roll > dens * density) continue
       const dc = distPoly(x, z, CHANNEL)
       const edge = dc < 34 || kind.bank > 0.1 || (kind.lake === 0 && Math.hypot((x - 186) / 66, (z + 138) / 50) < 1.28)
@@ -269,8 +269,8 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
   // ---- hanging roots and fallen trunks along the top of the channel banks, both sides, all the way up
   const rb = rng('bankroots')
   const cp = { x: 0, z: 0 }
-  for (let i = 0; i < 5200 * density; i++) {
-    const t = rb.range(0.12, 0.98), sgn = rb() < 0.5 ? -1 : 1, off = rb.range(13, 26), len = rb.range(1.5, 5.5), seed = rb(), w = rb.range(0.6, 1.4), roll = rb()
+  for (let i = 0; i < 9000 * density; i++) {
+    const t = rb.range(0.12, 0.98), sgn = rb() < 0.5 ? -1 : 1, off = rb.range(13, 26), len = rb.range(2, 7), seed = rb(), w = rb.range(0.9, 2.4), roll = rb()
     polyAt(CHANNEL, t, cp); const ax = cp.x, az = cp.z
     polyAt(CHANNEL, t + 0.003, cp)
     const dx = cp.x - ax, dz = cp.z - az, dl = Math.hypot(dx, dz) || 1
@@ -279,8 +279,8 @@ export function cookForest(hf: Heightfield, density: number, progress: (f: numbe
     if (kind.channel < 0.01 || kind.channel > 0.5 || h < 5.5) continue
     const e = 1.5
     const gxn = heightFormula(x + e, z) - heightFormula(x - e, z), gzn = heightFormula(x, z + e) - heightFormula(x, z - e)
-    if (roll < 0.06) R.spTree.push(x, h - 0.2, z, rb.range(2, 3.6), Math.atan2(-gzn, -gxn), seed, 1, rb())
-    else R.bankroot.push(x, h + 0.25, z, w, Math.atan2(-gxn, -gzn), seed, len, 0)
+    void roll
+    R.bankroot.push(x, h + 0.25, z, w, Math.atan2(-gxn, -gzn), seed, len, 0)
   }
   // ---- the green wall: low dense shrubs along the top of the banks and round the lake, down to the edge
   const rw = rng('edge-shrubs')
