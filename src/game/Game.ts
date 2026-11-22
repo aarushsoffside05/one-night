@@ -100,7 +100,8 @@ export class Game {
         const aoN: any = (ao as any)(depth, null, this.camera)
         aoN.resolutionScale = 0.5; aoN.radius.value = 0.7; aoN.thickness.value = 1.2; aoN.samples.value = this.tier === 'high' ? 12 : 8
         const aoSoft = (gaussianBlur as any)(aoN.getTextureNode(), null, 2).r
-        const shaded = col.mul(aoSoft.mul(0.7).add(0.3))
+        // one broken pixel (a not-a-number from a sliver of a triangle) must not bloom into a ball of light
+        const shaded = col.rgb.max(0).min(6).mul(aoSoft.max(0).min(1).mul(0.7).add(0.3))
         const glow: any = (bloom as any)(shaded, 0.16, 0.5, 1.5)
         this.post = new (THREE as any).RenderPipeline(r)
         this.post.outputNode = shaded.add(glow)

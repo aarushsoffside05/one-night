@@ -20,6 +20,8 @@ export class Roam {
     this.lakeCanoe = pr.addBoat('canoe', PLACES.lakeBank.x + 9, PLACES.lakeBank.z - 3, 1.2, 3)
     this.tied = pr.addBoat('canoe', R.x - 6.4, R.z + 1.5, 0.15, 4)
     this.skiff = pr.addBoat('skiff', -96, 243, 2.6, 5)
+    // canoes pulled up on the beach
+    pr.addBoat('canoe', -117.5, 221.5, 0.9, 6); pr.addBoat('canoe_long', -111, 218.6, 1.25, 7)
     this.enter()
   }
   enter() {

@@ -294,7 +294,7 @@ export function buildLife(group: THREE.Object3D, density: number, fishGeo: THREE
   })()
   const fishMesh = new THREE.Mesh(fishGeo, fishMat)
   fishMesh.visible = false
-  fishMesh.scale.setScalar(1.35)
+  fishMesh.scale.setScalar(1.65)
   add(fishMesh)
   const fish = { active: false, t: 0, x: 0, z: 0, heading: 0 }
   const fishRoll = (x: number, z: number, heading: number) => { fish.active = true; fish.t = 0; fish.x = x; fish.z = z; fish.heading = heading; ring(x, z, 2.6, true) }

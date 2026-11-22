@@ -71,8 +71,8 @@ export function waterMaterial(useSceneDepth: boolean): THREE.Material {
     const trunkStreak = smoothstep(0.52, 0.66, streakN)
     const blotch = noise(pw.xz.mul(0.035).add(Rs.xz.mul(2.0))).g
     const holes = smoothstep(0.56, 0.86, noise(pw.xz.mul(0.021).add(Rs.xz.mul(3.0)).add(5.3)).r)
-    let canopy: any = mix(vec3(0.05, 0.085, 0.025), vec3(0.13, 0.2, 0.055), smoothstep(0.3, 0.7, blotch)).mul(lightF)
-    canopy = mix(canopy, refl.mul(0.75), holes.mul(0.85))
+    let canopy: any = mix(vec3(0.04, 0.05, 0.02), vec3(0.085, 0.115, 0.04), smoothstep(0.3, 0.7, blotch)).mul(lightF)
+    canopy = mix(canopy, refl.mul(0.55), holes.mul(0.5))
     canopy = mix(canopy, vec3(0.03, 0.028, 0.02).mul(lightF), trunkStreak.mul(0.8))
     const land = mix(mix(forestCol, refl.mul(0.35), 0.3), canopy, under)
     refl = mix(refl, land, max(wall.mul(0.92), under.mul(0.9)))
@@ -81,7 +81,7 @@ export function waterMaterial(useSceneDepth: boolean): THREE.Material {
     // lamps lay a long warm path on the water
     const lampGlint = (L: any) => { const d = L.xyz.sub(pw); const dn = d.normalize(); return U.lampCol.mul(pow(max(dot(R, dn), 0), 40)).mul(L.w).mul(0.35).div(d.length().mul(d.length()).mul(0.012).add(1)) }
     refl = refl.add(lampGlint(U.lamp0)).add(lampGlint(U.lamp1)).add(lampGlint(U.lamp2))
-    const fres = pow(dot(view.negate(), n).oneMinus().clamp(), 3.2).mul(0.86).add(0.05).add(under.mul(0.12))
+    const fres = pow(dot(view.negate(), n).oneMinus().clamp(), 3.2).mul(0.86).add(0.05).add(under.mul(0.06))
     // a pale line where water meets land, and drifting foam strokes
     const edge = smoothstep(0.16, 0.0, vdepth).mul(0.5)
     const outCol = mix(col, refl, fres).add(vec3(0.5, 0.48, 0.4).mul(edge).mul(U.amb))
