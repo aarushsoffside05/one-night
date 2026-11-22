@@ -56,7 +56,7 @@ export function waterMaterial(useSceneDepth: boolean): THREE.Material {
       const d = jit.mul(d0)
       const q = pw.xz.add(dir2.mul(d)).add(340).div(680)
       const top = texture(TEX.height, q).r.add(smoothstep(0.05, 0.5, texture(TEX.cover, q).r).mul(24))
-      wall = max(wall, smoothstep(-3.0, 7.0, top.sub(pw.y.add(slope.mul(d)))))
+      wall = max(wall, smoothstep(-6.0, 12.0, top.sub(pw.y.add(slope.mul(d)))))
     }
     const lightF = U.amb.add(U.sunCol.mul(U.sunI).mul(0.3))
     const forestCol = mix(vec3(0.035, 0.05, 0.02), vec3(0.09, 0.12, 0.04), r2).mul(lightF)
@@ -73,9 +73,12 @@ export function waterMaterial(useSceneDepth: boolean): THREE.Material {
     const holes = smoothstep(0.56, 0.86, noise(pw.xz.mul(0.021).add(Rs.xz.mul(3.0)).add(5.3)).r)
     let canopy: any = mix(vec3(0.04, 0.05, 0.02), vec3(0.085, 0.115, 0.04), smoothstep(0.3, 0.7, blotch)).mul(lightF)
     canopy = mix(canopy, refl.mul(0.55), holes.mul(0.5))
-    canopy = mix(canopy, vec3(0.03, 0.028, 0.02).mul(lightF), trunkStreak.mul(0.8))
+    canopy = mix(canopy, vec3(0.03, 0.028, 0.02).mul(lightF), trunkStreak.mul(0.3))
     const land = mix(mix(forestCol, refl.mul(0.35), 0.3), canopy, under)
-    refl = mix(refl, land, max(wall.mul(0.92), under.mul(0.9)))
+    // gaps in the canopy let the sky down, but softly: the trees all round still take most of the mirror
+    const cu = (ox: number, oz: number) => texture(TEX.cover, pw.xz.add(vec2(ox, oz)).add(340).div(680)).r
+    const nearCov = cu(11, 3).add(cu(-9, 7)).add(cu(4, -12)).add(cu(-5, -8)).div(4)
+    refl = mix(refl, land, max(max(wall.mul(0.92), under.mul(0.9)), smoothstep(0.08, 0.4, nearCov).mul(0.72)))
     // a broad soft sheen under the sun or the moon
     refl = refl.add(U.discCol.mul(pow(sd, 18)).mul(0.05).mul(wall.oneMinus()).mul(under.oneMinus()))
     // lamps lay a long warm path on the water

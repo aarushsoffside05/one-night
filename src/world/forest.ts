@@ -8,7 +8,7 @@ import type { ForestCook, FieldName } from './forestCook'
 import * as G from './geom'
 import { WATER_RANGE } from './layout'
 import { detailUpright, PLANT_TEX } from './scans'
-import { texture, uv } from './tsl'
+import { texture, uv, vec4 } from './tsl'
 import scansUrl from '../assets/models/scans.glb?inline'
 import { b64ToBytes, parseGlb } from './glb'
 
@@ -70,6 +70,45 @@ function trunkMaterial(far: number) {
   })()
   m.colorNode = Fn(() => barkColor(ib.y, ia.y))()
   return m
+}
+
+// Every trunk standing in the flood lays a dark streak on the water, running from its foot towards the eye:
+// one flat instanced quad per trunk (local x across, y along 0..1), broken up by the ripples.
+function trunkReflMaterial(far: number) {
+  const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, fog: true })
+  const along = attribute('aux', 'vec3')
+  m.positionNode = Fn(() => {
+    const rad = ia.w, h = ib.z
+    const base = ia.xz
+    const to = U.eye.xz.sub(base), d = to.length().add(0.001), dir = to.div(d)
+    const wy = U.water
+    const stand = h.add(ia.y).sub(wy) // how much trunk is above the water
+    const eyeH = max(U.eye.y.sub(wy), 0.3)
+    const len = d.mul(stand.div(stand.add(eyeH))).mul(0.92).min(46)
+    const t = positionLocal.y
+    const wide = rad.mul(2.3).mul(t.mul(0.5).add(1))
+    const xz = base.add(dir.mul(len.mul(t)).add(dir.mul(rad))).add(vec2(dir.y.negate(), dir.x).mul(positionLocal.x.mul(wide)))
+    const wet = smoothstep(0.25, 0.7, wy.sub(ia.y)).mul(smoothstep(0.5, 2.0, stand)).mul(shrink(far))
+    return vec3(mix(base.x, xz.x, wet), wy.add(0.012), mix(base.y, xz.y, wet))
+  })()
+  const body = Fn(() => {
+    const pw = positionWorld, t = along.y, x = along.x
+    const rip = noise(pw.xz.mul(vec2(0.9, 0.5)).add(vec2(U.time.mul(0.05), U.time.mul(-0.03)))).g
+    const edge = smoothstep(1.0, 0.35, abs(x.sub(0.5)).mul(2).add(rip.sub(0.5).mul(0.9).mul(U.ripple)))
+    const fadeT = smoothstep(1.0, 0.25, t).mul(smoothstep(0.0, 0.03, t))
+    const breakup = smoothstep(0.25, 0.5, rip.add(t.oneMinus().mul(0.35)))
+    const light = U.amb.add(U.sunCol.mul(U.sunI).mul(0.15))
+    return vec4(vec3(0.035, 0.03, 0.022).mul(light), edge.mul(fadeT).mul(breakup).mul(0.78))
+  })()
+  m.colorNode = body.rgb; m.opacityNode = body.a
+  return m
+}
+function trunkReflGeometry(): THREE.BufferGeometry {
+  const g = new G.GB()
+  const N2 = 6
+  for (let j = 0; j <= N2; j++) for (let i = 0; i <= 1; i++) g.v(i - 0.5, j / N2, 0, 0, 1, 0, i, j / N2, 0)
+  for (let j = 0; j < N2; j++) { const a2 = j * 2; g.quad(a2, a2 + 1, a2 + 3, a2 + 2) }
+  return g.build()
 }
 
 function limbMaterial(far: number) {
@@ -235,6 +274,7 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
     { geometry: G.trunkGeometry(6, 4, 0), material: trunkM[1], near: 52, far: 170 },
     { geometry: G.trunkGeometry(4, 2, 0), material: trunkM[2], near: 170, far: 520 },
   ], 60))
+  { const rf = new Field('trunkRefl', F.trunk, [{ geometry: trunkReflGeometry(), material: trunkReflMaterial(130), near: 0, far: 130 }], group); for (const l of rf.lods) { l.mesh.renderOrder = 6; (l.mesh.material as any).side = THREE.DoubleSide } fields.push(rf) }
   fields.push(mk('limb' as any, [
     { geometry: G.limbGeometry(6, 3), material: limbMaterial(9999), near: 0, far: 60, shadow: true },
     { geometry: G.limbGeometry(4, 1), material: limbMaterial(260), near: 60, far: 260 },
@@ -242,8 +282,8 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
   const clumpM = [clumpMaterial(9999), clumpMaterial(9999), clumpMaterial(520)]
   fields.push(mk('clump', [
     { geometry: G.leafClumpGeometry(190, 0.36, 0, 'clump-a'), material: clumpM[0], near: 0, far: 40 },
-    { geometry: G.leafClumpGeometry(55, 0.62, 0, 'clump-a'), material: clumpM[1], near: 40, far: 140 },
-    { geometry: G.leafClumpGeometry(16, 1.05, 0, 'clump-a'), material: clumpM[2], near: 140, far: 520 },
+    { geometry: G.leafClumpGeometry(60, 0.6, 0, 'clump-a'), material: clumpM[1], near: 40, far: 140 },
+    { geometry: G.leafClumpGeometry(25, 0.85, 0, 'clump-a'), material: clumpM[2], near: 140, far: 520 },
   ]))
   fields.push(mk('spray', [
     { geometry: G.sprayGeometry(), material: plantMaterial(9999, 'spray'), near: 0, far: 60 },
