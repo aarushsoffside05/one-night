@@ -7,11 +7,17 @@
 // Walk rectangles, solids, anchors and lamps are recorded through the same frame,
 // so a piece can be reused anywhere (keep walkable pieces at yaw multiples of 90 degrees).
 import * as THREE from 'three/webgpu';
+import * as T from 'three/tsl';
 import { MeshBuilder, type KitMesh } from './meshkit';
-import { PAL } from './palette';
+import { PAL, SWATCHES, SWATCH_NAMES, hexToLinear } from './palette';
 import * as L from './layout';
 import { stream, WORLD_SEED, type Rng } from './rng';
-import { buildCanoe } from './props';
+import { makeWorldMaterial } from './worldmat';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import canoeUrl from '../assets/canoe.glb?url';
+import paddleUrl from '../assets/paddle.glb?url';
+import floatHouseUrl from '../assets/floating_house.glb?url';
+import stiltAUrl from '../assets/stilt_house_a.glb?url';
 import type { Solid } from './player';
 import { makeKitGeometry } from './gfx';
 import { sim } from '../state';
@@ -19,8 +25,10 @@ import { sim } from '../state';
 type V3 = [number, number, number];
 
 export interface Structures {
+  rgb: true;                         // every mesh here carries LINEAR rgb in `dat` (not swatch ids): draw with makeWorldMaterial(tx, { rgb: true })
   fixed: KitMesh;
-  floating: { mesh: KitMesh; x: number; z: number; yaw: number; draft: number }[];
+  fixedGlow: KitMesh;                // the glowing faces of `fixed` (lamp glass, lit panes), rgb in `dat`: draw emissive
+  floating: { mesh: KitMesh; glow: KitMesh | null; x: number; z: number; yaw: number; draft: number }[];
   solids: Solid[];
   floatSolids: { item: number; x: number; z: number; r: number; top: number }[];
   ropes: { fromFloat: number; lx: number; ly: number; lz: number; tx: number; ty: number; tz: number }[];
@@ -29,7 +37,60 @@ export interface Structures {
   walk: { x0: number; z0: number; x1: number; z1: number; y: number; float: number }[];
 }
 
-interface Ctx { b: MeshBuilder; f: number; S: Structures; seed: number; g: (x: number, z: number) => number; }
+// b: code-built parts (swatch ids, converted to rgb at the end); rb / gb: Blender-made parts and their glowing faces (rgb)
+interface Ctx { b: MeshBuilder; rb: MeshBuilder; gb: MeshBuilder; f: number; S: Structures; seed: number; g: (x: number, z: number) => number; A: Assets; }
+
+// ---------------------------------------------------------------- Blender-made assets (src/assets/*.glb, built by tools/blender/*.py)
+// COLOR_0 is linear rgb with baked AO; COLOR_0 alpha = 0 marks glowing faces. Pivot at the base centre, +Y up, front +Z.
+export interface Asset { mesh: KitMesh; glow: KitMesh | null; }
+export async function loadAsset(url: string): Promise<Asset> {
+  const buf = await (await fetch(url)).arrayBuffer();
+  const gltf = await new GLTFLoader().parseAsync(buf, '');
+  gltf.scene.updateMatrixWorld(true);
+  const out: [number[], number[], number[]][] = [[[], [], []], [[], [], []]];
+  const v = new THREE.Vector3(), n = new THREE.Vector3(), nm = new THREE.Matrix3();
+  gltf.scene.traverse((o: THREE.Object3D) => {
+    const m = o as THREE.Mesh; if (!m.isMesh) return;
+    const g = m.geometry, P = g.getAttribute('position'), N = g.getAttribute('normal'), C = g.getAttribute('color'), I = g.index;
+    nm.getNormalMatrix(m.matrixWorld);
+    const cnt = I ? I.count : P.count;
+    for (let t = 0; t < cnt; t += 3) {
+      const ids = [0, 1, 2].map((k) => (I ? I.getX(t + k) : t + k));
+      const glow = C && C.itemSize === 4 && ids.every((i) => C.getW(i) < 0.5) ? 1 : 0, dst = out[glow];
+      for (const i of ids) {
+        v.fromBufferAttribute(P, i).applyMatrix4(m.matrixWorld); n.fromBufferAttribute(N, i).applyMatrix3(nm).normalize();
+        dst[0].push(v.x, v.y, v.z); dst[1].push(n.x, n.y, n.z);
+        if (C) dst[2].push(C.getX(i), C.getY(i), C.getZ(i)); else dst[2].push(0.5, 0.5, 0.5);
+      }
+    }
+  });
+  const mk = (a: [number[], number[], number[]]): KitMesh => ({ pos: new Float32Array(a[0]), nrm: new Float32Array(a[1]), dat: new Float32Array(a[2]), tris: a[0].length / 9 });
+  return { mesh: mk(out[0]), glow: out[1][0].length ? mk(out[1]) : null };
+}
+export const ASSET_URLS = { canoe: canoeUrl, paddle: paddleUrl, floatingHouse: floatHouseUrl, stiltHouseA: stiltAUrl };
+type Assets = Record<keyof typeof ASSET_URLS, Asset>;
+export async function loadAssets(): Promise<Assets> {
+  const keys = Object.keys(ASSET_URLS) as (keyof typeof ASSET_URLS)[];
+  const got = await Promise.all(keys.map((k) => loadAsset(ASSET_URLS[k])));
+  return Object.fromEntries(keys.map((k, i) => [k, got[i]])) as Assets;
+}
+// draw an asset in the builder's current frame
+function put(c: Ctx, a: Asset) { c.rb.m = c.b.m.slice(); c.rb.append(a.mesh); if (a.glow) { c.gb.m = c.b.m.slice(); c.gb.append(a.glow); } }
+const CANOE_SHEER = 0.43; // canoe.glb: keel at y = 0, gunwale about here
+// the canoe with its gunwale at the frame's y = 0 (the old kit convention)
+function putCanoe(c: Ctx, k = 1) { c.b.push().scale(k).translate(0, -CANOE_SHEER, 0); put(c, c.A.canoe); c.b.pop(); }
+// swatch-id mesh -> rgb mesh (+ the glowing faces apart)
+const SW_LIN = SWATCH_NAMES.map((k) => hexToLinear(SWATCHES[k]));
+const SW_GLOW = new Set([PAL.lampGlow, PAL.windowGlow, PAL.deviceGlow]);
+function bake(c: Ctx): { mesh: KitMesh; glow: KitMesh | null } {
+  const b = c.b, main = c.rb, glow = c.gb;
+  for (let i = 0; i < b.pos.length; i += 9) {
+    const id = Math.round(b.dat[i]), dst = SW_GLOW.has(id) ? glow : main, col = SW_LIN[id] ?? [0.5, 0.5, 0.5];
+    for (let k = 0; k < 9; k++) { dst.pos.push(b.pos[i + k]); dst.nrm.push(b.nrm[i + k]); }
+    for (let k = 0; k < 3; k++) dst.dat.push(col[0], col[1], col[2]);
+  }
+  return { mesh: main.build(), glow: glow.tris ? glow.build() : null };
+}
 
 const TAU = Math.PI * 2, HP = Math.PI / 2;
 const WOOD = [PAL.plank, PAL.plankLight, PAL.plank, PAL.plankPale, PAL.plankGrey];
@@ -168,10 +229,10 @@ function tyre(b: MeshBuilder, x: number, y: number, z: number, R = 0.34, r = 0.1
   for (let i = 0; i < n; i++) { const p = ring(i / n * TAU), q = ring((i + 1) / n * TAU); for (let k = 0; k < 4; k++) b.quad(p[k], p[(k + 1) % 4], q[(k + 1) % 4], q[k]); }
   b.pop();
 }
-function paddle(b: MeshBuilder, a: V3, c: V3, blade = PAL.paintRed) {
-  log(b, PAL.plankLight, a, c, 0.035, 0.03, 5);
-  const dx = c[0] - a[0], dy = c[1] - a[1], dz = c[2] - a[2], len = Math.hypot(dx, dy, dz);
-  b.set(blade); b.push().translate(a[0], a[1], a[2]).rotY(Math.atan2(dx, dz)).rotX(Math.acos(dy / len)); b.box(0.2, 0.55, 0.05, 0.04); b.pop();
+// a paddle from a (blade tip) to c (grip): paddle.glb stands upright, 1.5 m, blade at the base
+function paddle(cx: Ctx, a: V3, c: V3, _blade = PAL.paintRed) {
+  const dx = c[0] - a[0], dy = c[1] - a[1], dz = c[2] - a[2], len = Math.hypot(dx, dy, dz), b = cx.b;
+  b.push().translate(a[0], a[1], a[2]).rotY(Math.atan2(dx, dz)).rotX(Math.acos(dy / len)).scale(len / 1.5); put(cx, cx.A.paddle); b.pop();
 }
 function hayPile(b: MeshBuilder, rng: Rng, x: number, y: number, z: number, r: number) {
   b.push().translate(x, y + r * 0.3, z); b.blob(rng, r, r * 0.6, r * 0.9, 0, 0.18, 0.5, [PAL.litterWarm, PAL.leafYellow, PAL.sand]); b.pop();
@@ -489,7 +550,7 @@ function waterTank(c: Ctx) {
   bx(b, PAL.paintRed, 1.0, g + 0.6, 0.08, 0.1, 0.1, 0.16);
   solid(c, 0, 0, 1.15, g + h + 1.6);
 }
-function canoeOnTrestles(c: Ctx, canoe: KitMesh) {
+function canoeOnTrestles(c: Ctx) {
   const b = c.b;
   for (const z of [-1.2, 1.2]) {
     const g = gl(c, 0, z);
@@ -497,8 +558,8 @@ function canoeOnTrestles(c: Ctx, canoe: KitMesh) {
     beam(b, PAL.plank, [-0.85, g + 0.78, z], [0.85, g + 0.78, z], 0.12, 0.12);
   }
   const g = gl(c, 0, 0);
-  b.push().translate(0, g + 0.8, 0).rotZ(Math.PI).rotY(0.04); b.append(canoe); b.pop();
-  paddle(b, [0.95, g + 0.05, 0.6], [0.6, g + 1.55, 0.75], PAL.paintTeal); paddle(b, [1.05, g + 0.05, 0.25], [0.62, g + 1.45, 0.3], PAL.paintRed);
+  b.push().translate(0, g + 0.8, 0).rotZ(Math.PI).rotY(0.04); putCanoe(c); b.pop();
+  paddle(c, [0.95, g + 0.05, 0.6], [0.6, g + 1.55, 0.75], PAL.paintTeal); paddle(c, [1.05, g + 0.05, 0.25], [0.62, g + 1.45, 0.3], PAL.paintRed);
   solidLine(c, 0, -1.8, 0, 1.8, g + 1.0, 0.5);
 }
 function gardenBox(c: Ctx, rng: Rng, len = 2.6, wid = 1.0, legs = 0.6, y = gl(c, 0, 0)) {
@@ -607,7 +668,7 @@ function thatchShelter(c: Ctx, rng: Rng, w = 4.2, d = 3.2) {
   return y;
 }
 // two canoes on a two-level pole rack
-function canoeRack(c: Ctx, canoe: KitMesh) {
+function canoeRack(c: Ctx) {
   const b = c.b;
   for (const z of [-1.3, 1.3]) {
     const g = gl(c, 0, z);
@@ -615,9 +676,9 @@ function canoeRack(c: Ctx, canoe: KitMesh) {
     beam(b, PAL.plank, [-0.9, g + 0.62, z], [0.9, g + 0.62, z], 0.11, 0.11); beam(b, PAL.plank, [-0.9, g + 1.5, z], [0.9, g + 1.5, z], 0.11, 0.11);
   }
   const g = gl(c, 0, 0);
-  b.push().translate(0, g + 0.62 + 0.38, 0); b.append(canoe); b.pop();
-  b.push().translate(0, g + 1.5 + 0.02, 0).rotZ(Math.PI).rotY(0.05); b.append(canoe); b.pop();
-  paddle(b, [0.95, g + 0.05, -0.4], [0.74, g + 1.6, -0.5], YELLOW);
+  b.push().translate(0, g + 0.62 + 0.38, 0); putCanoe(c); b.pop();
+  b.push().translate(0, g + 1.5 + 0.02, 0).rotZ(Math.PI).rotY(0.05); putCanoe(c); b.pop();
+  paddle(c, [0.95, g + 0.05, -0.4], [0.74, g + 1.6, -0.5], YELLOW);
   solidLine(c, 0, -1.9, 0, 1.9, g + 1.6, 0.45);
 }
 // lean-to and short fence (the ridge)
@@ -824,18 +885,17 @@ function motorBoat(c: Ctx) {
   bx(b, PAL.tin, 0, gy - 0.12, 1.75, 0.5, 0.05, 0.5);
   b.push().translate(0, gy + 0.05, -2.12); outboard(b); b.pop();
   cyl(b, PAL.paintRed, 0.3, gy - 0.4, -1.6, 0.14, 0.14, 0.3, 6, true);
-  paddle(b, [-0.3, gy - 0.2, 1.3], [-0.42, gy - 0.1, -0.6], YELLOW);
+  paddle(c, [-0.3, gy - 0.2, 1.3], [-0.42, gy - 0.1, -0.6], YELLOW);
 }
 
 // ---------------------------------------------------------------- the whole set
-function finish(b: MeshBuilder): KitMesh { return b.build(); }
 
-export function buildStructures(seed: number, groundAt: (x: number, z: number) => number): Structures {
-  const S: Structures = { fixed: null as unknown as KitMesh, floating: [], solids: [], floatSolids: [], ropes: [], lamps: [], anchors: {}, walk: [] };
+export async function buildStructures(seed: number, groundAt: (x: number, z: number) => number): Promise<Structures> {
+  const A = await loadAssets();
+  const S: Structures = { rgb: true, fixed: null as unknown as KitMesh, fixedGlow: null as unknown as KitMesh, floating: [], solids: [], floatSolids: [], ropes: [], lamps: [], anchors: {}, walk: [] };
   const fb = new MeshBuilder();
-  const c: Ctx = { b: fb, f: -1, S, seed, g: groundAt };
+  const c: Ctx = { b: fb, rb: new MeshBuilder(), gb: new MeshBuilder(), f: -1, S, seed, g: groundAt, A };
   const R = (n: string) => stream(seed, 'struct:' + n);
-  const canoe = buildCanoe(), canoeS = buildCanoe(3.8, 0.8);
   const FLOOR = L.FLOOD_RANGE + 0.6; // 11.2: just above the top flood level
 
   // ---- 1. the community
@@ -863,7 +923,7 @@ export function buildStructures(seed: number, groundAt: (x: number, z: number) =
     anchor(c, 'palmStack', px, pg, pz + 1.9, Math.PI);
     anchor(c, 'stiltDoor', dx, 0, d / 2 + 0.7, Math.PI); anchor(c, 'stiltPorch', 1.2, 0, d / 2 + porch * 0.5, 0);
     basket(fb, -hw + 0.9, 0, d / 2 + 0.5, 1.0, PAL.fruit); place(c, 0.4, 0, d / 2 + 0.3, 0, () => bench(c, 1.3, PAL.paintTeal));
-    paddle(fb, [-hw - 0.05, 0.02, d / 2 + 0.3], [-hw + 0.1, 1.6, d / 2 + 0.12], PAL.paintTeal);
+    paddle(c, [-hw - 0.05, 0.02, d / 2 + 0.3], [-hw + 0.1, 1.6, d / 2 + 0.12], PAL.paintTeal);
   });
   // two smaller painted houses on short stilts
   const bX = L.STILT_HOUSE[0] + 3, bZ = L.STILT_HOUSE[1] - 6;
@@ -872,7 +932,7 @@ export function buildStructures(seed: number, groundAt: (x: number, z: number) =
     house(c, { name: 'houseB', w, d, wallH: 2.6, porch, roof: 'side', pitch: 0.4, walls: [PAL.paintRed, PAL.paintRed, PAL.shirtRed], trim: PAL.paintCream, door: PAL.paintTeal, shutter: YELLOW, roofPals: TIN, glow: true, legs: true, platform: true, lanternFront: true,
       railGaps: { front: [[dx + hw + 0.25 - 0.75, dx + hw + 0.25 + 0.75]] } });
     place(c, dx, 0, d / 2 + porch, 0, () => stairs(c, -gl(c, 0, 1.2), 1.4, true));
-    paddle(fb, [hw - 0.4, 0.02, d / 2 + 0.3], [hw - 0.5, 1.6, d / 2 + 0.1], YELLOW);
+    paddle(c, [hw - 0.4, 0.02, d / 2 + 0.3], [hw - 0.5, 1.6, d / 2 + 0.1], YELLOW);
     void rng;
   });
   const cX = L.COMMUNITY[0] - 2, cZ = L.COMMUNITY[1] + 21;
@@ -889,7 +949,7 @@ export function buildStructures(seed: number, groundAt: (x: number, z: number) =
   place(c, L.AERIAL[0], Y(L.AERIAL[0], L.AERIAL[1]), L.AERIAL[1], 0.4, () => { aerial(c, R('aerial')); anchor(c, 'aerialFoot', 0.2, 0, 1.3, Math.PI); });
   place(c, 63.5, 0, -77.5, 0.25, () => clothesLine(c, R('line')));
   place(c, bX + 0.4, 0, bZ + 5.2, 0, () => waterTank(c));
-  place(c, 50, 0, -98.5, 0.5, () => canoeOnTrestles(c, canoe));
+  place(c, 50, 0, -98.5, 0.5, () => canoeOnTrestles(c));
   place(c, 54, 0, -101.5, -0.7, () => motorOnStand(c));
   place(c, 45, 0, -102, 1.25, () => netRack(c, R('net')));
   place(c, 67, 0, -68, 0.1, () => gardenBox(c, R('gbox')));
@@ -900,7 +960,7 @@ export function buildStructures(seed: number, groundAt: (x: number, z: number) =
     basket(fb, 51.8, Y(51.8, -100), -100, 1.1); basket(fb, 61.5, Y(61.5, -80.5), -80.5, 1.2, PAL.cloth);
     lanternPost(c, rng, 42.0, -87.2, 2.6, 0.6); lanternPost(c, rng, 58.5, -86.0, 2.6, 2.2); lanternPost(c, rng, 77.5, -93.0, 2.6, -1.2); lanternPost(c, rng, 90.5, mz - 3.4, 2.6, 0.2);
     // a canoe pulled up on the bank top
-    fb.push().translate(36.5, Y(36.5, -83) + 0.37, -83).rotY(1.9).rotZ(0.16); fb.append(canoe); fb.pop(); solidLine(c, 35, -82.5, 38, -83.5, Y(36.5, -83) + 0.5, 0.45);
+    fb.push().translate(36.5, Y(36.5, -83) + 0.37, -83).rotY(1.9).rotZ(0.16); putCanoe(c); fb.pop(); solidLine(c, 35, -82.5, 38, -83.5, Y(36.5, -83) + 0.5, 0.45);
     anchor(c, 'yard', 58, Y(58, -88), -88, 0);
   }
   // bank steps and the landing
@@ -919,7 +979,7 @@ export function buildStructures(seed: number, groundAt: (x: number, z: number) =
     const bx0 = 114, bzc = 40, deckY = Math.max(groundAt(bx0, bzc - 9), groundAt(bx0, bzc + 9)) + 0.55;
     let z0 = -6, z1 = 6; while (z0 > -14 && groundAt(bx0, bzc + z0 - 1.0) < deckY - 0.7) z0 -= 0.5; while (z1 < 14 && groundAt(bx0, bzc + z1 + 1.0) < deckY - 0.7) z1 += 0.5;
     place(c, bx0, deckY, bzc, 0, () => plankBridge(c, rng, z0, z1));
-    fb.push().translate(bx0 + 4.5, groundAt(bx0 + 4.5, bzc + z1 + 2.5) + 0.36, bzc + z1 + 2.5).rotY(0.7).rotZ(-0.12); fb.append(canoeS); fb.pop();
+    fb.push().translate(bx0 + 4.5, groundAt(bx0 + 4.5, bzc + z1 + 2.5) + 0.36, bzc + z1 + 2.5).rotY(0.7).rotZ(-0.12); putCanoe(c, 0.87); fb.pop();
     for (const t of [0.14, 0.33, 0.78]) { const p = L.pointOnLine(L.TRAIL, t), x = p[0] - p[3] * 2.4, z = p[1] + p[2] * 2.4; place(c, x, 0, z, t * 9, () => trailMarker(c, rng, t > 0.5 ? YELLOW : PAL.paintRed)); }
     // lake shore: shelter and canoe rack on the first ground that stays dry at low lake level
     let sx = 150, sz = 150, best = 1e9;
@@ -927,20 +987,19 @@ export function buildStructures(seed: number, groundAt: (x: number, z: number) =
     const lyaw = Math.atan2(L.LAKE[0] - sx, L.LAKE[1] - sz);
     place(c, sx, 0, sz, lyaw, () => { const y = thatchShelter(c, rng); anchor(c, 'lakeShelter', 0, y, 2.6, Math.PI); });
     const rx = sx - Math.cos(lyaw) * 5.4, rz = sz + Math.sin(lyaw) * 5.4;
-    place(c, rx, 0, rz, lyaw + 0.25, () => { canoeRack(c, canoe); anchor(c, 'lakeCanoes', 1.6, gl(c, 1.6, 0), 0, -HP); });
+    place(c, rx, 0, rz, lyaw + 0.25, () => { canoeRack(c); anchor(c, 'lakeCanoes', 1.6, gl(c, 1.6, 0), 0, -HP); });
     place(c, sx + Math.cos(lyaw) * 3.6, 0, sz - Math.sin(lyaw) * 3.6, 0, () => trailMarker(c, rng, PAL.paintTeal));
     // the ridge shelter: near (228, 96) if high enough, else the highest ground within 40 m
     let qx = 228, qz = 96, qh = groundAt(228, 96);
     if (qh < 8.6) for (let x = 188; x <= 268; x += 2) for (let z = 56; z <= 136; z += 2) { if (Math.hypot(x - 228, z - 96) > 40) continue; const g = groundAt(x, z); if (g > qh + 0.01) { qh = g; qx = x; qz = z; } }
     place(c, qx, 0, qz, Math.atan2(228 - qx, 96 - qz), () => ridgeShelter(c, rng));
   }
-  S.fixed = null as unknown as KitMesh;
 
   // ---- 2-4. floating things
   const addFloat = (x: number, z: number, yaw: number, draft: number, fn: (fc: Ctx) => void) => {
-    const fc: Ctx = { b: new MeshBuilder(), f: S.floating.length, S, seed, g: groundAt };
-    S.floating.push({ mesh: null as unknown as KitMesh, x, z, yaw, draft });
-    fn(fc); S.floating[fc.f].mesh = finish(fc.b);
+    const fc: Ctx = { b: new MeshBuilder(), rb: new MeshBuilder(), gb: new MeshBuilder(), f: S.floating.length, S, seed, g: groundAt, A };
+    S.floating.push({ mesh: null as unknown as KitMesh, glow: null, x, z, yaw, draft });
+    fn(fc); const bk = bake(fc); S.floating[fc.f].mesh = bk.mesh; S.floating[fc.f].glow = bk.glow;
     return fc.f;
   };
   const f2w = (i: number, lx: number, lz: number): [number, number] => { const f = S.floating[i], cs = Math.cos(f.yaw), sn = Math.sin(f.yaw); return [f.x + lx * cs + lz * sn, f.z - lx * sn + lz * cs]; };
@@ -963,7 +1022,7 @@ export function buildStructures(seed: number, groundAt: (x: number, z: number) =
   const CRAFT = addFloat(L.FLOAT_HOME[0] - 9, L.FLOAT_HOME[1] + 23, 1.9, 0.32, (fc) => { corralRaft(fc, R('craft')); });
   moor(CRAFT, 2.9, 0.7, 2.4, 0.97, 0.25, 9.6);
   addFloat(L.LANDING[0] - 4.2, L.LANDING[1] - 6.4, HP + 0.12, 0.2, (fc) => { fc.b.push().translate(0, -0.16, 0); motorBoat(fc); fc.b.pop(); solidLine(fc, 0, -1.6, 0, 1.6, 0.5, 0.6); });
-  addFloat(L.FLOAT_HOME[0] - 4.5, L.FLOAT_HOME[1] - 1.5, 0.06, 0.2, (fc) => { fc.b.push().translate(0, 0.2, 0); fc.b.append(canoe); fc.b.pop(); paddle(fc.b, [0.1, 0.1, 0.9], [-0.1, 0.16, -0.7], PAL.paintRed); });
+  addFloat(L.FLOAT_HOME[0] - 4.5, L.FLOAT_HOME[1] - 1.5, 0.06, 0.2, (fc) => { fc.b.push().translate(0, 0.2, 0); putCanoe(fc); fc.b.pop(); paddle(fc, [0.1, 0.1, 0.9], [-0.1, 0.16, -0.7], PAL.paintRed); });
   // a second, smaller floating home further up the channel (if there is water enough at low level)
   { let bt = -1, bg = -1.3;
     for (let t = 0.4; t <= 0.5; t += 0.005) { const p = L.pointOnLine(L.CHANNEL, t); const g = Math.max(groundAt(p[0], p[1]), groundAt(p[0] - p[3] * 4, p[1] + p[2] * 4), groundAt(p[0] + p[3] * 4, p[1] - p[2] * 4)); if (g < bg) { bg = g; bt = t; } }
@@ -976,35 +1035,37 @@ export function buildStructures(seed: number, groundAt: (x: number, z: number) =
       if (reach(1) <= reach(-1)) moor(i2, 4.35, 0.75, 2.95, nx, nz, 7.0); else moor(i2, 4.35, 0.75, -2.95, -nx, -nz, 7.0);
     }
   }
-  S.fixed = finish(fb);
+  { const bk = bake(c); S.fixed = bk.mesh; S.fixedGlow = bk.glow ?? new MeshBuilder().build(); }
   return S;
 }
 
 // dev preview: ?structs=1 adds the structures to the running world (remove when the engine wires them in)
 if (typeof window !== 'undefined' && typeof location !== 'undefined' && location.search.includes('structs=1')) {
-  const tick = () => {
+  const tick = async () => {
     const e = (window as any).__engine;
-    if (!e?.cooked || !e.worldMat || !e.scene) { setTimeout(tick, 25); return; }
+    if (!e?.cooked || !e.worldMat || !e.scene || !e.tex) { setTimeout(tick, 25); return; }
     const t0 = performance.now();
-    const s = buildStructures(WORLD_SEED, (x, z) => e.groundAt(x, z));
-    const fixed = new THREE.Mesh(makeKitGeometry(s.fixed), e.worldMat);
-    fixed.castShadow = fixed.receiveShadow = true; fixed.frustumCulled = false; fixed.name = 'structures'; e.scene.add(fixed);
-    const fl = s.floating.map((f) => { const m = new THREE.Mesh(makeKitGeometry(f.mesh), e.worldMat); m.castShadow = m.receiveShadow = true; m.frustumCulled = false; m.rotation.y = f.yaw; e.scene.add(m); return m; });
+    const s = await buildStructures(WORLD_SEED, (x, z) => e.groundAt(x, z));
+    const mat = makeWorldMaterial(e.tex, { rgb: true });
+    const gmat = new THREE.MeshBasicNodeMaterial(); gmat.colorNode = (T as any).attribute('dat', 'vec3').mul(1.5);
+    const add = (k: KitMesh, m: THREE.Material, parent: THREE.Object3D) => { const o = new THREE.Mesh(makeKitGeometry(k), m); o.castShadow = o.receiveShadow = m === mat; o.frustumCulled = false; parent.add(o); return o; };
+    add(s.fixed, mat, e.scene); if (s.fixedGlow.tris) add(s.fixedGlow, gmat, e.scene);
+    const fl = s.floating.map((f) => { const g = new THREE.Group(); g.rotation.y = f.yaw; add(f.mesh, mat, g); if (f.glow) add(f.glow, gmat, g); e.scene.add(g); return g; });
     const upd = () => s.floating.forEach((f, i) => fl[i].position.set(f.x, Math.max(sim.water * L.FLOOD_RANGE, e.groundAt(f.x, f.z) + f.draft), f.z));
     upd(); setInterval(upd, 30);
-    // preview ropes as straight chunky lines
-    const rb = new MeshBuilder();
-    for (const r of s.ropes) { const f = s.floating[r.fromFloat], cs = Math.cos(f.yaw), sn = Math.sin(f.yaw); rope(rb, [f.x + r.lx * cs + r.lz * sn, sim.water * L.FLOOD_RANGE + r.ly, f.z - r.lx * sn + r.lz * cs], [r.tx, r.ty, r.tz], 0.6, 0.045, 8); }
-    const rm = new THREE.Mesh(makeKitGeometry(rb.build()), e.worldMat); rm.frustumCulled = false; e.scene.add(rm);
+    // preview ropes as sagging chunky lines (the engine should redraw them as the water moves)
+    const rc: Ctx = { b: new MeshBuilder(), rb: new MeshBuilder(), gb: new MeshBuilder(), f: -1, S: s, seed: 0, g: () => 0, A: null as unknown as Assets };
+    for (const r of s.ropes) { const f = s.floating[r.fromFloat], cs = Math.cos(f.yaw), sn = Math.sin(f.yaw); rope(rc.b, [f.x + r.lx * cs + r.lz * sn, sim.water * L.FLOOD_RANGE + r.ly, f.z - r.lx * sn + r.lz * cs], [r.tx, r.ty, r.tz], 0.6, 0.045, 8); }
+    add(bake(rc).mesh, mat, e.scene);
     // preview camera: &scam=x,y,z,lx,ly,lz (world coordinates)
     const sc = new URLSearchParams(location.search).get('scam');
     if (sc && e.player) {
       const v = sc.split(',').map(Number), pos = new THREE.Vector3(v[0], v[1], v[2]), look = new THREE.Vector3(v[3], v[4], v[5]);
-      const hold = () => { e.useFixedCam = false; e.player.camOverride = { pos, look }; e.camera.position.copy(pos); e.player.target.copy(look); e.camera.lookAt(look); };
+      const hold = () => { e.useFixedCam = false; e.player.camOverride = { pos, look }; e.camera.position.copy(pos); if (e.player.target) e.player.target.copy(look); e.camera.lookAt(look); };
       hold(); setInterval(hold, 5);
     }
     (window as any).__structs = s;
-    console.log('[structs] fixed tris ' + s.fixed.tris + ' floating ' + s.floating.map((f) => f.mesh.tris).join(',') + ' solids ' + s.solids.length + '+' + s.floatSolids.length + ' walk ' + s.walk.length + ' lamps ' + s.lamps.length + ' ropes ' + s.ropes.length + ' ms ' + (performance.now() - t0).toFixed(0) + ' anchors ' + JSON.stringify(s.anchors, (_k, v) => (typeof v === 'number' ? Math.round(v * 10) / 10 : v)));
+    console.log('[structs] fixed tris ' + s.fixed.tris + ' floating ' + s.floating.map((f) => f.mesh.tris).join(',') + ' solids ' + s.solids.length + '+' + s.floatSolids.length + ' walk ' + s.walk.length + ' lamps ' + s.lamps.length + ' ropes ' + s.ropes.length + ' ms ' + (performance.now() - t0).toFixed(0));
   };
   tick();
 }
