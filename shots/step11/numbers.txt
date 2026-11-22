@@ -1,0 +1,50 @@
+backend webgpu, level high
+01 beach to mouth                low water, late afternoon  draws   78  tris  2281979
+01 beach to mouth                high water, morning        draws   81  tris  2283778
+01 beach to mouth                night by lamp              draws   78  tris  2281889
+01 beach to mouth                sunrise                    draws   78  tris  2281979
+02 river mouth                   low water, late afternoon  draws   85  tris  2679412
+02 river mouth                   high water, morning        draws   84  tris  2679167
+02 river mouth                   night by lamp              draws   86  tris  2679464
+02 river mouth                   sunrise                    draws   85  tris  2679412
+03 channel under banks           low water, late afternoon  draws   87  tris  3384405
+03 channel under banks           high water, morning        draws   85  tris  3379444
+03 channel under banks           night by lamp              draws   88  tris  3384457
+03 channel under banks           sunrise                    draws   86  tris  3379689
+04 landing and floating house    low water, late afternoon  draws   83  tris  2060454
+04 landing and floating house    high water, morning        draws   84  tris  2060357
+04 landing and floating house    night by lamp              draws   84  tris  2060506
+04 landing and floating house    sunrise                    draws   83  tris  2060454
+05 bank steps from top           low water, late afternoon  draws   80  tris  2568972
+05 bank steps from top           high water, morning        draws   83  tris  2570677
+05 bank steps from top           night by lamp              draws   81  tris  2569024
+05 bank steps from top           sunrise                    draws   80  tris  2568972
+06 yard and house on legs        low water, late afternoon  draws   79  tris  2514463
+06 yard and house on legs        high water, morning        draws   81  tris  2515829
+06 yard and house on legs        night by lamp              draws   80  tris  2514515
+06 yard and house on legs        sunrise                    draws   79  tris  2514463
+07 marked tree                   low water, late afternoon  draws   81  tris  2199112
+07 marked tree                   high water, morning        draws   84  tris  2200817
+07 marked tree                   night by lamp              draws   82  tris  2199164
+07 marked tree                   sunrise                    draws   81  tris  2199112
+08 trail                         low water, late afternoon  draws   81  tris  3338412
+08 trail                         high water, morning        draws   83  tris  3315275
+08 trail                         night by lamp              draws   81  tris  3326760
+08 trail                         sunrise                    draws   80  tris  3326708
+09 dry bed crossing              low water, late afternoon  draws   80  tris  3385722
+09 dry bed crossing              high water, morning        draws   84  tris  3387860
+09 dry bed crossing              night by lamp              draws   81  tris  3385774
+09 dry bed crossing              sunrise                    draws   80  tris  3385722
+10 giant trunk                   low water, late afternoon  draws   80  tris  3592013
+10 giant trunk                   high water, morning        draws   83  tris  3589435
+10 giant trunk                   night by lamp              draws   80  tris  3587349
+10 giant trunk                   sunrise                    draws   79  tris  3587297
+11 lake high bank east           low water, late afternoon  draws   81  tris  2509170
+11 lake high bank east           high water, morning        draws   82  tris  2509406
+11 lake high bank east           night by lamp              draws   82  tris  2509222
+11 lake high bank east           sunrise                    draws   82  tris  2509926
+12 deep forest                   low water, late afternoon  draws   80  tris  2955883
+12 deep forest                   high water, morning        draws   84  tris  2958021
+12 deep forest                   night by lamp              draws   82  tris  2960651
+12 deep forest                   sunrise                    draws   80  tris  2955883
+instances drawn at the last camera: {"terrainTris":262088,"trees":10098,"trunk":2455,"limb":6550,"clump":7693,"spray":2329,"palm":187,"sapling":466,"broadleaf":65,"tuft":1458,"log":80,"root":348,"vine":114,"bankroot":0,"spFern":149,"spFern2":118,"spLeather":77,"spPalm":48,"spFan":42,"spBanana":48,"spEar":39,"spTree":15,"spDrift":1,"floater":1401,"shaft":46}
