@@ -7,7 +7,7 @@
 import * as THREE from 'three/webgpu';
 import * as T from 'three/tsl';
 import { U } from './uniforms';
-import { MeshBuilder } from './meshkit';
+import { MeshBuilder, type KitMesh } from './meshkit';
 import { makeKitGeometry } from './gfx';
 import { makeWorldMaterial, waterYAt, openAt, windOffset, type WorldTextures } from './worldmat';
 import { PAL } from './palette';
@@ -29,17 +29,20 @@ export function makeLandMaps(grid: Float32Array, zone: Uint8Array): LandMaps {
 }
 const landUV = (xz: any) => xz.add(L.GRID_HALF).div(L.GRID_HALF * 2).mul(L.GRID_N / (L.GRID_N + 1)).add(0.5 / (L.GRID_N + 1));
 
-type Kind = 'fern' | 'grass' | 'litter' | 'drift' | 'reed' | 'pad' | 'sprout' | 'flower';
+type Kind = 'fern' | 'grass' | 'litter' | 'drift' | 'reed' | 'pad' | 'sprout' | 'flower' | 'rock' | 'mushroom';
+const ASSET: Partial<Record<Kind, string>> = { grass: 'dress_grass', fern: 'dress_fern', flower: 'dress_flower', drift: 'dress_log', pad: 'dress_pad', reed: 'dress_reed', rock: 'dress_rock', mushroom: 'dress_mushroom' };
+export const COVER_ASSETS = Object.values(ASSET) as string[];
 interface KindDef { kind: Kind; cell: number; w: number; wGL: number; seed: number; }
 const KINDS: KindDef[] = [
-  { kind: 'fern', cell: 2.1, w: 72, wGL: 40, seed: 11 },
-  { kind: 'sprout', cell: 2.6, w: 56, wGL: 30, seed: 23 },
-  { kind: 'grass', cell: 0.62, w: 150, wGL: 60, seed: 37 },
-  { kind: 'flower', cell: 1.5, w: 80, wGL: 36, seed: 91 },
+  { kind: 'fern', cell: 2.1, w: 56, wGL: 40, seed: 11 },
+  { kind: 'grass', cell: 0.74, w: 108, wGL: 56, seed: 37 },
+  { kind: 'rock', cell: 5.5, w: 28, wGL: 16, seed: 103 },
+  { kind: 'mushroom', cell: 4.2, w: 32, wGL: 18, seed: 117 },
+  { kind: 'flower', cell: 1.7, w: 56, wGL: 36, seed: 91 },
   { kind: 'litter', cell: 1.9, w: 72, wGL: 40, seed: 41 },
   { kind: 'drift', cell: 3.4, w: 48, wGL: 28, seed: 53 },
-  { kind: 'reed', cell: 1.3, w: 96, wGL: 48, seed: 67 },
-  { kind: 'pad', cell: 2.0, w: 80, wGL: 44, seed: 79 },
+  { kind: 'reed', cell: 1.4, w: 60, wGL: 48, seed: 67 },
+  { kind: 'pad', cell: 2.2, w: 52, wGL: 44, seed: 79 },
 ];
 
 function buildMesh(kind: Kind): THREE.BufferGeometry {
@@ -93,7 +96,7 @@ export class Cover {
   instances = 0;
   useCompute: boolean;
 
-  constructor(tx: WorldTextures, land: LandMaps, gpu: boolean) {
+  constructor(tx: WorldTextures, land: LandMaps, gpu: boolean, kits: Record<string, KitMesh | null> = {}) {
     this.useCompute = gpu;
     for (const def of KINDS) {
       const W = gpu ? def.w : def.wGL, N = W * W;
@@ -119,6 +122,8 @@ export class Cover {
         if (def.kind === 'fern') ok = dry.mul(offTrail).mul(t.step(zn.g, 0.3)).mul(t.step(zn.b, 0.25)).mul(t.step(zn.a, 0.2)).mul(t.step(pick, t.mix(0.75, 0.3, open)));
         else if (def.kind === 'sprout') ok = dry.mul(offTrail).mul(t.step(zn.b, 0.35)).mul(t.step(zn.a, 0.2)).mul(t.step(pick, t.mix(0.6, 0.2, zn.g)));
         else if (def.kind === 'grass') ok = dry.mul(offTrail).mul(t.step(zn.a, 0.3)).mul(t.step(pick, t.max(zn.g.mul(0.92), open.mul(0.85).add(0.28)).mul(t.float(1.0).sub(zn.b.mul(0.8)))));
+        else if (def.kind === 'rock') { ok = dry.mul(t.step(zn.a, 0.4)).mul(t.step(pick, t.mix(0.16, 0.5, t.max(zn.r, zn.b)))); sc = size.mul(1.3).add(0.5); }
+        else if (def.kind === 'mushroom') ok = dry.mul(offTrail).mul(t.step(zn.g, 0.3)).mul(t.step(zn.b, 0.3)).mul(t.step(open, 0.55)).mul(t.step(pick, 0.3));
         else if (def.kind === 'flower') ok = dry.mul(offTrail).mul(t.step(zn.a, 0.3)).mul(t.step(zn.b, 0.3)).mul(t.step(pick, t.max(zn.g.mul(0.6), open.mul(0.5).add(0.14))));
         else if (def.kind === 'litter') ok = dry.mul(t.step(zn.b, 0.3)).mul(t.step(zn.a, 0.2)).mul(t.step(zn.g, 0.5)).mul(t.step(pick, 0.7));
         else if (def.kind === 'drift') ok = dry.mul(t.step(0.08, zn.b)).mul(t.step(zn.b, 0.75)).mul(t.step(pick, 0.5)).add(dry.mul(t.step(zn.b, 0.08)).mul(t.step(pick, 0.07))).min(1.0);
@@ -154,11 +159,14 @@ export class Cover {
       const dat = t.attribute('dat', 'vec3');
       const local = rot(t.positionGeometry.mul(A.w));
       const world = local.add(A.xyz);
-      const mat = makeWorldMaterial(tx, { wind: false });
-      mat.positionNode = world.add(windOffset(world, dat.y.mul(def.kind === 'pad' || def.kind === 'drift' || def.kind === 'litter' ? 0.0 : 0.35)));
+      const kit = ASSET[def.kind] ? kits[ASSET[def.kind]!] : null;
+      const still = def.kind === 'pad' || def.kind === 'drift' || def.kind === 'litter' || def.kind === 'rock' || def.kind === 'mushroom';
+      const mat = makeWorldMaterial(tx, kit ? { asset: true, wind: false } : { wind: false });
+      const w = kit ? t.attribute('wnd', 'float') : dat.y;
+      mat.positionNode = world.add(windOffset(world, w.mul(still ? 0.0 : 0.3)));
       mat.normalNode = t.transformNormalToView(rot(t.normalGeometry));
-      if (def.kind === 'grass' || def.kind === 'reed' || def.kind === 'fern') { mat.side = THREE.DoubleSide; mat.normalNode = t.transformNormalToView(t.vec3(0.0, 1.0, 0.0).add(rot(t.normalGeometry).mul(def.kind === 'grass' ? 0.0 : 0.5)).normalize()); }
-      const mesh = new THREE.InstancedMesh(buildMesh(def.kind), mat, N);
+      if (def.kind === 'grass' || def.kind === 'reed' || def.kind === 'fern' || def.kind === 'flower' || def.kind === 'pad') mat.side = THREE.DoubleSide;
+      const mesh = new THREE.InstancedMesh(kit ? makeKitGeometry(kit) : buildMesh(def.kind), mat, N);
       mesh.count = N; mesh.frustumCulled = false; mesh.castShadow = false; mesh.receiveShadow = true; mesh.name = 'cover_' + def.kind;
       this.group.add(mesh);
     }

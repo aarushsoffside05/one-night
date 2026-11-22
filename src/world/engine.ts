@@ -16,7 +16,7 @@ import { makeSky, makeFarRings, makeClouds } from './sky';
 import { applyTimeOfDay } from './timeofday';
 import { FIXED_CAMS } from './cameras';
 import { makePost, type Post } from './post';
-import { Cover, makeLandMaps } from './cover';
+import { Cover, makeLandMaps, COVER_ASSETS } from './cover';
 import { People, type Look } from './people';
 import { Player, bindInput, type Solid } from './player';
 import { buildCanoe } from './props';
@@ -26,6 +26,8 @@ import { Animals } from './animals';
 import { addRipple } from './ripples';
 import { loadKit } from './assets';
 import { TREE_KINDS } from './trees';
+import { buildStructures, type Structures } from './structures';
+import * as T from 'three/tsl';
 import { Bench } from './bench';
 import { bus } from '../state';
 import * as L from './layout';
@@ -62,6 +64,9 @@ export class Engine {
   animals!: Animals;
   wakeAt = 0;
   canoeKit: KitMesh | null = null;
+  coverKits: Record<string, KitMesh | null> = {};
+  structs: Structures | null = null;
+  floaters: { g: THREE.Group; x: number; z: number; yaw: number; draft: number }[] = [];
   player!: Player;
   solids: Solid[] = [];
   lampSpot = new THREE.SpotLight(0xffc27a, 0, 26, 0.95, 0.6, 1.4);
@@ -78,6 +83,18 @@ export class Engine {
   constructor(public renderer: THREE.WebGPURenderer, public scene: THREE.Scene, public camera: THREE.PerspectiveCamera) {}
 
   groundAt(x: number, z: number): number { return this.cooked ? sampleGrid(this.cooked.terrain.grid, x, z) : 0; }
+  // the surface under a walker at (x, z) who is at height y: the land, or a deck, plank walk or house floor within reach
+  floorAt(x: number, z: number, y: number): number {
+    let g = this.groundAt(x, z);
+    const st = this.structs; if (!st) return g;
+    const wy = sim.water * L.FLOOD_RANGE;
+    for (const w of st.walk) {
+      let lx = x, lz = z, top = w.y;
+      if (w.float >= 0) { const f = st.floating[w.float]; const dx = x - f.x, dz = z - f.z, c = Math.cos(f.yaw), sn = Math.sin(f.yaw); lx = dx * c - dz * sn; lz = dx * sn + dz * c; top = Math.max(wy, this.groundAt(f.x, f.z) + f.draft) + w.y; }
+      if (lx >= w.x0 && lx <= w.x1 && lz >= w.z0 && lz <= w.z1 && top > g && y >= top - 0.6) g = top;
+    }
+    return g;
+  }
 
   async start() {
     markLoading(true);
@@ -104,6 +121,9 @@ export class Engine {
     const borrow: Record<string, string> = { vineTower: 'tallPale', weeper: 'roundCrown', pioneer: 'lowSpread' };
     TREE_KINDS.forEach((name, k) => { const from = borrow[name]; if (from && !crafted.has(k)) { const src = crafted.get(TREE_KINDS.indexOf(from as any)); if (src) crafted.set(k, src); } });
     this.canoeKit = await loadKit('canoe');
+    await Promise.all(COVER_ASSETS.map(async (n) => { this.coverKits[n] = await loadKit(n); }));
+    setUI({ loading: { stage: 'Raising the houses', f: 0.15 } });
+    if (!params.off.includes('structs')) { try { this.structs = await buildStructures(WORLD_SEED, (x, z) => this.groundAt(x, z)); } catch (e) { console.warn('[one-night] structures failed', e); } }
     this.build(cooked, crafted);
     if (params.water !== null) sim.water = sim.waterTarget = params.water;
     if (params.tod !== null) sim.tod = sim.todTarget = params.tod;
@@ -144,7 +164,7 @@ export class Engine {
     scene.add(makeFarRings(WORLD_SEED, this.worldMat));
     const land = makeLandMaps(c.terrain.grid, c.terrain.zone);
     const gpu = sim.backend === 'webgpu' && !params.off.includes('compute');
-    this.cover = new Cover(this.tex, land, gpu);
+    this.cover = new Cover(this.tex, land, gpu, this.coverKits);
     this.particles = new Particles(land, gpu);
     if (!params.off.includes('particles')) scene.add(this.particles.group);
     if (!params.off.includes('cover')) scene.add(this.cover.group);
@@ -159,6 +179,18 @@ export class Engine {
     scene.background = null;
     // free the cook's scratch arrays that were uploaded
     (c.terrain as any).mesh = null;
+    // houses, rafts, steps and props (Blender-made where the asset exists)
+    if (this.structs) {
+      const st = this.structs, t: any = T;
+      const mat = makeWorldMaterial(this.tex, { rgb: true });
+      const glowMat = new THREE.MeshBasicNodeMaterial();
+      glowMat.colorNode = t.attribute('dat', 'vec3').mul(t.mix(1.6, 5.0, U.night)).mul(U.fade); // lamp glass and lit panes: brighter after dark, picked up by the bloom
+      const add = (k: KitMesh | null, m: THREE.Material, parent: THREE.Object3D, cast: boolean) => { if (!k || !k.tris) return; const mesh = new THREE.Mesh(makeKitGeometry(k), m); mesh.castShadow = cast; mesh.receiveShadow = true; mesh.frustumCulled = false; parent.add(mesh); };
+      add(st.fixed, mat, scene, true); add(st.fixedGlow, glowMat, scene, false);
+      for (const f of st.floating) { const g = new THREE.Group(); add(f.mesh, mat, g, true); add(f.glow, glowMat, g, false); g.rotation.y = f.yaw; scene.add(g); this.floaters.push({ g, x: f.x, z: f.z, yaw: f.yaw, draft: f.draft }); }
+      for (const so of st.solids) this.solids.push(so);
+      for (const fs of st.floatSolids) { const f = st.floating[fs.item]; const c = Math.cos(f.yaw), sn = Math.sin(f.yaw); this.solids.push({ x: f.x + fs.x * c + fs.z * sn, z: f.z - fs.x * sn + fs.z * c, r: fs.r, top: 1e9 }); }
+    }
     this.animals = new Animals(this.tex); scene.add(this.animals.group);
     // people and the kid
     this.people = new People(this.tex); scene.add(this.people.group);
@@ -166,7 +198,7 @@ export class Engine {
     const kid = this.people.add(kidLook);
     const canoe = this.canoeKit ? new THREE.Mesh(makeKitGeometry(this.canoeKit), makeWorldMaterial(this.tex, { asset: true, wind: false })) : new THREE.Mesh(makeKitGeometry(buildCanoe()), this.worldMat);
     canoe.castShadow = true; canoe.receiveShadow = true; canoe.name = 'canoe'; scene.add(canoe);
-    this.player = new Player(kid, canoe, { groundAt: (x, z) => this.groundAt(x, z), forest: c.forest, solids: this.solids });
+    this.player = new Player(kid, canoe, { groundAt: (x, z) => this.groundAt(x, z), floorAt: (x, z, y) => this.floorAt(x, z, y), forest: c.forest, solids: this.solids });
     this.player.place(L.BANK_TOP[0] + 8, L.BANK_TOP[1] + 12, 2.0);
     bindInput(this.renderer.domElement);
     // the lamp: one spot light with a shadow, plus a small glow without one
@@ -246,6 +278,7 @@ export class Engine {
       this.focus.copy(this.player.pos);
     }
     this.camera.updateMatrixWorld();
+    { const wy = sim.water * L.FLOOD_RANGE; for (const f of this.floaters) { const bob = sim.reduceMotion ? 0 : Math.sin(sim.time * 0.9 + f.x) * 0.02; f.g.position.set(f.x, Math.max(wy, this.groundAt(f.x, f.z) + f.draft) + bob, f.z); } }
     this.people.update(sim.time);
     this.animals.update(this.focus, (x, z) => this.groundAt(x, z));
     // the canoe leaves rings behind it

@@ -7,7 +7,7 @@ import { INST_STRIDE, TREE_TRUNK_R, TREE_HEIGHT, type ForestCook } from './trees
 import { waterSurfaceAt } from './height';
 import * as L from './layout';
 
-export interface World { groundAt(x: number, z: number): number; forest: ForestCook; solids: Solid[]; }
+export interface World { groundAt(x: number, z: number): number; floorAt?(x: number, z: number, y: number): number; forest: ForestCook; solids: Solid[]; }
 export interface Solid { x: number; z: number; r: number; top: number; } // simple round obstacles (posts, houses use several)
 
 const keys = new Set<string>();
@@ -105,7 +105,7 @@ export class Player {
     if (dragDX || dragDY) { this.camYaw -= dragDX * 0.0042; this.camPitch = Math.min(1.1, Math.max(sim.firstPerson ? -1.0 : -0.35, this.camPitch + dragDY * 0.003)); lastLook = sim.time; dragDX = dragDY = 0; }
     if (wheel) { this.camDist = Math.min(9, Math.max(3.2, this.camDist + wheel * 0.004)); wheel = 0; }
     const wyHere = waterSurfaceAt(this.pos.x, this.pos.z, sim.water);
-    const ground = w.groundAt(this.pos.x, this.pos.z);
+    const ground = w.floorAt ? w.floorAt(this.pos.x, this.pos.z, this.pos.y + 0.45) : w.groundAt(this.pos.x, this.pos.z);
     const depth = wyHere - ground;
     // on foot until the water is waist-deep; then the canoe takes over, and gives way again when it grounds
     if (this.mode === 'foot' && depth > 0.78) { this.mode = 'canoe'; this.canoePos.copy(this.pos); this.canoeYaw = this.yaw; this.speed *= 0.3; }
@@ -131,7 +131,7 @@ export class Player {
       const ox = this.pos.x, oz = this.pos.z;
       this.pos.x += Math.sin(this.yaw) * this.speed * dt; this.pos.z += Math.cos(this.yaw) * this.speed * dt;
       this.collide(this.pos, 0.3);
-      this.pos.y = w.groundAt(this.pos.x, this.pos.z);
+      this.pos.y = w.floorAt ? w.floorAt(this.pos.x, this.pos.z, this.pos.y + 0.45) : w.groundAt(this.pos.x, this.pos.z);
       const moved = Math.hypot(this.pos.x - ox, this.pos.z - oz);
       this.walked += moved; if (sp > 0.5 && moved < sp * dt * 0.2) this.stuck += dt; else this.stuck = 0;
       f.pose = this.speed > 0.25 ? 'walk' : 'idle'; f.speed = this.speed; f.phase += this.speed * dt * 2.35;
