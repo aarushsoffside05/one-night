@@ -149,7 +149,7 @@ function emitClumps(b: MeshBuilder, list: Cl[], seed: number, kind: number, hi: 
     b.push().translate(cl.c[0], cl.c[1], cl.c[2]).rotY(yaw);
     b.set(cl.pals[1], wind, aux);
     const vol = cl.rx * cl.rx * cl.ry;
-    if (hi) b.leafCloud(jr, cl.rx * k * 1.05, cl.ry * k * 1.25, cl.rx * zr * k * 1.05, Math.round(Math.min(90, 26 + vol * 2.2)), Math.max(0.55, cl.rx * 0.26), cl.pals, cl.flat ?? 0.3);
+    if (hi) b.leafCloud(jr, cl.rx * k * 1.05, cl.ry * k * 1.25, cl.rx * zr * k * 1.05, Math.round(Math.min(120, 34 + vol * 3)), Math.max(0.6, cl.rx * 0.3), cl.pals, cl.flat ?? 0.3);
     else if (cl.cls < 2) b.leafCloud(jr, cl.rx * k * 1.08, cl.ry * k * 1.3, cl.rx * zr * k * 1.08, cl.cls === 0 ? 14 : 7, Math.max(0.9, cl.rx * 0.4), cl.pals, cl.flat ?? 0.3);
     b.pop();
   });

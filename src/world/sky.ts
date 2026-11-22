@@ -22,15 +22,16 @@ export function makeSky(): THREE.Mesh {
   const cell = dir.mul(170.0).floor();
   const h = t.fract(t.sin(cell.dot(t.vec3(12.9898, 78.233, 37.719))).mul(43758.5453));
   const star = t.step(0.9965, h).mul(hgt.smoothstep(0.05, 0.3)).mul(U.stars);
-  // painted streak clouds: long wisps that follow the horizon, lit by the sun's colour
-  const az = t.atan(dir.z, dir.x), el = dir.y;
-  const wisp = t.sin(el.mul(44.0).add(t.sin(az.mul(2.5).add(1.7)).mul(2.6)).add(az.mul(1.3)).add(U.time.mul(0.004))).mul(0.5).add(0.5);
-  const patch = t.sin(az.mul(1.7).add(el.mul(5.0)).add(0.6)).mul(0.5).add(0.5);
-  const band = t.smoothstep(0.03, 0.16, el).mul(t.smoothstep(0.75, 0.4, el));
-  const cloud = t.smoothstep(0.86, 0.98, wisp).mul(t.smoothstep(0.35, 0.8, patch)).mul(band).mul(0.7);
-  const cloudCol = t.mix(U.skyHorizon, U.sunCol.mul(0.6).add(t.vec3(0.62)), 0.7);
-  const halo = U.fogSunCol.mul(sd.pow(3.0).mul(0.28));
-  m.colorNode = t.mix(grad, cloudCol, cloud.mul(0.85).mul(t.float(1.0).sub(U.night.mul(0.7)))).add(glow).add(halo).add(t.vec3(0.9, 0.95, 1.0).mul(star)).mul(U.fade);
+  // painted clouds: noise on a flat sheet far overhead, so they stretch into streaks toward the horizon.
+  // Sun side warm and bright, far side takes the sky's own cool colour.
+  const el = dir.y;
+  const sheet = dir.xz.div(el.add(0.22)).mul(0.9).add(t.vec2(U.time.mul(0.003), 0.0));
+  const n = t.mx_fractal_noise_float(t.vec3(sheet.x, sheet.y.mul(2.3), 3.7), 4, 2.1, 0.5).mul(0.5).add(0.5);
+  const cover = t.smoothstep(0.5, 0.74, n).mul(t.smoothstep(0.02, 0.2, el));
+  const lit = t.smoothstep(0.55, 0.95, n).mul(0.6).add(sd.pow(2.0).mul(0.6));
+  const cloudCol = t.mix(t.mix(U.skyTop, U.skyHorizon, 0.75), U.sunCol.mul(0.55).add(t.vec3(0.7, 0.66, 0.62)), lit.clamp(0.0, 1.0));
+  const halo = U.fogSunCol.mul(sd.pow(3.0).mul(0.3)).add(U.fogSunCol.mul(sd.pow(24.0).mul(0.5)));
+  m.colorNode = t.mix(grad, cloudCol, cover.mul(0.9).mul(t.float(1.0).sub(U.night.mul(0.75)))).add(glow).add(halo).add(t.vec3(0.9, 0.95, 1.0).mul(star)).mul(U.fade);
   const mesh = new THREE.Mesh(g, m);
   mesh.frustumCulled = false; mesh.renderOrder = -10; mesh.name = 'sky';
   return mesh;

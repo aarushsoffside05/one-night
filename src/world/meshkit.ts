@@ -192,12 +192,12 @@ export class MeshBuilder {
     this.normalFn = (p) => { let x = (p[0] - c[0]) / rx, y = (p[1] - c[1]) / ry + 0.35, z = (p[2] - c[2]) / rz; const l = Math.hypot(x, y, z) || 1; return [x / l, y / l, z / l]; };
     // the core hides the far side and gives the mass its body
     const savePal = this.pal;
-    this.pal = pals[1]; this.blob(rng, rx * 0.88, ry * 0.86, rz * 0.88, 0, 0.14, flatBottom, pals);
+    this.pal = pals[1]; this.blob(rng, rx * 0.8, ry * 0.78, rz * 0.8, 0, 0.14, flatBottom, pals);
     for (let i = 0; i < leaves; i++) {
       // a point on the ellipsoid, a little more of them on top than underneath
       let u = rng() * 2 - 1; if (u < -0.2 && rng() < 0.5) u = -u;
       const th = rng() * Math.PI * 2, rr = Math.sqrt(1 - u * u);
-      const k = 0.9 + rng() * 0.16;
+      const k = 0.86 + rng() * 0.2;
       const nx = rr * Math.cos(th), ny = u, nz = rr * Math.sin(th);
       const px = nx * rx * k, py = (ny < 0 ? ny * (1 - flatBottom) : ny) * ry * k, pz = nz * rz * k;
       // leaf plane: spanned by a tangent and a direction leaning outward and down, like a hanging leaf

@@ -135,7 +135,7 @@ export class Engine {
     if (!params.off.includes('cover')) scene.add(this.cover.group);
     this.water = makeWater(); scene.add(this.water);
     this.sky = makeSky(); scene.add(this.sky);
-    this.clouds = makeClouds(WORLD_SEED); scene.add(this.clouds);
+    this.clouds = makeClouds(WORLD_SEED); this.clouds.visible = false; scene.add(this.clouds); // painted sky clouds replace the blob clouds
     const s = this.sun;
     s.castShadow = true; s.shadow.mapSize.set(2048, 2048);
     s.shadow.bias = -0.0008; s.shadow.normalBias = 0.06; s.shadow.radius = 2.5;
