@@ -308,7 +308,7 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
   - Prompt: "E: add a basket. Watch the canoe sit lower." [no fact]
   - DONA MARLENE (tying the tag): "You and a load: one shin of water. That is your green." [U8]
   - SEU ANÍSIO: "More in the boat, more boat in the water. Sound before you go." [no fact]
-  - DONA MARLENE (grounded): "Step out. It is only your knees. Without you she floats." [no fact]
+  - DONA MARLENE (grounded): "Step out. It is only your ankles there. Without you she floats." [no fact]
   - Prompt: "Hold E to step out and tow." [no fact]
   - VÓ ZEFA: "Up here with them, where it stays dry a while yet." [no fact]
   - TICO (hiding the float behind his back): "I am making a face. Do not look yet." [no fact]
@@ -450,52 +450,57 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
 
 ---
 
-### CHAPTER 5 - DAY 18 INTO DAY 19: BY THE LAMP (CORE, 4.5 min)
+### CHAPTER 5 - DAY 18 INTO DAY 19: BY THE LAMP (CORE, 5.2 min)
 
 #### 5.1 Two fingers
 - **Place:** the high ground by the lake; then the landing. **Water:** 0.867 (57 cm over the high ground). **Time:** dusk.
 - **Leads:** Raimundo. **Feeling:** held breath.
-- **Objective:** call it. Then gather the floats.
-- **Steps:** (1) At the high ground with Raimundo and Jandira. Before throwing: look at the water (the ripple that stood over the log on Day 15 is gone) and press Q "not yet" or E "enough". (2) F ahead: red stays dull by two fingers. Either call is answered kindly; the cord is the judge. (3) Raimundo ties a rag round the tree on the high ground, exactly at the waterline. (4) Cut to the landing in the last light. Vó hands her the white float; Raimundo the red; Jandira clips on her green; Tico runs along the plank walk with three more. The lamp goes onto the bow post (E).
+- **Objective:** call it. Then gather the floats, and sleep.
+- **Steps:** (1) At the high ground with Raimundo and Jandira. Before throwing: look at the water (the ripple that stood over the log on Day 15 is gone) and press Q "not yet" or R "enough". (2) F ahead: red stays dull by two fingers. Either call is answered kindly; the cord is the judge. (3) Raimundo ties a rag round the tree on the high ground, exactly at the waterline. (4) Cut to the landing in the last light (Vó, Raimundo, Jandira, Tico: four others). Vó hands her the white float; Raimundo the red; Jandira clips on her green; Tico runs along the plank walk with three more. They clip onto the cord in the order they will be dropped: white, yellow, blue, Zé, green, red. (5) Raimundo sends the girls to bed. Then an eight-second card on the bank-steps camera, in lamp light, the water one step higher on the steps than at dusk: "LATER. STILL DARK. DAY 19."
 - **People's way:** say what the cord says, even when it is the wrong answer for you. **Rushed way:** calling "enough": Raimundo has her throw, and red is dull. No cost.
-- **Learned by doing (test):** "not yet" said by her, not to her. If chapter 3 was not built, Jandira's line teaches the throw ahead here.
+- **Learned by doing (test):** "not yet" said by her, not to her. In a build with neither chapter 3 nor chapter 4, Jandira's line teaches the throw ahead here.
 - **Captions:**
-  - Prompt: "Look at the water first. Call it: Q not yet, E enough. Then throw." [no fact]
-  - JANDIRA (only if chapter 3 is not built): "Do not drop it. Throw it. Find the bottom before the boat gets there." [no fact]
+  - Prompt: "Look at the water first. Call it: Q not yet, R enough. Then throw." [no fact]
+  - JANDIRA (only if chapters 3 and 4 are not built): "Do not drop it under you. Throw it. Find the bottom before the boat gets there." [no fact]
   - LUANA: "Not yet. Two fingers short." [no fact]
   - RAIMUNDO: "Then not yet." [no fact]
-  - RAIMUNDO (tying the rag): "A tree does not float. If this rag is under at first grey, we tow at sunrise." [U16]
-  - LUANA: "Why not sleep, and look in the morning?" [no fact]
-  - RAIMUNDO: "A corral is slow, and wide as a wall. I want her over and tied before the afternoon wind. So her way gets marked tonight." [U6, U19]
-  - RAIMUNDO: "You two go. The light one sounds; the one who knows the trees steers. I come at first grey with the motor: a motor in the dark finds every log." [U17]
+  - RAIMUNDO (tying the rag): "A tree does not float. If this rag is under at first grey, we move her at sunrise." [U16]
+  - LUANA: "Why not mark her way in the morning?" [no fact]
+  - RAIMUNDO: "A corral is slow, and wide as a wall. I want the whole day in hand to get her down the channel and tied. So her way is marked before I come, and I push the moment I get there." [U6]
+  - RAIMUNDO: "You two go. The light one sounds; the one who knows the trees steers. And no motor: a motor in the dark finds every log." [U17]
   - VÓ ZEFA: "Mine is the white one. Put it where it matters." [no fact]
   - TICO: "Zé is finished. He goes too. And Pai's blue one, and Mãe's yellow." [no fact]
+  - RAIMUNDO: "Pale paint. You will see them in the lamp, and I will see them at first grey." [U2]
   - RAIMUNDO: "Red goes last. Red goes on the high ground, and only if red is covered." [U2]
+  - RAIMUNDO: "Sleep now. Vó wakes you while it is still black. Mark her way in the last of the night; I come at first grey with the motor." [U17]
   - AIM: "Mark the corral's way: six floats. Red only where red is covered." [no fact]
-- **Minutes:** 1.2. **Done when:** `call.made && rag.tied && floats.owned == 6 && lamp.onBow`.
+  - Card: "LATER. STILL DARK. DAY 19." [no fact]
+- **Minutes:** 1.2. **Done when:** `call.made && rag.tied && floats.owned == 6 && card.stillDark.shown && others.onScreen <= 4`.
 
 #### 5.2 Marking the way (must-have moment 3 begins: night by one lamp)
-- **Place:** the old bed from its mouth, the lane. **Water:** 0.87. **Time:** night. The only light is the lamp on the bow post: a warm pool about eight metres wide; trunks come out of the black and go back into it. The drop-line does not glow.
-- **Leads:** Jandira, in the back seat, paddling and steering. **Feeling:** focus, with small wonders (tension strength 1; no time limit).
+- **Place:** the landing; then the old bed from its mouth, and the lane. **Water:** 0.873 (it rose six centimetres while she slept). **Time:** the last of the night, black. The only light is the lamp on the bow post: a warm pool about eight metres wide; trunks come out of the black and go back into it. The drop-line does not glow.
+- **Leads:** Vó Zefa at the landing; then Jandira, in the back seat, paddling and steering. **Feeling:** focus and small wonders. This is not a tension scene: no clock, no fail state, and a small visible relief at every float.
 - **Objective:** put five floats where the corral can pass.
-- **Steps:** (1) Luana in the bow. Hold W: Jandira paddles on. A / D: Luana points left or right and Jandira steers there. (2) Five marks. At each: F to throw ahead, read the red tag, G to drop a float where red is lit. Mark 1, the turn out of the channel into the old bed (easy, deep). Mark 2, where the lane leaves the bed: the first throw lands hard on a sunken trunk; throw again beside it; mark the soft, deep side. Mark 3, a gap between two great trunks: throw to both sides, four metres apart; both must light red. Marks 4 and 5, the lane up to the high ground. (3) A float dropped where red is dull: Jandira says one line; E to pick it up; try again. (4) Night life, none of it sudden: two pale points at the waterline twelve metres ahead, steady for three seconds, then they sink without a splash; bats skim the lamp pool; frogs sit on floating plants; fireflies between far trunks; the outline of a sloth against stars; the dropped floats bob away behind into the dark, a line of pale dots.
+- **Steps:** (1) At the landing Vó lights the lamp and sets it on the bow post of the old canoe (nobody holds it). E: climb into the bow; Jandira takes the back seat; Vó stays on the steps. Cut to the old bed's mouth. (2) Hold W: Jandira paddles on. A / D: Luana points left or right and Jandira steers there. (3) Five marks. At each: F to throw ahead, read the red tag, G to drop the next float where red is lit. Mark 1 (white), the turn out of the channel into the old bed: easy, deep. Mark 2 (yellow), where the lane leaves the bed: the first throw lands hard on a sunken trunk; throw again beside it; the float goes on the soft, deep side. Mark 3 (blue), a gap between two great trunks: throw to both sides, four metres apart; both must light red. Mark 4 (Zé): a second sunken trunk, on the other hand; the float goes on the deep side again. Mark 5 (green), the last of the lane before the high ground: easy. (4) Every good float is answered at once: it settles upright in the lamp light, Jandira nods and dips her paddle, and fireflies show between the far trunks. (5) A float dropped where red is dull: Jandira says one line; E to pick it up; try again. (6) Night life, none of it sudden: bats skim the lamp pool; frogs sit on floating plants; the outline of a sloth against stars; the dropped floats bob away behind into the dark, a line of pale dots. Once, near the end of the lane, far out beyond the last trunks on the open lake's edge (forty metres off, nowhere she ever wades), two pale points catch the lamp, hold steady for three seconds, then sink without a splash.
 - **People's way:** sound both sides; trust a soft landing; mark only on red. **Rushed way:** marking on the first hard landing or on one side only: the float is "wrong" and must be picked up. No harm, no clock.
 - **Learned by doing (test):** everything from chapters 1 to 4, for something heavy that is not hers.
 - **Captions:**
+  - VÓ ZEFA (setting the lamp): "The lamp sits on the post. You need both hands for the cord." [no fact]
   - JANDIRA: "Front seat sounds. Back seat steers. Tell me where it is deep." [no fact]
   - Prompt: "W: Jandira paddles on. A / D: point the way. F: throw ahead. G: drop a float where red is covered." [no fact]
   - JANDIRA: "Wide as four canoes, remember. Sound both sides of the gap." [U6]
   - LUANA (hard landing): "Hard. That is wood. Again, beside it." [no fact]
+  - JANDIRA (a good float): "Good. That one stays." [no fact]
   - JANDIRA (wrong float): "Pick it up. A wrong mark is worse than no mark." [no fact]
-  - LUANA (the eyes): "Something is looking at us." JANDIRA: "Something is always looking. It lives here. Keep sounding." [no fact]
+  - LUANA (the eyes): "Something is looking at us." JANDIRA: "It was here first. Keep sounding." [U10]
   - JANDIRA: "On your first day you could walk in here. Same trunks." [no fact]
-- **Minutes:** 2.3. **Done when:** `floats.placedValid >= 5`.
+- **Minutes:** 3.0. **Done when:** `lamp.onBow && floats.placedValid >= 5`.
 
 #### 5.3 The rag
-- **Place:** the high ground by the lake; then the lake's edge. **Water:** 0.873 (63 cm over the high ground). **Time:** night to grey pre-dawn.
+- **Place:** the high ground by the lake; then the lake's edge. **Water:** 0.873 (63 cm over the high ground). **Time:** the last of the night to grey pre-dawn.
 - **Leads:** Jandira. **Feeling:** relief that turns to joy, quietly.
 - **Objective:** find the rag; say the word.
-- **Steps:** (1) The lamp finds the rag tree. The rag is a pale blur under the surface. (2) Call it: Q or E. (3) F ahead, to the side of the old log: red lights, by a finger. (4) G: the red float goes down on the high ground. (5) The canoe crosses onto the lake. The sky is grey; mist lies on the water; the corral is a dark shape by the bank; the cow's head turns. E: put the lamp out.
+- **Steps:** (1) The lamp finds the rag tree. The rag is a pale blur under the surface. (2) Call it: Q or R. (3) F ahead, to the side of the old log: red lights, by a finger. (4) G: the red float goes down on the high ground. (5) The canoe crosses onto the lake. The sky is grey; mist lies on the water; the corral is a dark shape by the bank; the cow's head turns. E: put the lamp out.
 - **People's way:** the rag says the water rose; only the cord says it is enough. **Rushed way:** dropping red without sounding: Jandira's line; sound; then drop.
 - **Learned by doing (mastery begins):** she says "now" from her own reading.
 - **Captions:**
@@ -511,27 +516,28 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
 
 ---
 
-### CHAPTER 6 - DAY 19, THEN DAY 21: FIRST LIGHT (CORE, 5.5 min)
+### CHAPTER 6 - DAY 19, THEN DAY 21: FIRST LIGHT (CORE, 5.7 min)
 
 #### 6.1 Leaves for the morning (must-have moment 2: the giant fish)
 - **Place:** the lake by the corral; floating plant mats 30 m out. **Water:** 0.873. **Time:** grey pre-dawn, first light.
-- **Leads:** Raimundo, arriving across the grey lake by motor canoe (a long wake); he and Jandira rig the tow rope at the corral, in sight the whole time. **Feeling:** hush, then wonder.
+- **Leads:** Raimundo, arriving across the grey lake by motor canoe (a long wake); he lashes the motor canoe's bow to the corral's back rail, ready to push, in sight the whole time. Jandira comes with Luana, in the back seat of the old canoe. **Feeling:** hush, then wonder.
 - **Objective:** cut the cow something fresh so she has a reason to move.
-- **Steps:** (1) Raimundo asks; Luana answers. (2) Paddle alone 30 m to the floating mats. Mist; giant lily pads; a heron lifts off. (3) Hold E to cut an armful; and a second. (4) During the second cut, two metres off the bow, the still water bulges. A long dark back. A broad tail, edged red. A ring that rocks the canoe and lifts the lily pads one after another. About three seconds. The camera stays low behind Luana and does not turn toward the fish; she stops moving; the player's input eases for three seconds. No caption, no name, no music. On the corral, Jandira lifts her chin toward the ring and goes back to the rope. (5) Paddle back.
+- **Steps:** (1) Raimundo asks; Luana answers. (2) Paddle 30 m to the floating mats with Jandira in the back seat. Mist; giant lily pads; a heron lifts off. (3) Hold E to cut an armful; and a second; Jandira cuts beside her. (4) During the second cut, two metres off the bow, the still water bulges. A long dark back. A broad tail, edged red. A ring that rocks the canoe and lifts the lily pads one after another. About three seconds. The camera stays low behind Luana and does not turn toward the fish; she stops moving; the player's input eases for three seconds. No caption, no name, no music. Behind her, Jandira lifts her chin toward the ring and goes back to cutting. (5) Paddle back.
 - **People's way / rushed way:** none. She is not looking for it and cannot miss it: it is triggered by the second cut.
 - **Learned by doing:** none. It is given.
 - **Captions:**
   - RAIMUNDO: "Covered? You are sure?" LUANA: "One finger to spare." [no fact]
   - RAIMUNDO: "Then at sunrise. Cut her something fresh. She will want a reason to move." [no fact]
+  - JANDIRA: "I come with you. Two cut faster than one." [no fact]
   - (The fish: no caption.)
-  - LUANA (back at the raft, low): "Did you see..." JANDIRA: "Mm." [no fact]
+  - LUANA (low): "Did you see..." JANDIRA: "Mm." [no fact]
 - **Minutes:** 1.2. **Done when:** `leaves.fresh >= 2 && fish.rollShown && player at corral`.
 
 #### 6.2 Sunrise (must-have moment 3 completes)
 - **Place:** the corral, casting off. **Water:** 0.873. **Time:** pre-dawn to full sunrise.
 - **Leads:** Raimundo. **Feeling:** wonder (the recipe: reaction first, child low in frame, back light, long hold).
 - **Objective:** let go the last rope.
-- **Steps:** (1) E: step aboard; put the fresh leaves in the front rack. The cow comes forward to them. (2) E, held, at the bank tree: untie the last rope. (3) As it comes free the sun breaks over the far tree line; the raft swings out; six seconds with no prompt and no caption: Luana and the cow in silhouette, the mist going gold. (4) The motor canoe noses in behind and pushes.
+- **Steps:** (1) E: step aboard; put the fresh leaves in the front rack. The cow comes forward to them. (2) E, held, at the bank tree: untie the last rope. (3) As it comes free the sun breaks over the far tree line; the raft swings out; six seconds with no prompt and no caption: Luana and the cow in silhouette, the mist going gold. (4) Behind her the motor starts, and the corral begins to move, pushed.
 - **Captions:**
   - RAIMUNDO: "The last rope is yours." [no fact]
   - (Sunrise: no caption for six seconds.)
@@ -539,28 +545,41 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
 - **Minutes:** 0.8. **Done when:** `corral.castOff && time == "sunrise"`.
 
 #### 6.3 Over the high ground (PEAK)
-- **Place:** lake bank, the high ground, the lane. **Water:** 0.873. **Time:** sunrise to morning.
-- **Leads:** Raimundo, pushing with the motor canoe from behind, where he cannot see past the corral; Jandira on the raft with the pole. Luana at the front rail. **Feeling:** tension (strength 2, under 45 seconds), then triumph.
-- **Objective:** be his eyes; get her over.
-- **Steps:** (1) The red float bobs ahead on the high ground. The corral moves on a set path from float to float; A / D nudges it left or right of each float; Q / E calls each stretch by eye, then F confirms. Two calls. (2) A late or wrong call bumps a trunk softly: the cow shifts her feet, the raft dips a little toward her, the calf stands up. Smooth calls: the calf stays lying down. (3) On the high ground the front logs touch. The corral stops, gently. (4) Raimundo calls everyone to the back. Jandira goes. Still touching. (5) The cow is standing right at the front, at the rack Luana filled. E: lift the leaves out; walk four metres to the back rack; E: put them in. The cow turns and follows. The front lifts. The motor pushes. The corral slides over. (6) Jandira hooks each float out with the pole as it passes and hands it back.
-- **People's way:** call early and softly; weight to the back. **Rushed way:** bumping only makes the cow shift. At the stop: Jandira gives the hint after 15 seconds; after 40 she picks the leaves up herself, walks half way and holds them out. It is over inside 60 seconds with no fail state. The cow and calf are dry and calm throughout.
-- **Learned by doing (mastery):** she reads by eye and is right. Then she changes what the raft needs, with the thing she has done for eighteen days.
+- **Place:** the lake bank, the high ground, the lane. **Water:** 0.873. **Time:** sunrise to morning.
+- **Leads:** Raimundo, pushing with the motor canoe from behind, where he cannot see past the corral; Jandira on the raft with the pole. Luana at the front rail. **Feeling:** tension (strength 2) in two short passages, each over inside 45 seconds, with a relief beat between and after; then triumph.
+- **Objective:** get her over; then be his eyes.
+- **Steps:**
+  1. From the open lake Raimundo lines the corral up on the red float while he can still see it past the corner, then tucks in behind and pushes straight. Luana stands at the front rail by the rack. Nothing to press: the red float comes on, the sun behind it (8 seconds).
+  2. FIRST PASSAGE. On the high ground the front logs touch. The corral stops, gently.
+  3. Raimundo calls everyone to the back. Jandira goes. Still touching. Raimundo says something heavy is still on the front; Jandira sees what.
+  4. The cow is standing right at the front, at the rack Luana filled. E: lift the leaves out; walk four metres to the back rack; E: put them in. The cow turns and follows. The front lifts. The motor pushes. The corral slides over. If the player waits: Jandira's hint line 10 seconds after the touch; at 30 seconds she picks the leaves up herself, walks half way and holds them out for Luana to take. Over by 45 seconds from the touch, with no fail state.
+  5. RELIEF. Open water in the lane. The calf lies down on the planks. Raimundo's and Jandira's lines.
+  6. SECOND PASSAGE. Twice in the lane the corral stops a raft's length short of a float that sits beside a sunken trunk (Zé, then the yellow one). In the low sun the trunk is a dark bar under the surface on one side of the float. Luana says, once, which side is deep: A or D. F checks it (red lights on the deep side). Raimundo pushes through on the side she called. The raft is never steered and there is no path to hold: two stops, one press each.
+  7. A wrong call left unchecked: the corner touches the sunken trunk softly, the cow shifts her feet, the raft dips a little toward her, the calf stands up; Jandira poles the corner off and the corral goes through on the other side. No call after 10 seconds: Jandira points the side with the pole. Both gaps are behind them inside 45 seconds.
+  8. RELIEF. The lane opens into the old bed. The calf lies back down. Jandira's line. She hooks each float out with the pole as it passes and hands it back.
+- **People's way:** weight to the back; look, say it once, check with the cord. **Rushed way:** a guessed side only makes the cow shift. The cow and calf are dry and calm throughout.
+- **Learned by doing (mastery):** she changes what the raft needs, with the thing she has done for eighteen days. Then she reads the water by eye, and the cord agrees.
 - **Captions:**
-  - RAIMUNDO: "I cannot see the water past her. You are my eyes. Call it." [no fact]
-  - Prompt: "A / D: call left or right. Q / E: not yet, or enough. F: throw ahead." [no fact]
-  - LUANA: "Zé on the left! Keep him on the left!" [no fact]
-  - JANDIRA (after a bump): "Softly. When we bump, she shifts, and the raft goes with her." [no fact]
+  - RAIMUNDO: "I can see red from here. After this I see only cow. Then you are my eyes." [no fact]
   - RAIMUNDO (the stop): "She is touching. Everybody to the back. Weight at the back lifts the front." [no fact]
-  - JANDIRA: "It is the cow. She is standing right on the front. She came up for your leaves." [no fact]
+  - RAIMUNDO: "Still touching. Something heavy is still on the front." [no fact]
+  - JANDIRA: "It is the cow. She came up for your leaves." [no fact]
+  - JANDIRA (hint, at 10 seconds): "She goes where the leaves go." [no fact]
   - LUANA: "Then she can follow them back." [no fact]
   - RAIMUNDO: "There she goes. Over." [no fact]
   - RAIMUNDO: "Without that we would have sat here an hour, waiting for another finger of water. Good." [no fact]
   - JANDIRA: "Eighteen days of leaves. She would follow you onto the roof." [no fact]
-- **Minutes:** 1.8. **Done when:** `corral.pastHump && cow.calm && floats.returned == 6`.
+  - RAIMUNDO (at each gap): "Float ahead. Which side?" [no fact]
+  - Prompt: "A / D: which side of the float? F: check." [no fact]
+  - LUANA: "Left of Zé!" (or "Right of Zé!", as called) [no fact]
+  - JANDIRA (after a touch): "Softly. When we touch, she shifts, and the raft goes with her. Other side." [no fact]
+  - JANDIRA (both clean): "Clean. She did not even look up." [no fact]
+  - JANDIRA (after a touch): "Through. Look, the calf is lying down again." [no fact]
+- **Minutes:** 2.0. **Done when:** `corral.pastHump && gaps.called == 2 && cow.calm && floats.returned == 6`.
 
 #### 6.4 Home
 - **Place:** the channel past the bank steps (6 showing), the floating house. **Water:** 0.873. **Time:** morning.
-- **Leads:** Seu Anísio (with Tico and the dog on the deck). **Feeling:** warm; belonging.
+- **Leads:** Seu Anísio (with Tico and the dog on the deck; Raimundo and Jandira with the corral: four others). **Feeling:** warm; belonging.
 - **Objective:** tie her to the house.
 - **Steps:** (1) Cut: the corral comes down the channel with the current. (2) Anísio throws a rope; E to catch. (3) Two ways to tie at the corral post: tight, or with a slack loop. E. (4) Raimundo keeps his promise.
 - **People's way:** slack, for tomorrow's water. Nobody prompts it. **Rushed way:** tight: Anísio asks one question; re-tie.
@@ -578,22 +597,22 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
 - **Place:** Vó's house, the bank steps (5 showing), the floating house, the riverboat at the landing. **Water:** 0.89. **Time:** morning.
 - **Leads:** Vó Zefa, then Cleia. **Feeling:** proud; a little sorry to go.
 - **Objective:** name the calf; go.
-- **Steps:** (1) Walk down five steps to the boat's plank. Macaws cross; a fruit drops by the landing and a swirl takes it. (2) Detour along the plank walk to the corral: E at the calf. (3) Board. At the rail, F once: the cord is not drawn on screen this time. (4) The boat backs out. From the stern: the floating house, the corral, the stilt house on its legs, Jandira's canoe heading the other way to school. (5) The closing map.
+- **Steps:** (1) Walk down five steps to the boat's plank. Macaws cross; a fruit drops by the landing and a swirl takes it. (2) Detour along the plank walk to the corral: E at the calf. (3) Board. At the rail, F once: the cord is not drawn on screen this time. (4) A fixed camera on the stern of the moored boat as the boatman lifts the ropes off: the floating house, the corral, the stilt house on its legs, Vó on the steps, Jandira's canoe heading the other way to school. The boat is not shown moving. (5) Cut to the closing map. Others on screen: Vó, Cleia, the boatman, Jandira.
 - **Captions:**
   - CLEIA: "So? Three weeks. Was it terrible?" [no fact]
   - LUANA: "On my first day your plank came down fifteen steps from the top. Count them now." [no fact]
   - LUANA (to the calf): "Cheia. Your name is Cheia. High water." [S0213]
   - VÓ ZEFA: "Keep the cord. It is only string. What is on it is yours." [no fact]
-  - CLEIA: "What is that thing?" LUANA: "It tells you what the water will carry." [no fact]
+  - CLEIA: "Mãe made you a drop-line? She made me one." LUANA: "It tells you what the water will carry." CLEIA: "I know what it tells you." [U1]
   - LUANA (after the drop): "Deep enough." [no fact]
   - LUANA: "When it goes down, can I come back and walk it?" VÓ ZEFA: "September. Bring shoes." [S0213]
   - Map line 1: "MAMIRAUÁ RESERVE, AMAZONAS, BRAZIL. About 1,124,000 hectares." [S0213]
   - Map line 2: "Here the river rises and falls about ten metres sixty in a year. High water: May to mid-July. Lowest: September, October, November." [S0213]
   - Map line 3: "Mamirauá is one of four protected areas of the Central Amazon Conservation Complex, home of the pirarucu, the largest freshwater fish of South America." [S0203; the one naming allowed by section 7, at region scale]
   - Map line 4: "The people in this story are made up. The place is real." [no fact]
-- **Minutes:** 0.8. **Done when:** `calf.named && boat.departed && map.shown`.
+- **Minutes:** 0.8. **Done when:** `calf.named && player.aboard && ropes.off && map.shown && others.onScreen <= 4`.
 
-**Feeling curve (core):** unwilling (0-1.5) / a job (1.5-3) / WONDER, the year (3-5) / breath (5-5.5) / pride, busy, sting, steadier (5.5-10) / tension and relief (10-11.5) / LOW (11.5-13.5) / held breath, focus, quiet joy (13.5-18) / hush and WONDER, fish and sunrise (18-20) / PEAK (20-22) / warm (22-23.5). Starts quiet; one high point in each ten minutes; relief after each; ends warmer than it began.
+**Feeling curve (core):** unwilling (0-1.5) / a job (1.5-3) / WONDER, the year (3-6.5) / breath (6.5-7) / pride, busy, sting, steadier (7-11.5) / tension and relief (11.5-13) / LOW (13-15) / held breath, sleep, focus, quiet joy (15-20) / hush and WONDER, fish and sunrise (20-22) / PEAK (22-24) / warm (24-26). Starts quiet; one high point in each ten minutes; relief after each; ends warmer than it began.
 
 ---
 
@@ -601,10 +620,10 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
 
 | Moment | Where | How |
 |---|---|---|
-| 1. Water through the trees to last year's mark; the forest a lake you paddle where you walked; then it falls | **Played, fast: 1.3 "Jandira's year"** (core, minute 3 to 5). Sitting in a canoe on the dry forest floor at the true level, the player holds SPACE: the water climbs the great tree to last year's dark line (level 1), she paddles a loop over the trail she just walked and touches the line; then it falls to the lowest river (level 0): dry bed, trench channel about ten metres deep to the line, the far beach, the cut-off lake; then it returns to 0.70 and the frame closes. Header on screen throughout: "JANDIRA TELLS IT. NOT REAL TIME." The light is held still; a fixed TODAY peg marks the true level it comes back to. **Lived, true: chapters 1 to 6.** She walks the trail on Day 1, wades it on Day 7, paddles it from Day 12-15, and brings a corral through the same trunks on Day 19. The pause cards (eight seconds, "THE DAYS PASS", day number) are the only other fast water, and each lands on a true level. |
+| 1. Water through the trees to last year's mark; the forest a lake you paddle where you walked; then it falls | **Played, fast: 1.3 "Jandira's year"** (core, minute 3 to 5). Sitting in a canoe on the dry forest floor at the true level, the player holds SPACE: the water climbs the great tree to last year's dark line (level 1), she paddles a loop over the trail she just walked and touches the line; then, still seated, it falls in one hold to the lowest river (level 0); only then does she step out and walk the dry bed to its mouth: the trench channel, about ten metres from its water to the line, and (optional) the cut-off lake; then she is put back on the canoe seat, the water returns to 0.70 beside her and the frame closes. She is never on foot while the water moves. Header on screen throughout: "JANDIRA TELLS IT. NOT REAL TIME." The light is held still; a fixed TODAY peg marks the true level it comes back to. **Lived, true: chapters 1 to 6.** She walks the trail on Day 1, wades it on Day 7, paddles it from Day 12-15, and brings a corral through the same trunks on Day 19. The pause cards (eight seconds, "THE DAYS PASS", day number) are the only other fast water, and each lands on a true level. |
 | 2. The giant fish at first light | **6.1**, on the lake, grey first light. She is there to cut leaves. Two metres from the canoe: a back, a tail, a ring that rocks the canoe and the lily pads. Three seconds; never a hero shot; no name; no caption. Named once, at region scale, on the closing map (6.5). |
-| 3. Night by a lamp, grey pre-dawn, full sunrise over the lake | **5.2** night, lit only by the lamp on the bow post (the device gives no light). **5.3** the sky greys as they reach the lake; lamp out. **6.1** holds the grey. **6.2** full sunrise over the lake as the last rope comes off. |
-| 4. The living forest | Every scene; the water re-houses it. Day 1: butterflies, lizard, birds, sloth, light shafts, drifting leaves. Day 7: ants and beetles climbing ahead of the water, fish rings between roots, fruit falling to swirls, backs rolling in the channel, macaws. Day 12: bats, frogs. Night: eyes at the waterline, bats, frogs, fireflies, a sloth against stars, floats bobbing. Dawn: mist, lily pads, heron. Nothing named on screen. |
+| 3. Night by a lamp, grey pre-dawn, full sunrise over the lake | **5.1** ends at dusk and a card ("LATER. STILL DARK. DAY 19.") covers the hours she sleeps. **5.2** the last of the night, lit only by the lamp on the bow post (the device gives no light). **5.3** the sky greys as they reach the lake; lamp out. **6.1** holds the grey. **6.2** full sunrise over the lake as the last rope comes off. |
+| 4. The living forest | Every scene; the water re-houses it. Day 1: butterflies, lizard, birds, sloth, light shafts, drifting leaves. Day 7: ants and beetles climbing ahead of the water, fish rings between roots, fruit falling to swirls, backs rolling in the channel, macaws. Day 12: bats, frogs. Night: bats, frogs, fireflies answering each float, far-off eyes on the lake's edge, a sloth against stars, floats bobbing. Dawn: mist, lily pads, heron. Nothing named on screen. |
 
 All four are also reachable in Roam (free water level and time of day): the great tree and old bed at any level; the lake at first light with the fish; lamp, grey and sunrise; the forest life.
 
@@ -628,15 +647,15 @@ All four are also reachable in Roam (free water level and time of day): the grea
 | People lead and know more | Each scene names who leads; never Luana. Tico (7) leads one. | yes |
 | Cultural depth beyond the tourist view, only as deep as the facts allow | The whole plot is four sourced lines of working life: the cassava rush, cut leaves and floating corrals, ropes checked as the water climbs, palm leaves on the floor. No beliefs, no costume. | yes |
 | Companion device: helps indulge, interact, learn | It is the core action. | yes |
-| Opened and browsed like a collection | Tab: the cord, tags, charms, floats, each with a diorama. | yes |
+| Opened and browsed like a collection | Tab: the cord, tags, charms, floats, each with a small side-cut of what it does. | yes |
 | Shows everything done so far | Tags and charms earned; cork clip moved; floats where they sit on the route. | yes |
 | Gives the next aim | Bare loops; one AIM line; the gap from cork to red at the high ground. | yes |
 | Never a record-keeper, album, notes, paper, wrist band; not a gimmick | Nothing is recorded; every piece changes a reading or gets dropped in the water. | yes |
 | Brazilian names | Luana, Josefa (Zefa), Raimundo, Jandira, Anísio, Marlene, Tico, Cleia; Mimosa, Cheia, Zé. | yes |
-| 20 to 30 minutes, in chapters a class can pause between | Core 23.5; with extension 28. Six chapters, a pause card after each. | yes, unplayed |
+| 20 to 30 minutes, in chapters a class can pause between | Core 25.9; with extension 29.8 (at the limit). Six chapters, a pause card after each. | yes, unplayed |
 | Four moments in Story and reachable in Roam | Section 7. | yes |
 | Opening line: people made up, place real, named | Section 10. | yes |
-| Banned old template (creative director, this round) | No orb or seeing device (a told year is a person talking, and it is framed). Not a last night: the night is two nights before she leaves, and it is work. No held light: the lamp sits on a post. No keeping a line or a pace. New cast. Order: landing, old bed, lake bank, great tree, trail, yard; then garden, floating house, high ground, lake, channel. | yes |
+| Banned old template (creative director, this round) | No orb or seeing device (a told year is a person talking, and it is framed). Not a last night: the night is two nights before she leaves, and it is work. No held light: the lamp sits on a post. No keeping a line or a pace: the raft is never steered and has no path to hold, only two stops with one side-call each (6.3); the trail walk has no pace to match (1.4). New cast. Order: landing, old bed, lake bank, trunk jam, great tree, trail, yard; then garden, floating house, high ground, lake, channel. Still open for the creative director: see section 11. | yes, with one open point |
 
 ### Against section 7 (truth and care)
 
@@ -649,14 +668,14 @@ All four are also reachable in Roam (free water level and time of day): the grea
 | Animals named only as a fact supports | Nothing is named on screen but the pirarucu, once, on the map. Nobody says the fish "comes up to breathe". "Cow", "calf", "dog" are plain words, and cattle are sourced (S0311). | yes |
 | No named Indigenous people | None. | yes |
 | No beliefs, legends, rituals, costume, body paint | None. | yes |
-| No invented customs; every action has a plain physical reason said aloud | Tie high: "the water went up and your knot did not". Leaves on the raft: "she has to learn where dinner is". Step out: "without you she floats". Light one in front: "the light one sounds". Rag: "a tree does not float". Weight back: "lifts the front". | yes |
+| No invented customs; every action has a plain physical reason said aloud | Front seat sounds: "my hands are on the motor". Leaves on the raft: "she has to learn where dinner is". Corral comes home: "fed from the deck, rope checked with the house ropes". Girls walk: "I keep the canoe". Tie high: "the water went up and your knot did not". Ferry: "four wades for me, one trip for a canoe". Step out: "without you she floats". Rope to the tree: "I cannot be at both ends of one rope". Night marking: "I push the moment I get there". Light one in front: "the light one sounds". Pale floats: "you will see them in the lamp". Lamp on the post: "you need both hands". Rag: "a tree does not float". Weight back: "lifts the front". | yes |
 | Ordinary river people of today | Radio, lamp, small motor, school, everyday clothes. | yes |
 | Kid never saves, never teaches | See above. | yes |
 | "Dry season fish crowd, easier to catch" (allowed) | Not used. No fishing on screen. | n/a |
 | Internal build small print | Section 10. | yes |
-| Care: no blood, death, jump scares, harm to child, animals, helpers | None. The cow and calf are dry, fed and calm in every scene. The eyes at night are seen far off, steady, and sink slowly. | yes |
+| Care: no blood, death, jump scares, harm to child, animals, helpers | None. The cow and calf are dry, fed and calm in every scene. The eyes at night are forty metres off on the open lake's edge, steady, and sink slowly; she never wades or paddles alone near there (Jandira is in her canoe in 6.1). She is never on foot while the told water moves (1.3). | yes |
 | No caught fish handled on screen | No fish is caught or handled. | yes |
-| Every tension moment ends in relief within 60 seconds | 2.2 grounding under 20 s; 3.1 under 60 s (Anísio steps in at 40); 4.1 under 30 s; 6.3 under 60 s (Jandira steps in at 40). The low point (4.3) is sadness, not peril. | yes |
+| Every tension moment ends in relief within 60 seconds | 2.2 grounding under 20 s. 3.1 under 60 s counted from the first sight of the low corner (the adults step in at 40). 4.1 under 30 s. 6.3 is two passages with relief between: the stop on the high ground is over within 45 s of the touch (hint at 10 s, Jandira carries the leaves at 30 s); the two gaps are over within 45 s (Jandira points after 10 s at each). 5.2 is not a tension scene: no clock, no fail, a small relief at every float. The low point (4.3) is sadness, not peril. | yes |
 | No flashing | The year holds one light; pause cards cross-fade. | yes |
 
 ---
@@ -669,34 +688,38 @@ All four are also reachable in Roam (free water level and time of day): the grea
 |---|---|---|---|---|---|---|
 | 1 | 0.70 | 7.42 | dry by 18 cm | dry by 1.20 m | 15 | 20 |
 | 7 | 0.76 | 8.06 | 46 cm, knee | dry by 56 cm | 12 | 14 ("two more weeks") |
-| 12 | 0.81 | 8.59 | 99 cm | awash ("only got wet today") | 9 | 9 ("nine days") |
+| 12 | 0.815 | 8.64 | 1.04 m | 2 cm ("only got wet today") | 9 | 9 ("nine days") |
 | 15 | 0.84 | 8.90 | 1.30 m | 28 cm; corral needs 60: "three hands short" | 8 | 6 ("six days") |
 | 18, dusk | 0.867 | 9.19 | 1.59 m | 57 cm: "two fingers short" | 6 | 3 |
-| 19, pre-dawn | 0.873 | 9.25 | 1.65 m | 63 cm: rag "three fingers under", "one finger to spare" | 6 | 2 |
+| 19, last of the night and pre-dawn | 0.873 | 9.25 | 1.65 m | 63 cm: rag "three fingers under", "one finger to spare" | 6 | 2 |
 | 21 | 0.89 | 9.43 | 1.83 m | 81 cm | 5 | 0 |
 
-Second pass: Day 1 to 7 is six days ("six days ago" in 2.1). Day 7 + 14 = 21. Day 12 + 9 = 21. Day 15 + 6 = 21. Day 19 + "two days pass" = 21. Eighteen days of feeding by Day 19 ("eighteen days of leaves"). Two fingers short plus three fingers of rise is one finger to spare. Time of day never runs backwards inside a chapter: 5 is dusk, night, grey; 6 is grey, sunrise, morning.
+Second pass: Day 1 to 7 is six days ("six days ago" in 2.1). Day 7 + 14 = 21. Day 12 + 9 = 21. Day 15 + 6 = 21. Day 19 + "two days pass" = 21. Eighteen days of feeding by Day 19 ("eighteen days of leaves"). Two fingers short plus three fingers of rise is one finger to spare. Time of day never runs backwards inside a chapter: 5 is dusk, then a card for the hours she sleeps, then the last of the night, then grey; 6 is grey, sunrise, morning. The night is accounted for: 5.1 ends at dusk with "Sleep now", the card says "LATER. STILL DARK. DAY 19.", and 5.2 opens with Vó lighting the lamp. The six centimetres between 0.867 and 0.873 come during those hours.
 
-**The geography, checked twice.** Out on Day 1: landing, down the channel, old bed mouth (428,312), up the bed, through the fallen trunks, lake bank. Back on Day 1: pasture, log (385,335), great tree (365,325), trail, trail head (255,270), yard. Daily canoe run from Day 7: yard slope, trail cut, great tree, old bed, fallen trunks, lake, corral. Shortcut: leave the bed at (420,318), up the lane, over the high ground (455,388), corral (432,412). Corral's way home: the same in reverse, then down the bed to its mouth, down the channel with the current, floating house (265,148). Second pass: the lake bank is 9.5 at its top and 8.62 at the saddle, so the saddle is the lowest dry crossing wide enough; the old bed is deeper but its lake end is choked; the forest floor (7.6) on the lane is over a metre deep by Day 15, so the lane is not the gate, the saddle is.
+**The geography, checked twice.** Out on Day 1: landing, down the channel, old bed mouth (428,312), up the bed, through the fallen trunks, lake bank. Back on Day 1, on foot and dry all the way: pasture, across the trunk jam (400,430) on its plank, down the old bed's west side, great tree (365,325), trail past the garden rise, trail head (255,270), yard. Daily canoe run from Day 7: yard slope, across the garden swale by the trail cut, great tree, old bed (nothing bridges it), the gap in the trunk jam, lake, corral. Shortcut: leave the bed at (420,318), up the lane, over the high ground (455,388), corral (432,412). Corral's way home: the same in reverse, then down the bed to its mouth, down the channel with the current, floating house (265,148). Second pass: the lake bank is 9.5 at its top and 8.62 at the saddle, so the saddle is the lowest dry crossing wide enough; the old bed is deeper but its lake end is choked; the forest floor (7.6) on the lane is over a metre deep by Day 15, so the lane is not the gate, the saddle is. Third pass, after judgement: the bed's bottom is 5.3 to 5.6, so on Day 1 (7.42) a motor canoe has 1.8 m under it the whole way and nothing over it; inside the told year the bed is only walked at level 0, when it is dry; the garden rise (8.0 to 8.5) is cut off from the yard slope (10.4) by a swale at 7.6, which is 46 cm deep on Day 7; the high ground (8.62) is the first thing the corral meets from its mooring, 33 m away, and the two side-calls come after it, in the lane; the beach is 390 m from the old bed and is never in view in Story.
 
 | Question | Answer (and where it is on screen) |
 |---|---|
 | Why does she not just call her mum and go home? | She does call, on the radio, on Day 7. The boat does not turn round (2.4). The drop-line is string. |
 | Why give a town kid the cow? | Every adult is pulling cassava before the river takes the garden, and Jandira has school (1.2). Feeding is the one job a beginner can do. |
 | Is the cow in danger? | No. The corral floats beside her grass from Day 1 and she walks onto it by herself on the third day (2.3). Raimundo brings leaves when Luana loses hers (4.2). |
-| Why is the corral out by the lake and not at the house? | The grass is on the lake bank; the house bank has none (seen). It comes home so it can be fed from the door and its rope checked with the house's (1.2, 6.4). Listed U7. |
-| Why not tow it out through the old bed, like the canoes? | The lake end of the bed is full of fallen trunks; the corral is as wide as four canoes (2.3, 4.2). |
+| Why is the corral out by the lake and not at the house? | The grass is on the lake bank; the house bank has none (seen). It comes home so it can be fed from the deck and its rope checked with the house ropes; Raimundo says so when he gives the job (1.2). Listed U6, U7. |
+| Why not take it out through the old bed, like the canoes? | The lake end of the bed is the trunk jam, with one gap a canoe wide; the corral is as wide as four canoes (2.3, 4.2). |
 | Why not drag or pole it over the high ground? | "The water carries her, or nothing does" (4.3). A grounded raft with a cow on it does not slide. |
 | Why not just wait a few more days? | They would. "She comes home when the water says. With you here, or after" (4.3). Only Luana has a clock. That is her stake, not theirs. |
-| Why go out at night at all? | Raimundo wants the corral over and tied before the afternoon wind, so the way is marked before first light (5.1). A marked way also lets him push from behind, where he cannot see. |
+| Why go out at night at all? | A corral is slow, and getting it over, down the channel and tied takes the whole day, so Raimundo wants to push the moment he arrives at first grey; that only works if the way is already marked (5.1). The motor cannot do the marking: "a motor in the dark finds every log". The girls sleep first and go out in the last of the night (5.1 card, 5.2). |
 | Why send two girls and not go himself? | "The light one sounds; the one who knows the trees steers." He brings the motor at first grey: "a motor in the dark finds every log" (5.1). Jandira paddles this forest to school every day. Flagged for the community reader (U17). |
 | Why does a 12-year-old read depth better than the adults? | She does not. They read it with a paddle and by eye (1.2, 4.3). She is in front because she is light and it leaves the adults free for the motor and the pole. |
 | If the rag was under, why still sound? | "Do not tell me the rag. Tell me the cord." The rag shows the water rose; only the cord shows it is enough at the log (5.3). |
-| Why did the corral touch if the float said deep enough? | The float was right for a level raft. The cow had walked to the front for the fresh leaves, so the front sat a finger deeper (6.3). |
+| Why did the corral touch if the float said deep enough? | The float was right for a level raft. The cow had walked to the front for the fresh leaves, so the front sat a finger deeper. Raimundo works out that something heavy is still on the front; Jandira sees it is the cow; Luana only acts (6.3). |
+| Where were the girls between dusk and the night paddle? | Asleep. Raimundo sends them to bed, a card says "LATER. STILL DARK. DAY 19.", and Vó wakes them and lights the lamp (5.1, 5.2). |
+| Why do the girls walk home on Day 1 when there is a motor canoe? | Raimundo stays to mend the corral's rail and keeps the canoe; the way is dry; the baskets are Vó's, emptied of the leaves they carried out (1.2, 1.3). |
+| If there are eyes in the water at night, why does she wade by day? | The eyes are seen once, forty metres off on the open lake's edge. She wades only in the forest shallows by the garden and the high ground, in daylight, with someone beside her, and on the lake at grey Jandira is in her canoe (5.2, 6.1). |
+| Does the big riverboat ever move? | Not on screen. It is moored when she steps off, gone when she looks back, moored again on Day 21, and the story ends as its ropes come off (1.1, 6.5). |
 | Did the water really rise ten metres while they sat in the canoe on Day 1? | No. "JANDIRA TELLS IT. NOT REAL TIME." is on screen the whole time, the light does not move, and it ends at "TODAY AGAIN. DAY 1." on dry leaves (1.3). |
 | How does the old canoe float level on Day 7? | She tied it high with slack on Day 1 (1.3). If she had tied low, Jandira made her re-tie inside the telling, so the real knot is always the high one. |
-| Where do the floats go after the tow? | Jandira hooks each out with the pole as the raft passes and hands it back (6.3). |
-| Why can she paddle on Day 7 if the trail is only knee-deep? | An empty canoe floats in a hand of water; with her and a load it needs a shin (2.1, 2.2). Where it is less, she steps out and tows. |
+| Where do the floats go after the crossing? | Jandira hooks each out with the pole as the raft passes and hands it back (6.3). |
+| Why can she paddle on Day 7 if the trail is only knee-deep? | An empty canoe floats in a hand of water; with her and a load it needs a shin (2.1, 2.2). The trail has 46 cm on Day 7. Where it is less, as on the root rise, she steps out and tows. |
 | How is the lake joined to the river on Day 1 if lakes are cut off? | They are cut off at low water (said in 1.3). By Day 1 the river is already in the old bed (1.2). |
 | Is it school holidays or not? | Luana's town school is out. Jandira's is not: she paddles there on screen. One line could be asked for by a reader; it is listed (U15). |
 | Does she see the big fish because she went looking? | No. She is cutting leaves. Nobody names it or explains it (6.1). |
@@ -707,10 +730,35 @@ Second pass: Day 1 to 7 is six days ("six days ago" in 2.1). Day 7 + 14 = 21. Da
 
 **Opening line (first thing on screen in Story, before "DAY 1"):**
 
-> The people in this story are made up. The place is real: the Mamirauá Reserve, in Amazonas, Brazil.
+> The people in this story are made up. The place is real: the Mamirauá Reserve, in Amazonas, Brazil. [S0213 for the place; nothing else is claimed]
 
 **Title screen, small type:**
 
-> Internal build. Not to be shown to children or published as finished until a reader from the reserve's own communities has seen it.
+> Internal build. Not to be shown to children or published as finished until a reader from the reserve's own communities has seen it. [no fact]
 
-**To put in front of that reader first** (sourced or not): one family's cow and calf inside the reserve (sourced, S0311, but a sensitive picture: it must read as one family's animal on its own pasture, with no cleared forest shown); two girls of 15 and 12 in a canoe at night; a child given the daily feeding; a passenger riverboat calling at the landing; the drop-line and floats as things made for a learner.
+**To put in front of that reader first** (sourced or not): one family's cow and calf inside the reserve (sourced, S0311, but a sensitive picture: it must read as one family's animal on its own pasture, with no cleared forest shown); two girls of 15 and 12 in a canoe in the last hours of the night; a child given the daily feeding; a passenger riverboat calling at the landing; the drop-line and floats as things made for a learner.
+
+---
+
+## 11. Changes after judgement
+
+A fresh judge failed the first version. All ten must-fix faults are answered below. This version has not been judged again.
+
+**Must-fix**
+
+1. **People on screen (3.3).** After lighting the lamp Anísio goes indoors with Tico and Marlene. On deck: Vó, Jandira, Raimundo. `others.onScreen <= 4` is in the done line here and in the other full scenes (2.2, 5.1, 6.4, 6.5).
+2. **The told year (1.3).** The fall is now one seated hold from 1.0 to 0. She steps out only at 0, walks the dry bed to its mouth, is put back on the canoe seat by a cross-fade, and watches the water return from there. The beach is out of Story (Roam only) and the two table rows are corrected.
+3. **The log over the old bed.** Deleted. Nothing bridges the bed. The foot crossing on Day 1 is the trunk jam at the lake end, on a loose plank that is lifted aside for canoes. Trail, old bed, scenes 1.2, 1.3, 2.3 and the geography check are updated (pasture to tree is now about 145 m).
+4. **The cassava garden (2.2).** It is now its own low rise beside the trail, cut off from the yard slope by a 45 m swale (46 cm deep on Day 7) with a root rise on the straight line. Marlene says why a canoe: "four wades for me, one trip for a canoe". The green tag is now tied before the crossing that uses it.
+5. **The lost night (5.1 to 5.3).** 5.1 ends with "Sleep now", then a card: "LATER. STILL DARK. DAY 19." 5.2 opens at the landing with Vó lighting the bow lamp. The lamp moved from 5.1 to 5.2, done lines changed.
+6. **Sixty seconds (6.3, 5.2).** 6.3 is two passages, each inside 45 seconds, with a relief beat between and after. 5.2 is retagged focus and small wonders, with a visible relief at every float. Section 8 row corrected.
+7. **The riverboat.** It never moves. In 1.1 it is gone when the camera lifts from Vó's hands; 6.5 ends on a fixed stern camera as the ropes come off. One boatman's shape in the wheelhouse; eight people ever.
+8. **Four captions.** "Three weeks. Here." / "I am not waiting for the water to go away, filha..." / the afternoon wind is cut everywhere / "It was here first. Keep sounding." [U10].
+9. **Three missing reasons.** Why the corral comes home (1.2), why Luana sits in front ("my hands are on the motor", 1.2), why the girls walk and whose baskets they carry (1.3; the baskets are seen in the canoe in 1.2).
+10. **No keep-the-line (6.3).** The raft is never steered and has no path. Two stops, one press each: which side of the float is deep, then F to check. "Nudge" and "set path" are gone from the scene and the engine list.
+
+**One thing changed beyond what the judge asked.** Re-reading 6.3 against the world showed that the high ground is the FIRST thing the corral meets from its mooring (33 m), and all five other floats lie beyond it. So the stop on the high ground now comes first and the two side-calls come after it, in the lane, not before it as the judge's wording had it. The 60-second rule is met either way.
+
+**Should-fix, done.** Device pieces show what they do, never a replayed scene. "No numbers on the cord HUD." Ring carries only TODAY. Day 12 is 0.815 (2 cm over the high ground). "Seven true levels." 4.1 directions (lane to the right) and "I crossed here empty this morning". Push, never tow. 4.3 line now rests on S0213. "Every day" and "every tree" softened. 3.1 restaged (Anísio holds the house end; the count starts at first sight). Throw-ahead fallback line sits in the first built scene that needs it; Tico set up in 2.2. Cleia: "She made me one." Raimundo reasons out the weight on the front. Eyes moved far out; Jandira in the canoe in 6.1. Night reason strengthened. Pale-paint reason. "Two fingers." Minutes re-counted (core 25.9, with extension 29.8). Q / R for the calls. Plank "less steep". UNSOURCED.md updated to match.
+
+**Still open, for the creative director to judge (not changed).** The judge noted an echo of the old template in the frame: a town kid dropped and collected by a boat, the boat's day as the clock, a night trip through the forest that ends on the lake at first light. The goal, the tool, the cast, the daylight chapters and the order of places are new, and the brief itself fixes night, grey and sunrise at a lake. If the echo is still too strong, the cheapest change is the clock: make it Raimundo's promise ("fed every day until she comes home") with no boat date, and let the boat simply arrive two days after the corral does.
