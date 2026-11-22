@@ -22,7 +22,7 @@ export class Forest {
   private box = new THREE.Box3();
   stats = { lod0: 0, lod1: 0, lod2: 0 };
 
-  constructor(public cook: ForestCook, kit: KitMesh[][], material: THREE.Material) {
+  constructor(public cook: ForestCook, kit: KitMesh[][], material: THREE.Material, assetMaterial?: THREE.Material, crafted?: Map<number, [KitMesh, KitMesh]>) {
     const n = cook.count, inst = cook.inst;
     this.mats = new Float32Array(n * 16); this.cols = new Float32Array(n * 3);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
@@ -37,7 +37,7 @@ export class Forest {
       perKind[inst[o + 5]]++;
     }
     const mk = (geo: KitMesh, cap: number, cast: boolean, name: string) => {
-      const mesh = new THREE.InstancedMesh(makeKitGeometry(geo), material, Math.max(1, cap));
+      const mesh = new THREE.InstancedMesh(makeKitGeometry(geo), geo.wnd && assetMaterial ? assetMaterial : material, Math.max(1, cap));
       mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(Math.max(1, cap) * 3), 3);
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
       mesh.frustumCulled = false; mesh.castShadow = cast; mesh.receiveShadow = true; mesh.count = 0; mesh.name = name;
@@ -45,7 +45,8 @@ export class Forest {
       return mesh;
     };
     for (let k = 0; k < NK; k++) {
-      this.meshes.push([mk(kit[k][0], Math.min(perKind[k], 600), TREE_HEIGHT[k] > 5, `tree${k}_near`), mk(kit[k][1], Math.min(perKind[k], 3000), false, `tree${k}_mid`)]);
+      const cr = crafted?.get(k);
+      this.meshes.push([mk(cr ? cr[0] : kit[k][0], Math.min(perKind[k], 600), TREE_HEIGHT[k] > 5, `tree${k}_near`), mk(cr ? cr[1] : kit[k][1], Math.min(perKind[k], 3000), false, `tree${k}_mid`)]);
       this.counts.push([0, 0]);
     }
     const farCap = [0, 0, 0];

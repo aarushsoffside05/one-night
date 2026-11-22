@@ -6,6 +6,7 @@ export function makeKitGeometry(m: KitMesh): THREE.BufferGeometry {
   g.setAttribute('position', new THREE.BufferAttribute(m.pos, 3));
   g.setAttribute('normal', new THREE.BufferAttribute(m.nrm, 3));
   g.setAttribute('dat', new THREE.BufferAttribute(m.dat, 3));
+  if (m.wnd) g.setAttribute('wnd', new THREE.BufferAttribute(m.wnd, 1));
   g.computeBoundingSphere();
   return g;
 }

@@ -3,7 +3,7 @@
 // palette swatch. Extra per-vertex data: wind weight and a free "aux" value.
 import type { Rng } from './rng';
 
-export interface KitMesh { pos: Float32Array; nrm: Float32Array; dat: Float32Array; tris: number; }
+export interface KitMesh { pos: Float32Array; nrm: Float32Array; dat: Float32Array; tris: number; wnd?: Float32Array; }
 
 type V3 = [number, number, number];
 

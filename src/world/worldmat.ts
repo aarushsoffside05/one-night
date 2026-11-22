@@ -58,7 +58,7 @@ export const windOffset = (p: any, weight: any) => {
   return t.vec3(sx, sy, sz).mul(weight).mul(U.wind);
 };
 
-export interface WorldMatOpts { wind?: boolean; flood?: boolean; rgb?: boolean; }
+export interface WorldMatOpts { wind?: boolean; flood?: boolean; rgb?: boolean; asset?: boolean; }
 
 export function makeWorldMaterial(tx: WorldTextures, opts: WorldMatOpts = {}): THREE.MeshLambertNodeMaterial {
   const m = new THREE.MeshLambertNodeMaterial();
@@ -69,10 +69,12 @@ export function makeWorldMaterial(tx: WorldTextures, opts: WorldMatOpts = {}): T
   // the ground carries blended colour per vertex instead of a swatch id; it gets the same time-of-day tint
   const lum = dat.dot(t.vec3(0.2126, 0.7152, 0.0722));
   const rgbT = t.mix(t.mix(t.vec3(lum), dat, U.sat), U.tintCol.mul(lum), U.tintAmt);
-  const sw = opts.rgb ? t.vec4(rgbT, 0.0) : swTex;
+  const isRgb = !!(opts.rgb || opts.asset);
+  const wnd = opts.asset ? t.attribute('wnd', 'float') : dat.y;
+  const sw = isRgb ? t.vec4(rgbT, 0.0) : swTex;
   const wp = t.positionWorld;
 
-  if (opts.wind !== false && !opts.rgb) m.positionNode = t.positionLocal.add(windOffset(t.positionLocal, dat.y));
+  if (opts.wind !== false && !opts.rgb) m.positionNode = t.positionLocal.add(windOffset(t.positionLocal, wnd));
 
   m.colorNode = t.Fn(() => {
     const col = sw.rgb.toVar();
@@ -88,7 +90,7 @@ export function makeWorldMaterial(tx: WorldTextures, opts: WorldMatOpts = {}): T
     const below = t.step(wp.y, U.markY.add(wob));
     const lip = t.step(wp.y, U.markY.add(wob)).mul(t.step(U.markY.add(wob).sub(0.3), wp.y));
     const stain = t.mix(1.0, 0.86, below).mul(t.mix(1.0, 0.62, lip));
-    col.mulAssign(t.mix(1.0, stain, t.max(isBark, isPost).mul(opts.rgb ? 0.0 : 1.0)));
+    col.mulAssign(t.mix(1.0, stain, opts.asset ? t.step(wnd, 0.05) : t.max(isBark, isPost).mul(opts.rgb ? 0.0 : 1.0)));
     // wet band just above the water, then the drowned tint below it
     const wet = t.smoothstep(0.75, 0.0, d).mul(t.step(0.0, d));
     col.mulAssign(t.mix(1.0, 0.58, wet));
@@ -98,7 +100,7 @@ export function makeWorldMaterial(tx: WorldTextures, opts: WorldMatOpts = {}): T
   })();
 
   // leaves let a little sun through: a soft lift on anything that sways
-  m.emissiveNode = sw.rgb.mul(sw.a).mul(U.glow).add(sw.rgb.mul(U.sunCol).mul(opts.rgb ? 0.0 : dat.y.min(1.0).mul(0.16)));
+  m.emissiveNode = sw.rgb.mul(sw.a).mul(U.glow).add(sw.rgb.mul(U.sunCol).mul(opts.rgb ? 0.0 : wnd.min(1.0).mul(0.16)));
 
   // soft sky shade: a baked "how open is it here" map, fading out above the canopy
   const open = t.max(openAt(tx, wp.xz), t.smoothstep(9.0, 20.0, wp.y.sub(L.FOREST_FLOOR)));

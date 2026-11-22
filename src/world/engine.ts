@@ -24,6 +24,8 @@ import { Quality, markLoading } from './quality';
 import { Particles } from './particles';
 import { Animals } from './animals';
 import { addRipple } from './ripples';
+import { loadKit } from './assets';
+import { TREE_KINDS } from './trees';
 import { Bench } from './bench';
 import { bus } from '../state';
 import * as L from './layout';
@@ -94,7 +96,10 @@ export class Engine {
     if (this.disposed) return;
     this.cooked = cooked;
     setUI({ loading: { stage: 'Raising the world', f: 0.2 } });
-    this.build(cooked);
+    setUI({ loading: { stage: 'Unpacking the Blender pieces', f: 0.1 } });
+    const crafted = new Map<number, [KitMesh, KitMesh]>();
+    await Promise.all(TREE_KINDS.map(async (name, k) => { const [a, b] = await Promise.all([loadKit(`tree_${name}_0`), loadKit(`tree_${name}_1`)]); if (a && b) crafted.set(k, [a, b]); }));
+    this.build(cooked, crafted);
     if (params.water !== null) sim.water = sim.waterTarget = params.water;
     if (params.tod !== null) sim.tod = sim.todTarget = params.tod;
     if (params.cam) this.setFixedCam(params.cam);
@@ -122,14 +127,14 @@ export class Engine {
     if (params.shot || params.auto) { sim.mode = (params.auto as any) || 'roam'; setUI({ mode: sim.mode }); }
   }
 
-  build(c: Cooked) {
+  build(c: Cooked, crafted: Map<number, [KitMesh, KitMesh]>) {
     const scene = this.scene;
     this.tex = makeWorldTextures(c.forest.open);
     this.worldMat = makeWorldMaterial(this.tex);
     const ground = new THREE.Mesh(makeKitGeometry(c.terrain.mesh), makeWorldMaterial(this.tex, { rgb: true }));
     ground.receiveShadow = true; ground.frustumCulled = false; ground.name = 'ground';
     scene.add(ground);
-    this.forest = new Forest(c.forest, c.treeKit, this.worldMat);
+    this.forest = new Forest(c.forest, c.treeKit, this.worldMat, makeWorldMaterial(this.tex, { asset: true }), crafted);
     scene.add(this.forest.group);
     scene.add(makeFarRings(WORLD_SEED, this.worldMat));
     const land = makeLandMaps(c.terrain.grid, c.terrain.zone);
