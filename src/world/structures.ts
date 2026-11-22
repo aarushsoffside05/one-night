@@ -293,17 +293,17 @@ export function buildStructures(hf: Heightfield, group: THREE.Object3D, markedTr
     for (let j = 0; j <= rings; j++) {
       const v = Math.pow(j / rings, 2.2), y = v * Hh
       const R0 = 3.3 - 1.0 * v
-      const foot = 0.55 * Math.exp(-y / 1.4)
+      const foot = 0.3 * Math.exp(-y / 1.0)
       for (let i = 0; i < sides; i++) {
         const th = (i / sides) * Math.PI * 2
         const ph = th * fins + Math.sin(th * 2) * 0.8
         const k = Math.round(ph / (Math.PI * 2))
         const size = 0.72 + 0.28 * Math.sin(k * 2.4 + 1)
-        const top = 6.5 + 4.5 * (0.5 + 0.5 * Math.sin(k * 1.7 + 2))
-        const fin = Math.pow(0.5 + 0.5 * Math.cos(ph), 30)
-        const reach = y < top ? 5.2 * size * Math.pow(1 - y / top, 3.0) * (1 + 0.12 * Math.sin(y * 1.9 + k)) : 0
+        const top = 8 + 5 * (0.5 + 0.5 * Math.sin(k * 1.7 + 2))
+        const fin = Math.pow(0.5 + 0.5 * Math.cos(ph), 11)
+        const reach = y < top ? 5.2 * size * Math.pow(1 - y / top, 2.1) * (1 + 0.12 * Math.sin(y * 1.9 + k)) : 0
         const lump = 1 + 0.07 * Math.sin(th * 5 + y * 0.21) + 0.04 * Math.sin(th * 11 - y * 0.5)
-        const rr = R0 * lump + foot + reach * (fin + 0.06 * Math.pow(0.5 + 0.5 * Math.cos(ph), 3))
+        const rr = R0 * lump + foot + reach * fin
         g.v(Math.cos(th) * rr, y, Math.sin(th) * rr, Math.cos(th), 0.2, Math.sin(th), 0, v, 0)
       }
     }
