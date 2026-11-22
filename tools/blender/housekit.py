@@ -50,6 +50,7 @@ def board_wall(a, b, y0, top, cols, cuts=(), bw=0.42, th=0.07, bevel=0.014):
         u = (i + 0.5) * w; x = a[0] + dx * u / L; z = a[1] + dz * u / L
         yt = top(u) - R.uniform(0, 0.05); off = jit(0.012)
         nx, nz = -dz / L, dx / L
+        if yt - y0 < 0.14: continue
         # only attach the cutters that reach this board
         mine = []
         for c in cuts:

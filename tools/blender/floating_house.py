@@ -8,7 +8,7 @@ from housekit import *
 
 BASE = 0.36
 
-def build(name='floating_house', seed=21, walls=('paintBlue', 'paintBlue', 'birdBlue'), trim='paintCream', door_col='birdYellow',
+def build(name='floating_house', seed=21, walls=(mix('birdBlue', 'white', 0.42), mix('birdBlue', 'white', 0.5), mix('paintBlue', 'white', 0.36)), trim='paintCream', door_col='flowerYellow',
           shutter='paintCream', roof_cols=('paintRed', 'tinRust', 'paintRed', 'tinRust', 'tin'), cap='tinRust'):
     reset(seed)
     top = log_raft(10.0, 13)
