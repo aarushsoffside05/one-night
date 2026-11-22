@@ -46,7 +46,7 @@ function tube(b: MeshBuilder, pts: V3[], rad: number[], sides: number, cap = tru
     let ux = u[0] - tx * d, uy = u[1] - ty * d, uz = u[2] - tz * d;
     const ul = Math.hypot(ux, uy, uz) || 1; ux /= ul; uy /= ul; uz /= ul; u = [ux, uy, uz];
     const vx = uy * tz - uz * ty, vy = uz * tx - ux * tz, vz = ux * ty - uy * tx;
-    const ring: V3[] = [], p = pts[i], r = rad[i];
+    const ring: V3[] = [], p = pts[i], r = rad[i] * 1.4;
     for (let j = 0; j < sides; j++) {
       const an = (j / sides) * TAU, co = Math.cos(an) * r, si = Math.sin(an) * r;
       ring.push([p[0] + ux * co + vx * si, p[1] + uy * co + vy * si, p[2] + uz * co + vz * si]);
@@ -148,9 +148,9 @@ function emitClumps(b: MeshBuilder, list: Cl[], seed: number, kind: number, hi: 
     const yaw = jr() * TAU, zr = 0.85 + jr() * 0.3, aux = jr(), k = hi ? 1 : 1.14;
     b.push().translate(cl.c[0], cl.c[1], cl.c[2]).rotY(yaw);
     b.set(cl.pals[1], wind, aux);
-    if (hi) b.leafBall(jr, cl.rx * k, cl.ry * k * 1.15, cl.rx * zr * k, cl.cls === 0 && cl.rx > 2.6 ? 1 : 0, 0.42, cl.pals, cl.flat ?? 0.3);
-    else if (cl.cls === 0) b.leafBall(jr, cl.rx * k * 1.08, cl.ry * k * 1.2, cl.rx * zr * k * 1.08, 0, 0.3, cl.pals, cl.flat ?? 0.3);
-    else lens(b, jr, cl.rx * k, cl.ry * k, cl.rx * zr * k, cl.pals, cl.flat ?? 0.3);
+    const vol = cl.rx * cl.rx * cl.ry;
+    if (hi) b.leafCloud(jr, cl.rx * k * 1.05, cl.ry * k * 1.25, cl.rx * zr * k * 1.05, Math.round(Math.min(90, 26 + vol * 2.2)), Math.max(0.55, cl.rx * 0.26), cl.pals, cl.flat ?? 0.3);
+    else if (cl.cls < 2) b.leafCloud(jr, cl.rx * k * 1.08, cl.ry * k * 1.3, cl.rx * zr * k * 1.08, cl.cls === 0 ? 14 : 7, Math.max(0.9, cl.rx * 0.4), cl.pals, cl.flat ?? 0.3);
     b.pop();
   });
 }

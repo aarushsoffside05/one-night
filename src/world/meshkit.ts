@@ -15,6 +15,8 @@ export class MeshBuilder {
   private stack: number[][] = [];
   // optional per-vertex wind from height: wind = windBase + y * windPerY (in local builder space, after transform)
   windFn: ((x: number, y: number, z: number) => number) | null = null;
+  // optional soft normals: given a finished vertex position, return its normal (used for leaf masses and grass)
+  normalFn: ((p: V3) => V3) | null = null;
 
   push() { this.stack.push(this.m.slice()); return this; }
   pop() { this.m = this.stack.pop()!; return this; }
@@ -49,7 +51,7 @@ export class MeshBuilder {
     nx /= l; ny /= l; nz /= l;
     for (const p of [a, b, c]) {
       this.pos.push(p[0], p[1], p[2]);
-      this.nrm.push(nx, ny, nz);
+      if (this.normalFn) { const q = this.normalFn(p); this.nrm.push(q[0], q[1], q[2]); } else this.nrm.push(nx, ny, nz);
       this.dat.push(this.pal, this.windFn ? this.windFn(p[0], p[1], p[2]) : this.wind, this.aux);
     }
   }
@@ -178,6 +180,41 @@ export class MeshBuilder {
       this.pal = pals[tones[1]]; this.tri(sc(B), sc(C), sc(apex));
       this.pal = pals[tones[2]]; this.tri(sc(C), sc(A), sc(apex));
     }
+    return this;
+  }
+  // A fluffy leaf mass: many small leaves on the skin of an ellipsoid around a dark core.
+  // Normals point out from the centre, so the whole mass shades as one soft, rounded volume
+  // while its edge stays leafy. Each leaf is drawn on both sides.
+  leafCloud(rng: Rng, rx: number, ry: number, rz: number, leaves: number, leafSize: number, pals: [number, number, number], flatBottom = 0.3) {
+    const c = this.P([0, 0, 0]);
+    const keep = this.normalFn;
+    const R = Math.max(rx, ry, rz);
+    this.normalFn = (p) => { let x = (p[0] - c[0]) / rx, y = (p[1] - c[1]) / ry + 0.35, z = (p[2] - c[2]) / rz; const l = Math.hypot(x, y, z) || 1; return [x / l, y / l, z / l]; };
+    // the core hides the far side and gives the mass its body
+    const savePal = this.pal;
+    this.pal = pals[1]; this.blob(rng, rx * 0.88, ry * 0.86, rz * 0.88, 0, 0.14, flatBottom, pals);
+    for (let i = 0; i < leaves; i++) {
+      // a point on the ellipsoid, a little more of them on top than underneath
+      let u = rng() * 2 - 1; if (u < -0.2 && rng() < 0.5) u = -u;
+      const th = rng() * Math.PI * 2, rr = Math.sqrt(1 - u * u);
+      const k = 0.9 + rng() * 0.16;
+      const nx = rr * Math.cos(th), ny = u, nz = rr * Math.sin(th);
+      const px = nx * rx * k, py = (ny < 0 ? ny * (1 - flatBottom) : ny) * ry * k, pz = nz * rz * k;
+      // leaf plane: spanned by a tangent and a direction leaning outward and down, like a hanging leaf
+      let tx = -nz, tz = nx; const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl;
+      const s = Math.min(1.0, leafSize) * (0.6 + rng() * 0.6), tw = (rng() - 0.5) * 1.2;
+      const ox = nx * 0.55, oy = -0.55 + ny * 0.3, oz = nz * 0.55;
+      const ax = tx * Math.cos(tw), ay = Math.sin(tw) * 0.5, az = tz * Math.cos(tw);
+      const tone = u > 0.3 ? 2 : u < -0.2 ? 0 : 1;
+      this.pal = pals[Math.max(0, Math.min(2, tone + (rng() < 0.25 ? 1 : rng() < 0.2 ? -1 : 0)))];
+      const A: V3 = [px - ax * s * 0.5, py - ay * s * 0.5 + s * 0.2, pz - az * s * 0.5];
+      const B: V3 = [px + ax * s * 0.5, py + ay * s * 0.5 + s * 0.2, pz + az * s * 0.5];
+      const T: V3 = [px + ox * s * 1.1, py + oy * s * 1.1, pz + oz * s * 1.1];
+      const U2: V3 = [px - ox * s * 0.35, py + s * 0.55, pz - oz * s * 0.35];
+      this.tri(A, B, T); this.tri(B, A, T); this.tri(A, U2, B); this.tri(B, U2, A);
+    }
+    this.pal = savePal; this.normalFn = keep;
+    void R;
     return this;
   }
   // a flat leaf/blade: a folded quad (two faces with a centre ridge) from base along +z, lifted

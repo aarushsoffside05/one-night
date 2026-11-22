@@ -34,8 +34,8 @@ interface KindDef { kind: Kind; cell: number; w: number; wGL: number; seed: numb
 const KINDS: KindDef[] = [
   { kind: 'fern', cell: 2.1, w: 72, wGL: 40, seed: 11 },
   { kind: 'sprout', cell: 2.6, w: 56, wGL: 30, seed: 23 },
-  { kind: 'grass', cell: 0.85, w: 128, wGL: 56, seed: 37 },
-  { kind: 'flower', cell: 2.3, w: 64, wGL: 32, seed: 91 },
+  { kind: 'grass', cell: 0.62, w: 150, wGL: 60, seed: 37 },
+  { kind: 'flower', cell: 1.5, w: 80, wGL: 36, seed: 91 },
   { kind: 'litter', cell: 1.9, w: 72, wGL: 40, seed: 41 },
   { kind: 'drift', cell: 3.4, w: 48, wGL: 28, seed: 53 },
   { kind: 'reed', cell: 1.3, w: 96, wGL: 48, seed: 67 },
@@ -49,8 +49,16 @@ function buildMesh(kind: Kind): THREE.BufferGeometry {
   else if (kind === 'sprout') { // a seedling: thin stem, two or three big leaves
     b.set(PAL.vine, 0.5); b.frustum(3, 0.045, 0.04, 0.55, false);
     for (let i = 0; i < 3; i++) { b.push().translate(0, 0.5, 0); blade(i * 2.1 + rng(), -0.25 + rng() * 0.3, 0.5 + rng() * 0.2, 0.3, i ? PAL.seedling : PAL.leafLight, 0.25); b.pop(); }
-  } else if (kind === 'grass') { // a soft tuft: a fan of blades, lighter at the tips
-    for (let i = 0; i < 10; i++) { b.push().translate((rng() - 0.5) * 0.7, 0, (rng() - 0.5) * 0.7).rotY(rng() * 6.28).rotX(-1.4 + rng() * 0.5); b.set([PAL.grassGround, PAL.leafLight, PAL.leafMid, PAL.leafYellow][i % 4], 1, rng()); const l = 0.22 + rng() * 0.3, w = 0.07; b.tri([-w, 0, 0], [w, 0, 0], [0, 0.02, l]); b.pop(); }
+  } else if (kind === 'grass') { // a thick tuft: bent blades, dark at the root and light at the tip, lit like the ground under it
+    b.normalFn = () => [0, 1, 0];
+    for (let i = 0; i < 9; i++) {
+      b.push().translate((rng() - 0.5) * 0.55, 0, (rng() - 0.5) * 0.55).rotY(rng() * 6.28).rotX(-1.42 + rng() * 0.42);
+      const l = 0.36 + rng() * 0.4, w = 0.05, m = l * 0.5, bend = 0.06 + rng() * 0.1;
+      b.set(i % 2 ? PAL.grassGround : PAL.leafMid, 0.3, rng()); b.quad([-w, 0, 0], [w, 0, 0], [w * 0.7, bend * 0.4, m], [-w * 0.7, bend * 0.4, m]);
+      b.set(i % 3 === 0 ? PAL.leafYellow : PAL.leafLight, 1, rng()); b.tri([-w * 0.7, bend * 0.4, m], [w * 0.7, bend * 0.4, m], [0, bend, l]);
+      b.pop();
+    }
+    b.normalFn = null;
   } else if (kind === 'flower') { // three small flowers on stems: spots of colour in the green
     const cols = [PAL.flowerPink, PAL.flowerYellow, PAL.flowerWhite, PAL.flowerPurple, PAL.flowerOrange];
     for (let i = 0; i < 3; i++) {
@@ -61,7 +69,6 @@ function buildMesh(kind: Kind): THREE.BufferGeometry {
   }
   else if (kind === 'litter') { // fallen leaves: a few flat tilted plates, and one root hump
     for (let i = 0; i < 4; i++) { b.push().translate((rng() - 0.5) * 1.1, 0.03 + rng() * 0.03, (rng() - 0.5) * 1.1).rotY(rng() * 6.28).rotX((rng() - 0.5) * 0.3); b.set([PAL.litterWarm, PAL.fruit, PAL.litter, PAL.barkRed][i], 0); b.tri([0, 0, -0.2], [0, 0, 0.22], [0.14, 0, 0]); b.tri([0, 0, -0.2], [-0.14, 0, 0], [0, 0, 0.22]); b.pop(); }
-    b.set(PAL.rootDark, 0); b.push().translate(0.2, -0.05, 0).rotY(rng() * 3); b.limb([-0.6, 0, 0], [0.6, 0.02, 0.1], 0.1, 0.07, 4, true); b.pop();
   } else if (kind === 'drift') { // fallen wood left along the flood lines
     b.set(PAL.deadwood, 0); b.push().rotZ(Math.PI / 2 - 0.08).translate(0.12, -0.9, 0); b.frustum(5, 0.13, 0.09, 1.9, true, true); b.pop();
     b.push().translate(0.2, 0.08, 0).rotY(0.9); b.limb([0, 0, 0], [0.5, 0.25, 0.1], 0.06, 0.045, 3, true); b.pop();
@@ -150,6 +157,7 @@ export class Cover {
       const mat = makeWorldMaterial(tx, { wind: false });
       mat.positionNode = world.add(windOffset(world, dat.y.mul(def.kind === 'pad' || def.kind === 'drift' || def.kind === 'litter' ? 0.0 : 0.35)));
       mat.normalNode = t.transformNormalToView(rot(t.normalGeometry));
+      if (def.kind === 'grass' || def.kind === 'reed' || def.kind === 'fern') { mat.side = THREE.DoubleSide; mat.normalNode = t.transformNormalToView(t.vec3(0.0, 1.0, 0.0).add(rot(t.normalGeometry).mul(def.kind === 'grass' ? 0.0 : 0.5)).normalize()); }
       const mesh = new THREE.InstancedMesh(buildMesh(def.kind), mat, N);
       mesh.count = N; mesh.frustumCulled = false; mesh.castShadow = false; mesh.receiveShadow = true; mesh.name = 'cover_' + def.kind;
       this.group.add(mesh);
