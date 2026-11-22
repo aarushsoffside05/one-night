@@ -12,7 +12,7 @@ def lin(h):
     return [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
 def mixc(a, b, t): return [a[i] + (b[i] - a[i]) * t for i in range(3)]
 
-BARK = {'pale': ('#8f7c62', '#d6c8a6'), 'brown': ('#5c4638', '#9a7b5e'), 'red': ('#6a4534', '#b07a58'), 'dark': ('#463529', '#7a5f4c')}
+BARK = {'pale': ('#857a68', '#cfc6ae'), 'brown': ('#54463c', '#8e7a66'), 'red': ('#5e4a40', '#9a7c68'), 'dark': ('#40362e', '#6e6054')}
 LEAF = {'deep': ('#17502f', '#2f8a3e', '#6cc040'), 'mid': ('#1f6a36', '#45a33d', '#a6de4c'), 'light': ('#2f7c3e', '#6dbf3f', '#d2e85a'),
         'blue': ('#145246', '#27836b', '#5cc28a'), 'olive': ('#4c6426', '#7f9d35', '#cfd95a'), 'gold': ('#5c7a2a', '#a8c040', '#ffe070')}
 
@@ -122,10 +122,10 @@ def build(name, K, lod):
                 pos.append(tuple(p)); nrm.append(tuple(n)); col.append((cc[0], cc[1], cc[2], 0.8))
         bm.free()
         # the leafy fringe: small folded leaves hugging the skin, drawn on both sides
-        leaves = (int(16 + rx * rx * ry * 1.1) if lod == 0 else 6)
-        ls = max(0.5, rx * 0.26) * (1 if lod == 0 else 1.7)
+        leaves = (int(22 + rx * rx * ry * 1.5) if lod == 0 else 6)
+        ls = max(0.32, rx * 0.14) * (1 if lod == 0 else 1.9)
         for i in range(leaves):
-            u = rng.uniform(-0.55, 1); th = rng.uniform(0, math.tau); rr = math.sqrt(max(0, 1 - u * u)); k = rng.uniform(0.9, 1.08)
+            u = rng.uniform(-0.55, 1); th = rng.uniform(0, math.tau); rr = math.sqrt(max(0, 1 - u * u)); k = rng.uniform(0.93, 1.0)
             n = Vector((rr * math.cos(th), rr * math.sin(th), u))
             p = Vector((c.x + n.x * rx * k, c.y + n.y * rz * k, c.z + (n.z * 0.62 if n.z < 0 else n.z) * ry * k))
             t = Vector((-n.y, n.x, 0)); t = t.normalized() if t.length > 1e-4 else Vector((1, 0, 0))

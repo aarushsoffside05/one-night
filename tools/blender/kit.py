@@ -45,7 +45,7 @@ def mix(a, b, t):
     a, b = colour(a), colour(b)
     return tuple(a[i] + (b[i] - a[i]) * t for i in range(3))
 
-def _obj(name, data, loc, rot, col, vary=0.08, glow=False, sharp=50.0, ao=1.0, part=True):
+def _obj(name, data, loc, rot, col, vary=0.08, glow=False, sharp=58.0, ao=1.0, part=True):
     o = bpy.data.objects.new(name, data)
     bpy.context.scene.collection.objects.link(o)
     o.location = loc
@@ -172,7 +172,7 @@ def blob(r, loc, scale=(1, 1, 1), col='leaf', sub=1, noise=0.18, name='blob', fl
         k = 1 + R.uniform(-noise, noise); v.co = Vector((v.co.x * k * scale[0], v.co.y * k * scale[1], v.co.z * k * scale[2]))
         if flat and v.co.z < 0: v.co.z *= (1 - flat)
     bm.to_mesh(me); bm.free()
-    kw.setdefault('sharp', 20.0)
+    kw.setdefault('sharp', 75.0)
     return _obj(name, me, loc, (0, 0, R.uniform(0, 6)), col, **kw)
 
 def leaf(base, tip, width, col='leafLight', fold=0.25, name='leaf', **kw):
@@ -185,6 +185,7 @@ def leaf(base, tip, width, col='leafLight', fold=0.25, name='leaf', **kw):
         w = width * math.sin(math.pi * min(1, v * 0.85 + 0.12)) * 0.5
         s = (u - 0.5) * 2
         return base + d * v + side * (s * w) + up * (abs(s) * w * fold - 0.25 * L * v * v * 0.6)
+    kw.setdefault('sharp', 80.0)
     return sheet(2, 3, fn, 0.018, col, name=name, offset=0.0, **kw)
 
 # ---------------------------------------------------------------- bake + export
@@ -207,6 +208,7 @@ def export(name, origin=(0, 0, 0), ao_dist=0.9, ao_strength=0.75, ground=None):
     lc = big.loops.layers.float_color.new('Col')
     ln = big.loops.layers.float_vector.new('nrm')
     org = Vector(origin)
+    stats = {}
     for o in PARTS:
         oe = o.evaluated_get(dg); me = oe.to_mesh()
         bm = bmesh.new(); bm.from_mesh(me); oe.to_mesh_clear()
@@ -217,6 +219,7 @@ def export(name, origin=(0, 0, 0), ao_dist=0.9, ao_strength=0.75, ground=None):
         cs = math.cos(math.radians(o["sharp"])); col = list(o["col"]); glow = o["glow"]; aos = o["ao"]
         vmap = {}
         for v in bm.verts: vmap[v] = big.verts.new(v.co)
+        keys = set()
         area = {f: f.calc_area() for f in bm.faces}
         for f in bm.faces:
             try: nf = big.faces.new([vmap[v] for v in f.verts])
@@ -232,8 +235,13 @@ def export(name, origin=(0, 0, 0), ao_dist=0.9, ao_strength=0.75, ground=None):
                 if n.length < 1e-9: n = f.normal.copy()
                 n.normalize()
                 nl[ln] = n
+                keys.add((l.vert.index, round(n.x, 2), round(n.y, 2), round(n.z, 2)))
                 nl[lc] = (col[0], col[1], col[2], 0.0 if glow else aos)   # alpha carries the AO weight for now
+        nm = o.name.split('.')[0]; st = stats.setdefault(nm, [0, 0]); st[0] += 1; st[1] += len(keys)
         bm.free()
+    if os.environ.get('KIT_STATS'):
+        for k, v in sorted(stats.items(), key=lambda kv: -kv[1][1])[:22]: print('   %-16s x%-4d %6d verts' % (k, v[0], v[1]))
+    print('[kit] est. export verts', sum(v[1] for v in stats.values()))
     big.normal_update(); big.faces.ensure_lookup_table(); big.verts.ensure_lookup_table()
     # ambient occlusion, one value per (vertex, normal) so shared corners stay shared
     bvh = BVHTree.FromBMesh(big)

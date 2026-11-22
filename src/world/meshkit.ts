@@ -197,12 +197,12 @@ export class MeshBuilder {
       // a point on the ellipsoid, a little more of them on top than underneath
       let u = rng() * 2 - 1; if (u < -0.2 && rng() < 0.5) u = -u;
       const th = rng() * Math.PI * 2, rr = Math.sqrt(1 - u * u);
-      const k = 0.86 + rng() * 0.2;
+      const k = 0.92 + rng() * 0.08;
       const nx = rr * Math.cos(th), ny = u, nz = rr * Math.sin(th);
       const px = nx * rx * k, py = (ny < 0 ? ny * (1 - flatBottom) : ny) * ry * k, pz = nz * rz * k;
       // leaf plane: spanned by a tangent and a direction leaning outward and down, like a hanging leaf
       let tx = -nz, tz = nx; const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl;
-      const s = Math.min(1.0, leafSize) * (0.6 + rng() * 0.6), tw = (rng() - 0.5) * 1.2;
+      const s = Math.min(0.6, leafSize * 0.55) * (0.6 + rng() * 0.6), tw = (rng() - 0.5) * 1.2;
       const ox = nx * 0.55, oy = -0.55 + ny * 0.3, oz = nz * 0.55;
       const ax = tx * Math.cos(tw), ay = Math.sin(tw) * 0.5, az = tz * Math.cos(tw);
       const tone = u > 0.3 ? 2 : u < -0.2 ? 0 : 1;

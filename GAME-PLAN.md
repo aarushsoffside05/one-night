@@ -1,6 +1,6 @@
 # GAME-PLAN: CHEIA - Three Weeks of Rising Water
 
-Status: NOT READY. This plan has not yet been checked by a fresh judge, and no reader from the reserve's communities has seen it. Nothing in it is built. Minutes are planned, not played.
+Status: NOT READY. A fresh judge failed the first version on ten must-fix faults. This version answers them (see section 11) and has not been judged again. No reader from the reserve's communities has seen it. Nothing in it is built. Minutes are planned, not played.
 
 Working title: CHEIA ("cheia" is the sourced local word for high water, S0213; it becomes the calf's name in the last scene).
 
@@ -18,21 +18,21 @@ The old story ("One Night Through the Forest": a visiting boy's last night, a gl
 |---|---|
 | A calf in slow peril on shrinking ground for four chapters | Gone. The cow and calf are never in danger. The corral already floats beside their pasture on Day 1; the cow walks onto it by herself for her dinner by Day 3 (sourced: cattle kept in floating corrals, fed cut foliage). The clock is Luana's boat and the depth over the high ground, not an animal's safety. |
 | Kid as rescuer ("get the cow off") | The job is feeding. The corral comes home "when the water says, with you or without you". At the peak the adults say they would have waited an hour for more water without her. |
-| Day 1 is a trail walk to the lake (echo of the old route) | Day 1 is morning, and work. She goes OUT by motor canoe up the old bed and walks BACK the other way with empty baskets. Order: landing, old bed, lake bank, great tree, trail, yard. |
-| Sounding is a measuring exercise | No numbers on screen, ever. A sounding only lights tags go / no-go and is always followed by a choice: ride, step out and tow, go round, take less, mark or do not mark. |
+| Day 1 is a trail walk to the lake (echo of the old route) | Day 1 is morning, and work. She goes OUT by motor canoe up the old bed and walks BACK the other way with empty baskets. Order: landing, old bed, lake bank, trunk jam, great tree, trail, yard. |
+| Sounding is a measuring exercise | No numbers on the cord HUD. A sounding only lights tags go / no-go and is always followed by a choice: ride, step out and tow, go round, take less, mark or do not mark. |
 | Quiet, chore-like middle; "feed the cow again" six times | Each chapter has a different errand: tie a canoe for water that is not there yet; ferry cassava; a throwing game with a seven-year-old; a shortcut that fails; marking a road by lamp; trimming a raft with a cow. Raft-building is cut. Feeding is played in full only twice. |
-| Device too plain | The cord is the HUD. The browse view is a toy: pull the cord against a side-cut of the place, bob the floats, replay dioramas. Six painted floats each belong to a person and all get used. |
+| Device too plain | The cord is the HUD. The browse view is a toy: pull the cord against a side-cut of the place, bob the floats, watch what each piece does. Six painted floats each belong to a person and all get used. |
 | Year turn tacked on as a closing film | Cut. The ten-metre rise and fall is PLAYED in chapter 1 ("Jandira's year"), in the player's hand, clearly framed as told, starting and ending on the true level. |
 | "Brings Luana back a year later" muddles the clock | Cut. The story is 21 days. Her wish to come back at low water is one line. |
 | Kid alone, grounded, light going | The grounding is in late-afternoon light, shin-deep, with Jandira two canoe-lengths behind. Relief inside 30 seconds. The night is two girls in one canoe. |
-| Four moments only in chapters 5-6; heavy build | Chapter 1 alone holds two of the four (the rise and fall; the living forest). Chapters 1, 5, 6 alone hold all four (see section 6, "If the build stops early"). No raft-building, no cow loading, four true water levels instead of five, the riverboat is seen only moored. |
-| Low-water places built for a cutscene | The trench channel, dry bed, cut-off lake and far beach are walked or seen in the playable year in chapter 1, and in Roam. |
+| Four moments only in chapters 5-6; heavy build | Chapter 1 alone holds two of the four (the rise and fall; the living forest). Chapters 1, 5, 6 alone hold all four (see section 6, "If the build stops early"). No raft-building, no cow loading, seven true water levels that the pause cards step between, and a riverboat that never moves: it is only ever seen moored. |
+| Low-water places built for a cutscene | The trench channel, the dry bed and the cut-off lake are walked or seen in the playable year in chapter 1, and in Roam. The far beach is Roam only. |
 
 ---
 
 ## 2. Story spine (ending first)
 
-**Ending.** Morning of Day 21. The corral rides tied to the floating house with slack in its rope; the cow chews; the calf sleeps on the planks. The riverboat's plank now rests five steps from the top of the bank steps; on Day 1 it rested fifteen down. Luana's mother asks if it was terrible. Luana names the calf Cheia, drops her line off the boat rail without looking at it and says "Deep enough." She asks to come back when the water is down, to walk it. The boat pulls out. A closing map names the place.
+**Ending.** Morning of Day 21. The corral rides tied to the floating house with slack in its rope; the cow chews; the calf sleeps on the planks. The riverboat's plank now rests five steps from the top of the bank steps; on Day 1 it rested fifteen down. Luana's mother asks if it was terrible. Luana names the calf Cheia, drops her line off the boat rail without looking at it and says "Deep enough." She asks to come back when the water is down, to walk it. The ropes come off. A closing map names the place.
 
 **Want (given on Day 1).** Keep the cow fed every day until the corral can come home to the house, and be there when it does: then the calf is hers to name.
 
@@ -42,9 +42,9 @@ The old story ("One Night Through the Forest": a visiting boy's last night, a gl
 
 **Stakes a child feels.** A promise (the calf's name). Not being the useless one from town in front of a sharp older cousin. And a clock she cannot move: her boat comes on Day 21, and if the water is not enough by then, the corral comes home after she has gone and three weeks of leaves end with a wave from a boat rail. Nobody is in danger at any point.
 
-**Low point (chapter 4, Day 15).** She overloads the canoe to "do two days in one", takes the straight way without sounding, grounds, and watches her leaves float off between the trunks. Then the real blow: with the red tag on, the high ground reads three hands short, six days before her boat. "So I fed her for nothing."
+**Low point (chapter 4, Day 15).** She overloads the canoe to "do two days in one", takes the short way without sounding, grounds, and watches her leaves float off between the trunks. Then the real blow: with the red tag on, the high ground reads three hands short, six days before her boat. "So I fed her for nothing."
 
-**Peak (chapter 6, Day 19).** Sunrise over the lake as the last rope comes off. The corral follows her six floats through the trees. On the high ground the front touches. Everyone goes to the back; still touching. The cow is standing on the front because she came forward for Luana's fresh leaves. Luana carries the leaves to the back; the cow follows; the front lifts; the corral slides over.
+**Peak (chapter 6, Day 19).** Sunrise over the lake as the last rope comes off. The high ground is the first thing in the corral's way, and on it the front touches. Everyone goes to the back; still touching. The cow is standing on the front because she came forward for Luana's fresh leaves. Luana carries the leaves to the back; the cow follows; the front lifts; the corral slides over. Then, down the lane, the corral stops at the two tight places and she says, by eye, which side of her own float is deep.
 
 **Why the kid is there.** School is out; her mother Cleia cooks on a passenger riverboat and there is nobody to mind Luana in town. Cleia grew up in this community. The boat drops Luana at her grandmother's landing on the way upriver and collects her on the way back, three weeks later. Why she gets a real job: it is the week people rush to pull cassava before the river floods the gardens (S0311), and her cousin goes to school by canoe (S0311). There are no hands left over.
 
@@ -61,15 +61,16 @@ The old story ("One Night Through the Forest": a visiting boy's last night, a gl
 | **Seu Anísio** | Neighbour, floating house. | Ropes: checks and re-ties the house to its trees as the water climbs. Lends the blue float. |
 | **Dona Marlene** | His wife. Low cassava garden and the floating garden. | Loads: more in the boat, more boat in the water. Ties the green tag. Lends the yellow float. |
 | **Tico**, 7 | Their son. | The throwing game; that a log "pretends" to be the bottom. Paints and lends the float with a face ("Zé"). |
-| **Cleia** | Luana's mother. | Seen on the boat rail at start and end; one radio caption. |
+| **Cleia** | Luana's mother. Cooks on the riverboat. | Seen on the boat rail at start and end; one radio caption. |
+| The boatman | No name, no lines. | A shape in the riverboat's wheelhouse, so the boat does not read as empty. He lifts the ropes off in 6.5. |
 
-Animals with roles: the cow (Mimosa), her calf (unnamed until the end), the floating house's dog. Seven people ever besides Luana; never more than four others on screen.
+Animals with roles: the cow (Mimosa), her calf (unnamed until the end), the floating house's dog. Seven named people besides Luana, plus the boatman: eight ever. Never more than four others on screen; the fullest scenes (2.2, 3.3, 5.1, 6.4, 6.5) are counted in their own lines.
 
 ---
 
 ## 3. The one core action: SOUND IT, THEN CHOOSE
 
-Aim with the mouse, hold **F** to let the weighted cord run out, let go when it touches bottom: the cord goes slack and a ring spreads (all visual; nothing depends on sound). While the cord is out, it is drawn up the edge of the screen with its coloured tags. **A tag under the waterline means "deep enough for that".** There are no numbers. Then the player chooses what to do with the answer.
+Aim with the mouse, hold **F** to let the weighted cord run out, let go when it touches bottom: the cord goes slack and a ring spreads (all visual; nothing depends on sound). While the cord is out, it is drawn up the edge of the screen with its coloured tags. **A tag under the waterline means "deep enough for that".** The cord shows no numbers. Then the player chooses what to do with the answer.
 
 | Chapter | Step | What is new | The choice it feeds |
 |---|---|---|---|
@@ -78,15 +79,15 @@ Aim with the mouse, hold **F** to let the weighted cord run out, let go when it 
 | 3, Day 12 (extension) | play | Throw the weight AHEAD (aim, swing, release). Soft landing or hard landing. | Hit Tico's floats; tie a rope from a canoe. |
 | 4, Day 15 | twist | A hard landing is a log, not the bottom: throw again beside it. Skipping the sounding costs a load. Red tag: what the corral needs. | Sound or go. Then the answer she does not want: three hands short. |
 | 5, Night 18 | test under the lamp | Same action for something heavy that is not hers: sound both sides of a gap, drop a float only where red is covered. Call it by eye first. | Mark here, or not here. "Not yet." |
-| 6, Day 19 | mastery | She calls depths by the look of the water and the cord only confirms. Then the reverse of sounding: change what the raft needs by moving the weight on it. | Left or right; and where the cow stands. |
+| 6, Day 19 | mastery | The reverse of sounding: change what the raft needs by moving the weight on it. Then she says by the look of the water which side of a float is deep, and the cord only confirms. | Where the cow stands; then this side or that side, once, at two gaps. |
 
-Secondary verbs, all in service of it: paddle, wade and tow, load, cut leaves (hold E), tie (E on a tie point), drop a float (G), call left / right (A / D on the raft).
+Secondary verbs, all in service of it: paddle, wade and tow, load, cut leaves (hold E), tie (E on a tie point), drop a float (G), say which side of a float is deep (A / D, one press, on the raft).
 
 ---
 
 ## 4. The device: THE DROP-LINE
 
-**What it is.** A hand-sized wooden winder, a cord and a smooth weight. Vó Zefa winds it on Day 1 from a spare hand-line reel, "because your arm is not as long as a paddle". The people here do not need one: they sound with a paddle and by eye, on screen. It is honestly a learner's tool, made for her (UNSOURCED U1). It is called "the drop-line" or "the cord" in captions, never "the line" alone.
+**What it is.** A hand-sized wooden winder, a cord and a smooth weight. Vó Zefa winds it on Day 1 from a spare hand-line reel, "because your arm is not as long as a paddle". The people here do not need one: they sound with a paddle and by eye, on screen. It is honestly a learner's tool: Vó made one for Luana's mother once, and makes this one for her (UNSOURCED U1). It is called "the drop-line" or "the cord" in captions, never "the line" alone.
 
 **In play (every minute).** It is the core action. Hold F anywhere there is water: off the landing, a plank walk, a log, a canoe, the raft. From chapter 5 it also carries six painted marker floats, dropped with G.
 
@@ -102,7 +103,7 @@ Secondary verbs, all in service of it: paddle, wade and tow, load, cut leaves (h
 
 **Screen 3, browse: THE FLOATS.** The six floats bob in a row on short cords: Vó's white, Jandira's green, Marlene's yellow, Anísio's blue, Tico's "Zé" with a painted face, Raimundo's red. Flick one and it bobs. Once dropped in chapter 5, each is shown where it sits on a top view of the corral's way, so the screen shows the road she has marked so far.
 
-**Its collection is its capability, not a record.** Select any piece and a tiny low-poly diorama replays the ten seconds in which she earned it, then shows what the cord can now tell her. Once a tag is on, every later sounding reads against it: collecting makes the tool smarter. Everything on it is used at the end: all three tags are read on the night, all six floats are dropped, and the last one (red) is the story's "now".
+**Its collection is its capability, not a record.** Select any piece and a tiny low-poly side-cut shows what the piece DOES: the yellow tag going under beside an empty canoe, the green beside a loaded one, the red beside the corral, the weight sinking into mud or jumping off wood. It never replays a scene and never shows Luana. Once a tag is on, every later sounding reads against it: collecting makes the tool smarter. Everything on it is used at the end: all three tags are read on the night, all six floats are dropped, and the last one (red) is the story's "now".
 
 **How it gives the next aim.** Bare loops with a faint outline show what is still to learn or borrow. One aim line sits under the winder (verbatim lines are in section 6, tagged AIM). And at any pause the gap between the cork clip and the red tag at the high ground IS the clock: "three hands short" on Day 15, "two fingers short" at dusk on Day 18, covered before dawn on Day 19.
 
@@ -119,43 +120,43 @@ Heights are metres above the lowest river (water level x 10.6).
 | Place | Position | Height | Notes |
 |---|---|---|---|
 | Open river | west edge, x 0-80 | - | Flows past; silhouette forest beyond. |
-| Sand beach | 70-130, 50-110, at the channel mouth | 0-2 | Bare only at low water. Seen from the old bed's mouth in "Jandira's year"; walked in Roam. |
+| Sand beach | 70-130, 50-110, at the channel mouth | 0-2 | Bare only at low water. Roam only: it is about 390 m from the old bed, round the channel bend and behind the community bank, so Story never shows it. |
 | The channel | mouth (100,100); east along y 130 to (300,130); bends north-east; north along x 430 to (430,330); leaves east at (600,380) | bottom about -2 | A trench between banks taller than a house at level 0, hanging roots, dark water line on trunks at the top. |
 | Community high bank | x 160-260, y 160-260, north of the channel | top 10.45 | Ankle-deep at level 1. |
 | Landing and bank steps | (205,150) up to (205,172) | steps of 20 cm | The story's gauge: 15 steps showing on Day 1, 12 on Day 7, 9 on Day 12, 8 on Day 15, 6 on Day 18-19, 5 on Day 21. |
 | Stilt house (Vó Zefa) | (200,200) | floor 11.0 | Plank walk to the steps; a stack of palm leaves, and an oven and sieve left mid-task underneath (unnamed); radio inside; radio aerial at (185,215). |
 | Yard and marked tree | (225,215) | 10.4 | Dark line on the trunk. |
 | Floating house (Anísio, Marlene, Tico) | (265,148) at the water's edge | rides the level | Log raft, deck wider than the house, pot plants, one lamp, dog, canoe alongside; ropes to two trees. Floating garden at (285,150). The corral's berth is beside it. |
-| Low cassava garden, banana plants | (245,255), back slope of the bank | 8.0-8.5 | Water at the lowest row on Day 7; under by Day 12. Banana stems cut by the waterline. |
-| Trail | trail head (255,270) north-east to the great tree; on to the lake bank | floor 7.6 | 123 m to the great tree, then 20 m to the log, then 72 m to the pasture. Dry on Day 1, knee-deep on Day 7, paddled after. |
+| Low cassava garden, banana plants | its own low rise in the forest, centre about (296,304), some 24 m across; the trail skirts its south foot | top 8.0-8.5 | Cut off from the yard slope by a 45 m swale of forest floor at 7.6, with one root rise at about 7.9 on the straight line; the trail cut bends round the root rise. Day 1: reached dry-shod. Day 7 (water 8.06): water at the lowest row, the swale 46 cm deep, the root rise 16 cm. Under by Day 12. Banana stems cut by the waterline. |
+| Trail | trail head (255,270) north-east past the garden rise to the great tree; then north up the old bed's west side to the trunk jam | floor 7.6 | 123 m to the great tree; then about 110 m up the bed's west side, 8 m across the trunk jam and 30 m to the pasture (about 145 m, pasture to tree). Dry on Day 1, knee-deep on Day 7, paddled after. |
 | Great buttressed tree | (365,325) | foot 7.6; last year's dark line at 10.6 (3 m up, twice Luana's height) | Landmark in chapters 1, 2, 4, 5. An old canoe lies at its foot on Day 1. |
-| The old bed | mouth at the channel (428,312); west to the log crossing (385,335); north to (375,385); into the lake at (400,430) | bottom 5.3-5.6 | The lake's only water link. Holds 1.8 m of water on Day 1; dry at level 0. Its lake end is choked with fallen trunks: a canoe slips through, a corral does not. A fallen log bridges it on the trail. |
+| The old bed | mouth at the channel (428,312); west to a bend (385,335); north to (375,385); into the lake at (400,430) | bottom 5.3-5.6 | The lake's only water link. Holds 1.8 m of water on Day 1; dry at level 0. Nothing bridges it, so a canoe has clear water along it at every story level. Its lake end is the TRUNK JAM (400,430): fallen trunks heaped as high as the bank (about 9 m) with one gap a canoe wide. A canoe slips through at every level; a corral does not. On Day 1 the jam is also the only foot crossing: a loose plank lies over the gap, lifted aside for a canoe and dropped back for feet. |
 | Lake bank and pasture | arc from (400,435) to (470,385); pasture at 415-440, 395-410 | 8.9 to 9.5 | The "high bank" of the lake. Top strip still dry on Day 21. |
 | The high ground by the lake ("the hump") | (455,388), a low saddle in the lake bank | top 8.62; a sunken log lies on it, top 8.75 | The story's gate. One tree stands on it (the rag tree). |
 | The lane | from the hump south-west to the old bed at (420,318), about 80 m | floor 7.6 | Wide-spaced big trunks: the only way wide enough for the corral. |
-| Corral mooring | (432,412), lake side of the pasture | floats | Plank from the bank to the raft: steep on Day 1, level by Day 7. |
-| The lake | centre (480,480), about 170 m across | joined to the river above level 0.5; own level about 5.3 m below that | Mist at dawn, floating plant mats near (445,425), giant lily pads in the north bay. Cut off and pale through the last trunks at low water. |
+| Corral mooring | (432,412), lake side of the pasture | floats | Plank from the bank (8.9) to the raft: steep on Day 1, less steep on Day 7, level on Day 15. |
+| The lake | centre (480,480), about 170 m across | joined to the river above about level 0.5; below that it keeps its own level, about 5.3 m | Mist at dawn, floating plant mats near (445,425), giant lily pads in the north bay. Cut off and pale through the last trunks at low water. |
 | Flooded forest | everything between | floor 7.6 | Three depth layers of trunks; silhouette rings beyond the edge. |
 
-**True water levels used by Story:** 0.70 (Day 1), 0.76 (Day 7), 0.81 (Day 12, extension), 0.84 (Day 15), 0.867 to 0.873 (dusk Day 18 to dawn Day 19), 0.89 (Day 21). Plus 0 to 1 inside "Jandira's year" and in Roam.
+**True water levels used by Story (seven):** 0.70 (Day 1), 0.76 (Day 7), 0.815 (Day 12, extension), 0.84 (Day 15), 0.867 (dusk, Day 18), 0.873 (last of the night and dawn, Day 19), 0.89 (Day 21). Plus 0 to 1 inside "Jandira's year" and in Roam.
 
 **Kit pieces.**
 
 - Luana's old plank canoe with a bow post for the lamp; Jandira's school canoe; Raimundo's motor canoe; paddles; one pole.
 - The corral raft (NEW hero piece): logs, plank deck, rail fence, a leaf rack at each end, a gate, a plank. About 3 x 5 m ("as wide as four canoes"). It must sit visibly deeper with people aboard and tip a little toward the cow.
-- The riverboat (NEW, simple): white, two decks, hammocks on the upper deck. Seen only moored at the landing, twice.
+- The riverboat (NEW, simple): white, two decks, hammocks on the upper deck, one boatman's shape in the wheelhouse. Seen only moored at the landing, twice. It never moves: in 1.1 it is gone when the camera lifts from a close shot, and 6.5 cuts to the map from a fixed camera on its stern.
 - The drop-line: winder, cord, weight, three tags, two charms, six floats in pale paint that reads in lamp light.
 - Ropes and tie points (buttress knob and root crest; two house trees; corral post); the rag.
-- Cassava roots and baskets; leaf bundles; the palm-leaf stack; the radio; the lamp.
+- Cassava roots and baskets; the walkers' plank at the trunk jam; leaf bundles; the palm-leaf stack; the radio; the lamp.
 - Cow, calf (stand, walk a few steps, eat, lie, turn the head), dog.
 - Unnamed life: butterflies, a lizard, small birds, a sloth, ants and beetles on trunks, fish rings, falling fruit with swirls, two dolphin backs, macaws crossing, eyes at the waterline, bats, frogs on floating plants, fireflies, herons, mist. The giant fish: back, tail, ring only.
-- States the engine needs: canoe sits lower with load (a height offset, 0 to 4 baskets); grounded (stops, tilts 3 degrees); wade (slow walk, ripples) and tow (canoe follows on a rope); raft on a path between floats with a left / right nudge; the framed "year" (border, ring, hold-to-run).
+- States the engine needs: canoe sits lower with load (a height offset, 0 to 4 baskets); grounded (stops, tilts 3 degrees); wade (slow walk, ripples) and tow (canoe follows on a rope); the raft pushed by the motor canoe in straight stretches from float to float, with a stop at the high ground and a stop at each of two gaps (one side-call each), a soft bump, and a small tip toward the cow; the framed "year" (border, ring, hold-to-run, player seated for the last hold).
 
 ---
 
 ## 6. Chapters and scenes
 
-Keys: WASD move or paddle; mouse aim; **E** contextual; **F** hold and release the drop-line (aim + hold to swing, release to throw ahead from chapter 3 or 4 on); **G** drop a float; **SPACE** run the year (chapter 1 only); **Q / E** call "not yet / enough"; **A / D** call left / right on the raft; **Tab** open the device.
+Keys: WASD move or paddle; mouse aim; **E** contextual; **F** hold and release the drop-line (aim + hold to swing, release to throw ahead from chapter 3 or 4 on); **G** drop a float; **SPACE** run the year (chapter 1 only); **Q / R** call "not yet / enough" (5.1, 5.3); **A / D** point the way from the bow (5.2) and say which side of a float is deep (6.3); **Tab** open the device. E is only ever the contextual action.
 
 Caption tags: [S....] = facts.md id, Place Mamirauá (S0203 = the wider complex, used once on the map); [B7.7] = brief section 7's "less firmly sourced" line (trunks keep the mark; channels dry, lakes cut off); [no fact] = story talk or plain physics, claims nothing about the place; [U..] = listed in UNSOURCED.md.
 
@@ -163,49 +164,49 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
 
 | Chapter | Day | Water | Time of day | Core / extension | Minutes |
 |---|---|---|---|---|---|
-| 1. The boat goes on | 1 | 0.70 | morning | CORE | 5.5 |
+| 1. The boat goes on | 1 | 0.70 | morning | CORE | 7.0 |
 | 2. Knee deep | 7 | 0.76 | morning | CORE | 4.5 |
-| 3. Ropes | 12 | 0.81 | late afternoon to dusk | EXTENSION | 4.5 |
+| 3. Ropes | 12 | 0.815 | late afternoon to dusk | EXTENSION | 3.9 |
 | 4. The shortcut | 15 | 0.84 | late afternoon to dusk | CORE | 3.5 |
-| 5. By the lamp | 18-19 | 0.867 to 0.873 | dusk, night, grey pre-dawn | CORE | 4.5 |
-| 6. First light | 19, then 21 | 0.873, then 0.89 | grey pre-dawn, sunrise, morning | CORE | 5.5 |
+| 5. By the lamp | 18-19 | 0.867, then 0.873 | dusk; sleep; last of the night, grey pre-dawn | CORE | 5.2 |
+| 6. First light | 19, then 21 | 0.873, then 0.89 | grey pre-dawn, sunrise, morning | CORE | 5.7 |
 
-**Core: 23.5 minutes, and holds all four must-have moments. With the extension: 28 minutes.**
+**Core: 25.9 minutes, and holds all four must-have moments. With the extension: 29.8 minutes, which is at the limit: if play-testing runs long, chapter 3 is the part that goes.**
 
-**If the build stops early.** Build order is 1, then 5 and 6, then 2, then 4, then 3. Chapters 1 + 5 + 6 alone hold all four moments. In that short build one card bridges them ("EIGHTEEN DAYS OF LEAVES"), and the three tags are already on the cord when chapter 5 opens, each named in one line by Raimundo at the hump. Chapter 3 can be left out with no hole: the throw-ahead and the hard landing are also taught in 4.1 and 5.1.
+**If the build stops early.** Build order is 1, then 5 and 6, then 2, then 4, then 3. Chapters 1 + 5 + 6 alone hold all four moments. In that short build one card bridges them ("EIGHTEEN DAYS OF LEAVES" [no fact]), and the three tags are already on the cord when chapter 5 opens, each named in one line by Raimundo at the hump. Chapter 3 can be left out with no hole: Jandira's one line that teaches the throw ahead is spoken in the first built scene that needs it (3.2 does it if chapter 3 is built; otherwise 4.1; otherwise 5.1), the hard landing is taught again in 4.1 and 5.2, and Tico and his float are set up in 2.2.
 
 ---
 
-### CHAPTER 1 - DAY 1: THE BOAT GOES ON (CORE, 5.5 min)
+### CHAPTER 1 - DAY 1: THE BOAT GOES ON (CORE, 7.0 min)
 
 #### 1.1 The landing
 - **Place:** riverboat at the landing, bank steps, top of the bank. **Water:** 0.70 to 0.70. **Time:** morning to morning.
 - **Leads:** Vó Zefa. **Feeling:** unwilling curiosity.
 - **Objective:** get off the boat, climb to Vó, be given the drop-line, try it.
-- **Steps:** (1) Start on the boat's lower deck; walk the plank to the landing. (2) Climb the bank steps (15 showing). (3) E at Vó: a five-second close shot of her hands winding cord onto the winder and knotting the white top knot. (4) Walk back down to the landing edge. Aim at the water, hold F, release when the cord goes slack: ring; the cord on screen shows the white knot far above the waterline. (5) Sound a second place (the end of the landing is deeper than beside the steps). (6) The boat backs out; Cleia waves from the rail; E to wave back (optional).
+- **Steps:** (1) Start on the moored boat's lower deck. Cleia is at the rail; a boatman's shape stands in the wheelhouse. E to wave (optional). Walk the plank to the landing. (2) Climb the bank steps (15 showing). (3) E at Vó: a five-second close shot of her hands winding cord onto the winder and knotting the white top knot. When the camera lifts, Luana looks back from the top step: the landing is empty and a wake is fading on the channel. The boat is never shown moving. (4) Walk back down to the landing edge. Aim at the water, hold F, release when the cord goes slack: ring; the cord on screen shows the white knot far above the waterline. (5) Sound a second place (the end of the landing is deeper than beside the steps).
 - **People's way that works:** let the cord run until it goes soft, then let go. **Rushed way that fails:** let go early: the weight hangs in mid-water, no ring, the cord on screen shows nothing. Vó says one line; try again at once. No harm.
 - **Learned by doing (teach):** the bottom is found by the cord going soft.
 - **Captions:**
   - Card: "DAY 1" [no fact]
   - CLEIA: "Three weeks, filha. The boat goes to the end of the river and comes back for you." [U3]
-  - LUANA: "Three weeks. With no road." [no fact]
+  - LUANA: "Three weeks. Here." [no fact]
   - VÓ ZEFA: "Here everybody goes by canoe. So first you learn what is under one." [S0311]
   - VÓ ZEFA: "Your arm is not as long as a paddle. So: a cord, and a weight." [U1]
   - VÓ ZEFA: "This cord is ten metres sixty. That is how far the river climbs here in a year." [S0213]
   - Prompt: "Hold F to let the cord run. Let go when it goes soft." [no fact]
   - VÓ ZEFA (early release): "It has not touched. Let it run till it goes soft." [no fact]
   - VÓ ZEFA: "Good. Now you know something the water was not telling you." [no fact]
-- **Minutes:** 1.5. **Done when:** `line.owned && soundings.valid >= 2 && boat.departed`.
+- **Minutes:** 1.5. **Done when:** `line.owned && soundings.valid >= 2 && boat.gone && others.onScreen <= 3`.
 
 #### 1.2 Up the old bed
 - **Place:** motor canoe from the old bed's mouth to the lake bank; pasture; corral. **Water:** 0.70 to 0.70. **Time:** morning.
-- **Leads:** Tio Raimundo (stern, motor at walking speed), Jandira amidships with a leaf bundle. Luana rides in the bow. **Feeling:** a job lands on her.
+- **Leads:** Tio Raimundo (stern, motor at walking speed), Jandira amidships. Luana rides in the bow. Four baskets ride between them: Vó's two, full of cut leaves, and two of his. **Feeling:** a job lands on her.
 - **Objective:** tell Raimundo what is under the canoe; put the leaves where the cow must learn to find them.
-- **Steps:** (1) Scene opens at the old bed's mouth. Raimundo asks; hold F off the bow at two marked spots (deep; then shallower at the fallen trunks). After each he dips his paddle to the same depth and nods. (2) The canoe slips between the fallen trunks into the lake and noses to the bank. (3) Climb the bank: cow, calf, grass. (4) E to take a leaf bundle from Jandira; carry it down the steep plank onto the corral; E at the rack. (5) The cow walks down the plank after the leaves; the calf follows to the top of the plank and stops. (6) Raimundo gives the job.
+- **Steps:** (1) Scene opens at the old bed's mouth. Raimundo asks; hold F off the bow at two marked spots (deep; then shallower at the fallen trunks). After each he dips his paddle to the same depth and nods. (2) At the trunk jam Jandira leans out and lifts the walkers' plank aside; the canoe slips through the gap into the lake and noses to the bank. (3) Climb the bank: cow, calf, grass. (4) E to take a leaf bundle that Jandira lifts out of Vó's basket; carry it down the steep plank onto the corral; E at the rack. (5) The cow walks down the plank after the leaves; the calf follows to the top of the plank and stops. (6) Raimundo gives the job.
 - **People's way:** leaves on the raft's rack. **Rushed way:** E on the grass beside the cow: she eats there and does not come down; Raimundo carries the rest to the rack himself with one line. At least one bundle must reach the rack. No harm.
 - **Learned by doing (teach):** her read matches his paddle. The corral is where dinner is.
 - **Captions:**
-  - RAIMUNDO: "Front seat. Tell me what is under us." [no fact]
+  - RAIMUNDO: "My hands are on the motor. Front seat: tell me what is under us." [no fact]
   - RAIMUNDO (dipping his paddle): "Same as my paddle says. Good." [no fact]
   - JANDIRA: "The river is already in the old bed. Next it comes over the forest floor." [U5]
   - LUANA: "Why bring leaves to a cow that is standing in grass?" [no fact]
@@ -214,28 +215,31 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
   - RAIMUNDO: "When the grass goes under, she lives on this. A floating corral." [S0311]
   - RAIMUNDO: "We are pulling cassava before the river takes the garden. Jandira has school. No hands left over. So you feed her. Every day." [S0311]
   - LUANA: "Me? I do not know anything about cows." RAIMUNDO: "She knows about leaves. That is enough." [no fact]
-  - RAIMUNDO: "When the water is deep enough, the corral comes home to the house. Keep her fed till then, and be here, and the calf is yours to name." [U6]
+  - RAIMUNDO: "When the water is deep enough, the corral comes home to the floating house. Keep her fed till then, and be here, and the calf is yours to name." [U6]
+  - LUANA: "Why move her at all?" RAIMUNDO: "Tied at the house, she is fed from the deck and her rope is checked with the house ropes. Out here it is a trip every day." [U6]
   - LUANA: "How deep is deep enough?" RAIMUNDO: "You have the cord. One day you will tell me." [no fact]
 - **Minutes:** 1.5. **Done when:** `soundings.fromBow >= 2 && rack.bundles >= 1 && cow.onRaftOnce && job.given`.
 
 #### 1.3 Tie it for the water, and JANDIRA'S YEAR (must-have moment 1)
-- **Place:** trail from the pasture, the log over the old bed, the great tree; inside the telling also the dry bed to its mouth. **Water:** 0.70; inside the frame 0.70 up to 1.0, down to 0, back to 0.70; ends 0.70. **Time:** morning (inside the frame the light is held still in one pale "told" grade; no day-night flicker).
+- **Place:** the pasture, the trunk jam, the old bed's west side, the great tree; inside the telling also the dry bed down to its mouth. **Water:** 0.70; inside the frame 0.70 up to 1.0, down to 0, back to 0.70; ends 0.70. **Time:** morning (inside the frame the light is held still in one pale "told" grade; no day-night flicker).
 - **Leads:** Jandira. **Feeling:** wonder.
 - **Objective:** tie the old canoe so the water cannot take it; then find out why.
 - **Steps:**
-  1. Walk the dry trail from the pasture with Jandira (72 m), carrying the empty baskets. Cross the log; F off the log is allowed (deep).
+  1. Raimundo stays to mend the corral's rail and keeps the motor canoe; he says so, and sends the girls home on foot with Vó's two empty baskets. Walk with Jandira from the pasture to the trunk jam (30 m). She drops the walkers' plank back over the canoe gap; cross (8 m). F off the jam is allowed (deep). Walk down the dry west side of the old bed, water lying in it beside them, to the great tree (110 m).
   2. At the great tree an old canoe lies upside down at the buttress. Jandira says it is Luana's if the water does not take it first. E: flip it together.
   3. E to take the rope end. Two tie points show on the buttress: a LOW knob at waist height (rope short and tight) and a HIGH root crest above her head (one step up the buttress, the spare rope in coils). E on one to tie.
   4. Jandira: "Get in." E to sit in the canoe on the dry leaves.
-  5. The frame comes on: a rope-coloured border, a ring with three labels and a fixed cork peg at TODAY, and the header. **Hold SPACE and the year runs. Let go and it stops; the player can look, paddle or walk.**
+  5. The frame comes on: a rope-coloured border, the header, and a plain ring with a notch at the top, a notch at the bottom and a fixed cork peg at TODAY (the one word on it). **Hold SPACE and the year runs. Let go and it stops, and the player can look around.**
   6. Rise, 0.70 to 1.0 (about 20 s held). Water crosses the floor; the canoe lifts. If she tied LOW: at 0.78 the bow is pulled down and the canoe leans; the telling stops, runs back to today in five seconds, Jandira says one line, the player re-ties HIGH and runs it again. If HIGH: the canoe rides up level and the coils pay out.
   7. At 1.0 it stops by itself. Paddle a loop round the tree on the rope: the trail she just walked is three metres under the hull. E at the trunk: she touches last year's dark line.
-  8. Fall, 1.0 to 0.72 (about 12 s held): the canoe settles on the floor. They step out. Jandira walks down the bed toward its mouth (64 m); the year waits. Follow her.
-  9. At the mouth, hold SPACE again: 0.72 to 0 (about 12 s). The bed is dry underfoot; the channel below drops into a trench with banks taller than a house and hanging roots; far off, the river and a pale beach. Optional: let go and run to the lake bank (90 m): the lake sits alone in its bowl.
-  10. Hold SPACE: 0 back to 0.70 (about 15 s). The peg on the ring clicks at TODAY. The border fades through the rope colour; they are sitting in a canoe on dry leaves at the great tree.
+  8. Fall, 1.0 to 0, in one hold, seated (about 25 s held). At 0.72 the canoe settles on the forest floor, and the water keeps going: off the floor, down the walls of the old bed twenty metres away, out of the bed altogether. It stops by itself at 0. Stepping out is offered only now, so the player is never on foot while the water moves.
+  9. Step out. Follow Jandira into the dry bed and down it to its mouth (about 70 m). They stop at a root two metres back from the edge and look down: the channel is a trench with banks taller than a house and hanging roots, and the dark line is far up the trunks on the other side. Optional: walk up the dry bed to the trunk jam (about 100 m from the bend) and look through it: the lake sits alone in its bowl.
+  10. Prompt "E: back to the canoe", from anywhere. A two-second cross-fade puts them back on the seats at the great tree. Hold SPACE, seated: 0 back to 0.70 (about 15 s). The water comes back into the old bed beside them and stops 18 cm below the leaves. The peg on the ring clicks at TODAY. The border fades; they are sitting in a canoe on dry leaves at the great tree.
 - **People's way:** tie high, with the slack. **Rushed way:** tie low and tight; it fails inside the telling only, where nothing is real. Relief in five seconds.
 - **Learned by doing (teach):** tie for where the water will be. The floor she is standing on is river bed for part of every year. Ten metres is taller than a house.
 - **Captions:**
+  - RAIMUNDO: "I stay to mend her rail, and I keep the canoe. You two walk: it is dry all the way. Take Vó's baskets home." [no fact]
+  - JANDIRA (at the jam): "Plank down for feet. Plank up for canoes." [no fact]
   - JANDIRA: "That old one is yours. If the water does not take it first." [no fact]
   - JANDIRA: "A canoe left on the ground gets tied. Tie it for where the water WILL be." [U9]
   - Prompt: "Choose where to tie: the low knob, or up on the root with the slack." [no fact]
@@ -243,7 +247,7 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
   - LUANA: "That is twice my height. No." [no fact]
   - JANDIRA: "Get in." LUANA: "We are sitting in a boat. On the ground." JANDIRA: "Not for long. I will tell you a year." [no fact]
   - Frame header: "JANDIRA TELLS IT. NOT REAL TIME." [no fact]
-  - Ring labels: "TODAY" [no fact] / "HIGH WATER: MAY TO MID-JULY" [S0213] / "LOWEST: SEPTEMBER, OCTOBER, NOVEMBER" [S0213]
+  - Ring: the one word "TODAY" [no fact]
   - Prompt: "Hold SPACE to let the year run. Let go to stop and look around." [no fact]
   - JANDIRA (low tie): "Stop. The water went up and your knot did not. Tie it again, up there." [U9]
   - JANDIRA (top): "High water. May to the middle of July. Touch the line: that is last year." [S0213, B7.7]
@@ -252,20 +256,21 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
   - JANDIRA (at the mouth): "September, October, November: that is the bottom." [S0213]
   - JANDIRA: "From down there to last year's line: ten metres. A bit more." [S0213]
   - JANDIRA: "Down here the channels go dry, and the lakes sit on their own." [B7.7]
-  - JANDIRA: "Then it comes back up. Every year." [S0213]
+  - Prompt: "E: back to the canoe." [no fact]
+  - JANDIRA (rising again): "Then it comes back up. Every year." [S0213]
   - Frame close: "TODAY AGAIN. DAY 1." [no fact]
   - JANDIRA: "That was talking. This is today. Baskets." [no fact]
-- **Minutes:** 2.0. **Done when:** `canoe.tie == "high" && year.reachedTop && year.reachedBottom && frame.closed && water == 0.70`.
+- **Minutes:** 3.5. **Done when:** `canoe.tie == "high" && year.reachedTop && year.reachedBottom && player.seated && frame.closed && water == 0.70`.
 
 #### 1.4 The trail home
 - **Place:** great tree to the trail head, yard, marked tree. **Water:** 0.70. **Time:** morning.
 - **Leads:** Jandira, ahead with baskets; she stops to shift her load and to look up. No pace to keep. **Feeling:** the forest is alive; first small liking.
 - **Objective:** carry the baskets home.
-- **Steps:** (1) Walk the trail (123 m). Along it: butterflies on a damp patch lift as she passes; a lizard runs up a buttress; small birds cross low; a sloth moves one arm high above; light shafts shift; leaves drift down; puddles in the hollows (F in a puddle is allowed: the cord barely wets). (2) At the yard, Vó at the marked tree. (3) E: put the baskets under the house beside the palm-leaf stack. Pause card.
+- **Steps:** (1) Walk the trail (123 m), dry all the way; it passes the foot of the cassava garden, where two far figures are bent over the rows. Along it: butterflies on a damp patch lift as she passes; a lizard runs up a buttress; small birds cross low; a sloth moves one arm high above; light shafts shift; leaves drift down; puddles in the hollows (F in a puddle is allowed: the cord barely wets). (2) At the yard, Vó at the marked tree. (3) E: put the baskets under the house beside the palm-leaf stack. Pause card.
 - **People's way / rushed way:** none; a walk. **Learned by doing:** none new (a breath after the wonder).
 - **Captions:**
   - VÓ ZEFA: "Well? Did she like her dinner?" LUANA: "She came down the plank for it." [no fact]
-  - VÓ ZEFA (hand on the yard tree's dark line): "Every tree here keeps last year on it." [B7.7]
+  - VÓ ZEFA (hand on the yard tree's dark line): "The trees here keep last year on them." [B7.7]
   - AIM: "Feed the cow. Learn what floats in what." [no fact]
   - Card: "THE DAYS PASS" / "DAY 7" [no fact]
 - **Minutes:** 0.5. **Done when:** `baskets.stored && player in zone yard`.
@@ -290,28 +295,30 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
 - **Minutes:** 1.0. **Done when:** `canoe.untied && tag.yellow && player.inCanoe`.
 
 #### 2.2 The cassava
-- **Place:** the low garden on the back slope; banana plants standing in water; 45 m of shallows to the dry yard slope. **Water:** 0.76. **Time:** morning.
-- **Leads:** Dona Marlene (Seu Anísio pulling roots beside her). **Feeling:** busy and useful.
-- **Objective:** ferry the roots to dry ground before the water reaches the rows.
-- **Steps:** (1) Paddle to the garden's edge. (2) E to load a basket; each press adds one, up to four; the canoe visibly sits lower each time. (3) F toward the yard: on the straight line the green tag stays dull (a root rise, too shallow); along the trail cut it lights. (4) Go round by the deep line, or go straight, and where green is dull hold E to step out: the canoe rises; wade and tow it across; E to climb back in. (5) E at the yard slope to unload to Vó. Four baskets delivered in one or two trips. (6) Marlene ties the green tag.
-- **People's way:** sound, then go round or step out and tow. **Rushed way:** paddle the straight line heaped: the canoe stops softly and leans. Marlene says one line; step out; it floats. Under 20 seconds. Nothing is lost.
+- **Place:** the low garden on its own rise beside the trail; banana plants standing in water at its foot; the 45 m swale between the garden and the dry yard slope. **Water:** 0.76 (the swale is 46 cm deep; the root rise on the straight line 16 cm). **Time:** morning.
+- **Leads:** Dona Marlene (Seu Anísio pulling roots beside her). Across the swale Vó Zefa waits on the yard slope, with Tico beside her painting a float. Four others on screen. **Feeling:** busy and useful.
+- **Objective:** ferry the roots across the swale to dry ground before the water reaches the rows.
+- **Steps:** (1) Paddle down the trail cut to the garden's edge. Water stands round the stems of the lowest row. (2) E to load a basket; each press adds one, up to four; the canoe visibly sits lower each time. After the first, Marlene ties the green tag on the cord. (3) F toward the yard: on the straight line the yellow tag lights but the green stays dull (the root rise, too shallow for a loaded canoe); along the trail cut, which bends round the root rise, green lights. (4) Go round by the deep line, or go straight, and where green is dull hold E to step out: the canoe rises; wade and tow it across; E to climb back in. (5) E at the yard slope to unload to Vó. Four baskets delivered in one or two trips.
+- **People's way:** sound, then go round or step out and tow. **Rushed way:** paddle the straight line heaped: the canoe stops softly on the root rise and leans. Marlene says one line; step out; it floats. Under 20 seconds. Nothing is lost.
 - **Learned by doing (test):** more in the boat, more boat in the water. Her own weight counts.
 - **Captions:**
   - DONA MARLENE: "The river is coming into the garden. What we do not pull today, it keeps." [S0311]
+  - DONA MARLENE: "Four baskets is four wades for me. It is one trip for a canoe." [no fact]
   - DONA MARLENE: "Load her. Then look how she sits." [no fact]
   - Prompt: "E: add a basket. Watch the canoe sit lower." [no fact]
+  - DONA MARLENE (tying the tag): "You and a load: one shin of water. That is your green." [U8]
   - SEU ANÍSIO: "More in the boat, more boat in the water. Sound before you go." [no fact]
   - DONA MARLENE (grounded): "Step out. It is only your knees. Without you she floats." [no fact]
   - Prompt: "Hold E to step out and tow." [no fact]
-  - DONA MARLENE: "You and a load: one shin of water. That is your green." [U8]
   - VÓ ZEFA: "Up here with them, where it stays dry a while yet." [no fact]
-- **Minutes:** 1.5. **Done when:** `roots.delivered >= 4 && tag.green`.
+  - TICO (hiding the float behind his back): "I am making a face. Do not look yet." [no fact]
+- **Minutes:** 1.5. **Done when:** `roots.delivered >= 4 && tag.green && others.onScreen <= 4`.
 
 #### 2.3 Cut and feed
 - **Place:** forest edge, the old bed, the choked mouth, the corral. **Water:** 0.76. **Time:** morning.
 - **Leads:** Raimundo, passing in the motor canoe with a load of roots; then she is trusted alone, in sight of the pasture. **Feeling:** quiet competence.
 - **Objective:** cut a canoe-load of leaves and get it to the rack.
-- **Steps:** (1) Hold E at three low leafy branches over the water; the canoe sits lower with each armful. (2) Paddle up the old bed. A fruit drops and a swirl rises to it; two grey backs roll far off at the bed's mouth; macaws cross overhead. (3) Slip between the fallen trunks into the lake. (4) Near the bank F: green lights. Tie up to the raft (E). (5) Carry three armfuls to the rack. The cow is already aboard, chewing; the calf lies on the planks; the plank from the bank is nearly level now.
+- **Steps:** (1) Hold E at three low leafy branches over the water; the canoe sits lower with each armful. (2) Paddle up the old bed. A fruit drops and a swirl rises to it; two grey backs roll far off at the bed's mouth; macaws cross overhead. (3) Slip between the fallen trunks into the lake. (4) Near the bank F: green lights. Tie up to the raft (E). (5) Carry three armfuls to the rack. The cow is already aboard, chewing; the calf lies on the planks; the plank from the bank is less steep now.
 - **People's way / rushed way:** none; a clean run that uses 2.2. **Learned by doing:** the daily job, once, in full.
 - **Captions:**
   - Prompt: "Hold E to cut leaves. Three armfuls fill the rack." [no fact]
@@ -330,33 +337,33 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
   - CLEIA (radio): "The boat turns round at the end of the river, filha. Not before. Two more weeks." [U3, U14]
   - LUANA: "And if the water comes into the house?" [no fact]
   - VÓ ZEFA: "Then we pile palm leaves on the floor and live on top of them. That is what these are for." [S0311]
-  - VÓ ZEFA: "Nobody here is waiting for the water to go away. We are waiting for it to be enough." [no fact]
+  - VÓ ZEFA: "I am not waiting for the water to go away, filha. I am waiting for it to be enough." [no fact]
   - AIM: "Find out what the corral needs under it." [no fact]
   - Card: "THE DAYS PASS" / "DAY 12" (or "DAY 15" if chapter 3 is not built) [no fact]
 - **Minutes:** 0.7. **Done when:** `radio.used`.
 
 ---
 
-### CHAPTER 3 - DAY 12: ROPES (EXTENSION, 4.5 min)
+### CHAPTER 3 - DAY 12: ROPES (EXTENSION, 3.9 min)
 
 #### 3.1 The short rope
-- **Place:** the floating house and its upstream tree. **Water:** 0.81. **Time:** late afternoon.
+- **Place:** the floating house and its upstream tree. **Water:** 0.815. **Time:** late afternoon.
 - **Leads:** Seu Anísio. **Feeling:** gentle tension (strength 1), then relief.
-- **Objective:** get a rope end to the tree and tie it so the corner comes up.
-- **Steps:** (1) Paddle up to the house. One deck corner sits low; water laps over two planks; a pot plant slides and Tico catches it. (2) Anísio, in his canoe at the tree, unties the short rope and hands her the end (E). (3) Paddle 8 m to the trunk against a slow current. (4) Two tie points: at the water (tight) or an arm's reach up with a slack loop. E to tie. (5) The corner rises; the dog walks back onto it.
-- **People's way:** high, with slack. **Rushed way:** tied at the water, tight: the corner stays low; one line; re-tie. If the player has not tied after 40 seconds, Anísio ties this one and hands her the second rope to do. The corner is up inside 60 seconds either way.
+- **Objective:** move the rope's tree end up the trunk so the corner comes up.
+- **Steps:** (1) Paddle up to the house. One deck corner sits low; water laps over two planks; a pot plant slides and Tico catches it. The 40-second count starts here, at the first sight of the low corner. (2) Anísio is on the deck at that corner, holding the rope's house end and ready to pay it out; he cannot be at the tree as well, and says so. (3) Paddle 8 m to the trunk against a slow current. E: untie the old knot, down at the water. (4) Two places to tie again: at the water (tight) or an arm's reach up with a slack loop. E to tie. (5) Anísio makes his end fast; the corner rises; the dog walks back onto it.
+- **People's way:** high, with slack. **Rushed way:** tied at the water, tight: the corner stays low; one line; re-tie. If the rope is not tied high 40 seconds after the first sight of the corner, Dona Marlene takes the deck end, Anísio paddles over and ties this one himself, and hands Luana the second rope to do with no clock. The corner is up inside 60 seconds either way.
 - **Learned by doing (twist of 1.3):** the same tie, from a canoe, on a house.
 - **Captions:**
   - TICO: "Pai! The corner is drinking!" [no fact]
   - SEU ANÍSIO: "The house went up. The knot did not. A short rope pulls the corner under." [U9]
-  - SEU ANÍSIO: "Take the end to the tree. Tie it high, leave it slack." [U9]
+  - SEU ANÍSIO: "I hold this end and give you slack. I cannot be at both ends of one rope. Take the canoe to the tree: tie it high, leave it slack." [U9]
   - SEU ANÍSIO (wrong tie): "That is tied for this morning. Tie it for tomorrow." [U9]
-  - SEU ANÍSIO: "There. We check every rope, every day the water climbs." [S0311]
+  - SEU ANÍSIO: "There. We check every rope as the water climbs." [S0311]
   - LUANA: "I know this one. Jandira made me tie a canoe to a root." [no fact]
-- **Minutes:** 1.7. **Done when:** `houseRope == "highSlack" && house.level`.
+- **Minutes:** 1.5. **Done when:** `houseRope == "highSlack" && house.level`.
 
 #### 3.2 Tico's game
-- **Place:** the floating house deck and the floating garden. **Water:** 0.81. **Time:** late afternoon.
+- **Place:** the floating house deck and the floating garden. **Water:** 0.815. **Time:** late afternoon.
 - **Leads:** Tico (he knows the game; Luana does not). Dona Marlene at the floating garden. **Feeling:** play.
 - **Objective:** land the weight beside Tico's floats.
 - **Steps:** (1) Tico, painting a face on a float, throws three floats out. (2) Aim, hold F to swing, release to throw; land the weight inside a float's ring. Three hits. (3) Two land soft: the slack sinks slowly (soft charm). One float sits over a sunken trunk: the weight jumps (hard charm). Throw again beside it. (4) Tico shows her the painted float.
@@ -369,13 +376,13 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
   - TICO: "It jumped! That is a log. A log is not the bottom, it just lies there pretending." [no fact]
   - SEU ANÍSIO: "He is right. Lands hard, throw again beside it." [no fact]
   - TICO: "This one is called Zé. He is not finished. You cannot have him yet." [no fact]
-- **Minutes:** 1.6. **Done when:** `toss.hits >= 3 && charm.soft && charm.hard`.
+- **Minutes:** 1.4. **Done when:** `toss.hits >= 3 && charm.soft && charm.hard`.
 
 #### 3.3 Lamp on the deck
-- **Place:** the floating house deck. **Water:** 0.81. **Time:** dusk.
-- **Leads:** Vó Zefa (come down for the evening), Raimundo arriving by motor canoe. **Feeling:** cosy.
+- **Place:** the floating house deck. **Water:** 0.815. **Time:** dusk.
+- **Leads:** Vó Zefa (come down for the evening); Jandira; Raimundo arriving by motor canoe. Three others on screen. **Feeling:** cosy.
 - **Objective:** sit down.
-- **Steps:** (1) Anísio lights the deck lamp (nobody holds it). (2) E to sit on the deck edge; bats begin over the water; frogs on the floating plants; the dog settles against her. (3) F off the deck, for the pleasure of it. (4) Tab is prompted once: the cork clip has moved up the cord since Day 7.
+- **Steps:** (1) Anísio lights the deck lamp and hangs it on its hook (nobody holds it), then goes indoors with Tico and Dona Marlene: the door shuts, the window glows, the dog stays out. (2) E to sit on the deck edge beside Vó and Jandira; bats begin over the water; frogs on the floating plants; the dog settles against her. Raimundo's canoe noses in. (3) F off the deck, for the pleasure of it. (4) Tab is prompted once: the cork clip has moved up the cord since Day 7.
 - **Captions:**
   - VÓ ZEFA: "The radio says they have turned round. Nine days." [U3, U14]
   - LUANA: "Nine days. And the corral?" [no fact]
@@ -384,28 +391,30 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
   - JANDIRA: "Listen to her. A week ago she wanted it to stop." [no fact]
   - AIM: "Find out what the corral needs under it." [no fact]
   - Card: "THE DAYS PASS" / "DAY 15" [no fact]
-- **Minutes:** 1.2. **Done when:** `player.sat && time == "dusk"`.
+- **Minutes:** 1.0. **Done when:** `player.sat && time == "dusk" && others.onScreen <= 4`.
 
 ---
 
 ### CHAPTER 4 - DAY 15: THE SHORTCUT (CORE, 3.5 min)
 
-#### 4.1 Too much, too straight
+#### 4.1 Too much, too quick
 - **Place:** the old bed, the lane, the high ground by the lake. **Water:** 0.84 (28 cm over the high ground; 15 cm over its sunken log). **Time:** late afternoon, full light.
 - **Leads:** Jandira, two canoe-lengths behind, back from school. **Feeling:** tension (strength 1), relief inside 30 seconds.
 - **Objective (Luana's own):** get two days of leaves to the corral in one trip.
-- **Steps:** (1) The canoe is already heaped; E adds the last two armfuls; it sits very low. (2) Where the lane leaves the bed: left is the long way through the fallen trunks; straight on is the high ground, which Jandira crosses empty every day. (3a) If the player sounds first (F ahead): green stays dull. Hold E to step out, tow across, climb in. Nothing lost. (3b) If the player paddles on: the canoe stops on the sunken log and leans; the top of the heap slides off and drifts away between the trunks. Jandira draws level and speaks. Hold E to step out: the water is at her shins; the canoe lifts; tow it over. (4) Either way Jandira has her throw twice at the log: hard, then soft beside it (hard charm, if not yet owned).
-- **People's way:** sound; step out; tow. **Rushed way:** go straight, heavy. Costs half a load of leaves and some pride. No harm; she is standing in shin-deep water beside her cousin in daylight.
+- **Steps:** (1) The canoe is already heaped; E adds the last two armfuls; it sits very low. (2) Ten metres up the old bed from the channel, the lane leaves it to the right. Straight on up the bed is the long way, through the trunk jam. Right is the short way, up the lane and over the high ground, which Jandira crossed empty this morning. (3a) If the player sounds first (F ahead): green stays dull. Hold E to step out, tow across, climb in. Nothing lost. (3b) If the player paddles on: the canoe stops on the sunken log and leans; the top of the heap slides off and drifts away between the trunks. Jandira draws level and speaks. Hold E to step out: the water is at her shins; the canoe lifts; tow it over. (4) Either way Jandira has her throw twice at the log: hard, then soft beside it (hard charm, if not yet owned).
+- **People's way:** sound; step out; tow. **Rushed way:** go the short way, heavy, unsounded. Costs half a load of leaves and some pride. No harm; she is standing in shin-deep water beside her cousin in daylight.
 - **Learned by doing (twist):** what floats one boat does not float another. A hard landing is a log.
 - **Captions:**
   - LUANA: "Two days of leaves in one go. Then tomorrow I do nothing." [no fact]
   - JANDIRA: "That is a lot of boat in the water." [no fact]
-  - Prompt: "The straight way crosses the high ground by the lake. Sound it, or go." [no fact]
+  - JANDIRA (only if chapter 3 is not built): "Do not drop it under you. Throw it. Find the bottom before the boat gets there." [no fact]
+  - Prompt (only if chapter 3 is not built): "Aim. Hold F to swing. Let go to throw the weight ahead." [no fact]
+  - Prompt: "The short way, to the right, crosses the high ground by the lake. Sound it, or go." [no fact]
   - JANDIRA (if she sounded): "Green is dry. So?" LUANA: "So I get out, and she floats." [no fact]
   - LUANA (if grounded): "No, no. My leaves!" [no fact]
   - JANDIRA (if grounded): "Step out. It is only your shins. The canoe is light without you." [no fact]
   - Prompt: "Hold E to step out and tow." [no fact]
-  - JANDIRA: "I cross here empty. You were not empty." [no fact]
+  - JANDIRA: "I crossed here empty this morning, taking Tio his coffee. You were not empty." [no fact]
   - JANDIRA: "It landed hard. That is the old log, not the ground. Throw again beside it." [U5]
 - **Minutes:** 1.4. **Done when:** `canoe.pastHump && (soundedFirst || recovered) && charm.hard`.
 
@@ -413,12 +422,12 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
 - **Place:** the corral at the lake bank. **Water:** 0.84. **Time:** late afternoon.
 - **Leads:** Raimundo (already there, with a bundle of his own). **Feeling:** small comfort, then a hard fact.
 - **Objective:** find out what the corral needs.
-- **Steps:** (1) Carry what is left to the rack; Raimundo adds his. The cow eats; the calf noses Luana's sleeve. (2) From her canoe, F beside the raft. (3) Raimundo and Jandira step aboard beside the cow: the raft sinks a hand. F again. (4) Raimundo ties the red tag.
+- **Steps:** (1) Carry what is left to the rack; Raimundo adds his. The cow eats; the calf noses Luana's sleeve. (2) From her canoe, F beside the raft. (3) Raimundo and Jandira step aboard beside the cow: the raft sinks two fingers (shown a little larger than life, no more). F again. (4) Raimundo ties the red tag.
 - **Learned by doing (teach):** the heavy thing needs the most water; and people on it count too.
 - **Captions:**
   - RAIMUNDO: "She eats. Nobody's cow goes hungry because a canoe sat down." [no fact]
   - RAIMUNDO: "Sound beside the raft. Now watch. Now sound again." [no fact]
-  - LUANA: "It went down. A whole hand." [no fact]
+  - LUANA: "It went down. Two fingers." [no fact]
   - RAIMUNDO: "Logs, planks, fence, a cow, a calf, and us: six hands of water, or she sits on the ground. That is your red." [U8]
   - RAIMUNDO: "And she is as wide as four canoes. She does not fit between the fallen trunks. She goes over the high ground, or she stays." [U5, U6]
 - **Minutes:** 1.0. **Done when:** `tag.red`.
@@ -431,7 +440,7 @@ Between chapters, the pause card: a fixed camera on the bank steps, three soft c
 - **Captions:**
   - LUANA: "Red is way up here. Three hands short." [no fact]
   - LUANA: "The boat comes in six days. Will it be enough?" [U3]
-  - RAIMUNDO: "Maybe. Some years it climbs and climbs. Some years it stops and sits." [U4]
+  - RAIMUNDO: "Maybe. Some years the flood is big. Some years less." [S0213]
   - LUANA: "Can we not pull her over? All of us?" RAIMUNDO: "The water carries her, or nothing does." [no fact]
   - RAIMUNDO: "She comes home when the water says. With you here, or after." [no fact]
   - LUANA: "So I fed her for nothing." JANDIRA: "You fed her so she ate. That is not nothing." [no fact]

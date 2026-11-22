@@ -6,18 +6,20 @@ import * as T from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { fxaa } from 'three/addons/tsl/display/FXAANode.js';
 import { godrays } from 'three/addons/tsl/display/GodraysNode.js';
+import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { U } from './uniforms';
 
 const t: any = T;
 
 export const P = {
-  bloomStrength: t.uniform(0.5),
-  saturation: t.uniform(1.14),
+  bloomStrength: t.uniform(0.38),
+  saturation: t.uniform(1.03),
   contrast: t.uniform(1.06),
   lift: t.uniform(new THREE.Color(0, 0, 0)),
   tint: t.uniform(new THREE.Color(1, 1, 1)),
   vignette: t.uniform(0.22),
   rays: t.uniform(0.5),
+  ao: t.uniform(1.0),
 };
 
 export type PostKind = 'lite' | 'mid' | 'full';
@@ -40,7 +42,10 @@ export function makePost(renderer: THREE.WebGPURenderer, scene: THREE.Scene, cam
     const sp = t.pass(scene, camera, { samples: 0 });
     const col = sp.getTextureNode('output');
     const bl = bloom(col, 1, 0.6, 0.85);
-    let lit = col.rgb.add(bl.rgb.mul(P.bloomStrength));
+    // soft contact shade where things meet (half resolution), tinted cool so shade is never dead black
+    let base = col.rgb;
+    if (rays) { const aoPass: any = ao(sp.getTextureNode('depth'), null as any, camera as any); aoPass.resolutionScale = 0.5; aoPass.radius.value = 0.9; aoPass.thickness.value = 1.2; const occ = aoPass.getTextureNode().r; base = base.mul(t.mix(t.vec3(0.36, 0.34, 0.5), t.vec3(1.0), occ.pow(P.ao.mul(1.6)))); }
+    let lit = base.add(bl.rgb.mul(P.bloomStrength));
     if (rays) {
       // light shafts: the sun's shadow map marched at half resolution
       const gr: any = godrays(sp.getTextureNode('depth'), camera as any, sun as any);
@@ -58,6 +63,6 @@ export function makePost(renderer: THREE.WebGPURenderer, scene: THREE.Scene, cam
   return {
     setScale(s: number) { full.sp.setResolutionScale(s); mid.sp.setResolutionScale(s); passLite.setResolutionScale(s); },
     render(k: PostKind) { (k === 'full' ? full.pipe : k === 'mid' ? mid.pipe : lite).render(); },
-    passes(k: PostKind) { return k === 'full' ? (withRays ? 11 : 9) : k === 'mid' ? 9 : 1; }, // full-screen passes, reported apart from the draw budget
+    passes(k: PostKind) { return k === 'full' ? (withRays ? 14 : 9) : k === 'mid' ? 9 : 1; }, // full-screen passes, reported apart from the draw budget
   };
 }

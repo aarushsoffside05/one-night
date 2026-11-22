@@ -13,11 +13,7 @@ import { PAL, SWATCHES, SWATCH_NAMES, hexToLinear } from './palette';
 import * as L from './layout';
 import { stream, WORLD_SEED, type Rng } from './rng';
 import { makeWorldMaterial } from './worldmat';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import canoeUrl from '../assets/canoe.glb?url';
-import paddleUrl from '../assets/paddle.glb?url';
-import floatHouseUrl from '../assets/floating_house.glb?url';
-import stiltAUrl from '../assets/stilt_house_a.glb?url';
+import { loadKit } from './assets';
 import type { Solid } from './player';
 import { makeKitGeometry } from './gfx';
 import { sim } from '../state';
@@ -43,39 +39,27 @@ interface Ctx { b: MeshBuilder; rb: MeshBuilder; gb: MeshBuilder; f: number; S: 
 // ---------------------------------------------------------------- Blender-made assets (src/assets/*.glb, built by tools/blender/*.py)
 // COLOR_0 is linear rgb with baked AO; COLOR_0 alpha = 0 marks glowing faces. Pivot at the base centre, +Y up, front +Z.
 export interface Asset { mesh: KitMesh; glow: KitMesh | null; }
-export async function loadAsset(url: string): Promise<Asset> {
-  const buf = await (await fetch(url)).arrayBuffer();
-  const gltf = await new GLTFLoader().parseAsync(buf, '');
-  gltf.scene.updateMatrixWorld(true);
+// loadKit gives one merged mesh (dat = linear rgb, wnd = colour alpha); split the glowing triangles (alpha 0) apart
+export async function loadAsset(name: string): Promise<Asset | null> {
+  const k = await loadKit(name);
+  if (!k) return null;
   const out: [number[], number[], number[]][] = [[[], [], []], [[], [], []]];
-  const v = new THREE.Vector3(), n = new THREE.Vector3(), nm = new THREE.Matrix3();
-  gltf.scene.traverse((o: THREE.Object3D) => {
-    const m = o as THREE.Mesh; if (!m.isMesh) return;
-    const g = m.geometry, P = g.getAttribute('position'), N = g.getAttribute('normal'), C = g.getAttribute('color'), I = g.index;
-    nm.getNormalMatrix(m.matrixWorld);
-    const cnt = I ? I.count : P.count;
-    for (let t = 0; t < cnt; t += 3) {
-      const ids = [0, 1, 2].map((k) => (I ? I.getX(t + k) : t + k));
-      const glow = C && C.itemSize === 4 && ids.every((i) => C.getW(i) < 0.5) ? 1 : 0, dst = out[glow];
-      for (const i of ids) {
-        v.fromBufferAttribute(P, i).applyMatrix4(m.matrixWorld); n.fromBufferAttribute(N, i).applyMatrix3(nm).normalize();
-        dst[0].push(v.x, v.y, v.z); dst[1].push(n.x, n.y, n.z);
-        if (C) dst[2].push(C.getX(i), C.getY(i), C.getZ(i)); else dst[2].push(0.5, 0.5, 0.5);
-      }
-    }
-  });
+  for (let t = 0; t < k.tris; t++) {
+    const w = k.wnd, glow = w && w[t * 3] < 0.5 && w[t * 3 + 1] < 0.5 && w[t * 3 + 2] < 0.5 ? 1 : 0, d = out[glow];
+    for (let i = t * 9; i < t * 9 + 9; i++) { d[0].push(k.pos[i]); d[1].push(k.nrm[i]); d[2].push(k.dat[i]); }
+  }
   const mk = (a: [number[], number[], number[]]): KitMesh => ({ pos: new Float32Array(a[0]), nrm: new Float32Array(a[1]), dat: new Float32Array(a[2]), tris: a[0].length / 9 });
   return { mesh: mk(out[0]), glow: out[1][0].length ? mk(out[1]) : null };
 }
-export const ASSET_URLS = { canoe: canoeUrl, paddle: paddleUrl, floatingHouse: floatHouseUrl, stiltHouseA: stiltAUrl };
-type Assets = Record<keyof typeof ASSET_URLS, Asset>;
+const ASSET_FILES = { canoe: 'canoe', paddle: 'paddle', floatingHouse: 'floating_house', stiltHouseA: 'stilt_house_a' } as const;
+type Assets = Record<keyof typeof ASSET_FILES, Asset | null>;
 export async function loadAssets(): Promise<Assets> {
-  const keys = Object.keys(ASSET_URLS) as (keyof typeof ASSET_URLS)[];
-  const got = await Promise.all(keys.map((k) => loadAsset(ASSET_URLS[k])));
+  const keys = Object.keys(ASSET_FILES) as (keyof typeof ASSET_FILES)[];
+  const got = await Promise.all(keys.map((k) => loadAsset(ASSET_FILES[k])));
   return Object.fromEntries(keys.map((k, i) => [k, got[i]])) as Assets;
 }
 // draw an asset in the builder's current frame
-function put(c: Ctx, a: Asset) { c.rb.m = c.b.m.slice(); c.rb.append(a.mesh); if (a.glow) { c.gb.m = c.b.m.slice(); c.gb.append(a.glow); } }
+function put(c: Ctx, a: Asset | null) { if (!a) return; c.rb.m = c.b.m.slice(); c.rb.append(a.mesh); if (a.glow) { c.gb.m = c.b.m.slice(); c.gb.append(a.glow); } }
 const CANOE_SHEER = 0.43; // canoe.glb: keel at y = 0, gunwale about here
 // the canoe with its gunwale at the frame's y = 0 (the old kit convention)
 function putCanoe(c: Ctx, k = 1) { c.b.push().scale(k).translate(0, -CANOE_SHEER, 0); put(c, c.A.canoe); c.b.pop(); }
@@ -783,9 +767,21 @@ function deckBoards(c: Ctx, rng: Rng, x0: number, x1: number, z0: number, z1: nu
   for (let i = 0; i < n; i++) bx(c.b, pick(rng, DECK), (x0 + x1) / 2 + jit(rng, 0.06), y - 0.1, z0 + (i + 0.5) * w, x1 - x0 + jit(rng, 0.12), 0.1, w - 0.025);
   walk(c, x0, z0, x1, z1, y);
 }
-function floatHouse(c: Ctx, name: string, o: Partial<HouseOpt>, main: boolean) {
+// run fn with the drawing thrown away: keeps its solids, walk rects, lamps and anchors (used when a Blender asset replaces the code-built look)
+function ghost(c: Ctx, fn: () => void) { const real = c.b, tmp = new MeshBuilder(); tmp.m = real.m.slice(); c.b = tmp; try { fn(); } finally { c.b = real; } }
+const FLOAT_HOUSE_BASE = 0.36;   // floating_house.glb: the waterline is this far above the pivot
+function floatHouse(c: Ctx, name: string, o: Partial<HouseOpt>, main: boolean, asset: Asset | null = null) {
+  if (asset) {
+    // the Blender-made house; the code-built twin below supplies the same solids / walk / anchors (same layout numbers)
+    c.b.push().translate(0, -FLOAT_HOUSE_BASE, 0); put(c, asset); c.b.pop();
+    const n = c.S.lamps.length; let y = 0;
+    ghost(c, () => { y = floatHouse(c, name, o, main, null); });
+    c.S.lamps.length = n; lampAt(c, -0.3, 1.85, 2.1);
+    if (main) anchor(c, 'floatLamp', -0.3, 1.85, 2.1);
+    return y;
+  }
   const b = c.b, rng = stream(c.seed, 'float:' + name);
-  const top = logRaft(b, rng, 10, 13), y = top + 0.1;
+  const top = logRaft(b, rng, 10, 13), y = top - 0.02 + 0.1;   // 0.48, as in floating_house.glb
   deckBoards(c, rng, -4.6, 4.6, -3.2, 3.2, y);
   place(c, -1.6, y, -0.9, 0, () => house(c, { name, w: 5, d: 3.4, wallH: 2.55, porch: 1.5, roof: 'side', pitch: 0.4, walls: [PAL.paintBlue, PAL.paintBlue, PAL.birdBlue], trim: PAL.paintCream, door: YELLOW, shutter: PAL.paintCream, roofPals: [PAL.paintRed, PAL.tinRust, PAL.paintRed, PAL.tinRust, PAL.tin], glow: true, legs: false, platform: false, rails: false, sag: 0.14, awning: undefined, ...o }));
   // the porch lamp
@@ -905,14 +901,23 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
   place(c, mx, FLOOR, mz, -HP, () => {
     const rng = R('main'), w = 7, d = 5, porch = 2.4, hw = w / 2, zf = d / 2 + porch, dx = w * 0.32 - hw;
     const sideZ = d / 2 + porch / 2;
-    house(c, { name: 'main', w, d, wallH: 2.5, porch, roof: 'front', pitch: 0.5, walls: [PAL.plankLight, PAL.plankPale, PAL.plankLight, PAL.plank], trim: PAL.paintTeal, door: PAL.paintRed, shutter: PAL.paintCream, roofPals: TIN, glow: true, legs: true, platform: true, sag: 0.16, hammock: true, lanternFront: true, awning: [YELLOW, PAL.paintCream],
-      railGaps: { front: [[dx + hw + 0.25 - 0.8, dx + hw + 0.25 + 0.8]], right: [[porch / 2 - 0.75, porch / 2 + 0.75]] } });
+    const glb = A.stiltHouseA, STILT_LEG = 3.6, STILT_STAIR = 2.8;   // stilt_house_a.glb: floor 3.6 m above its pivot, side steps 2.8 m down
+    const draw = () => { house(c, { name: 'main', w, d, wallH: 2.5, porch, roof: 'front', pitch: 0.5, walls: [PAL.plankLight, PAL.plankPale, PAL.plankLight, PAL.plank], trim: PAL.paintTeal, door: PAL.paintRed, shutter: PAL.paintCream, roofPals: TIN, glow: true, legs: true, platform: true, sag: 0.16, hammock: true, lanternFront: true, awning: [YELLOW, PAL.paintCream],
+      railGaps: { front: [[dx + hw + 0.25 - 0.8, dx + hw + 0.25 + 0.8]], right: [[porch / 2 - 0.75, porch / 2 + 0.75]] } }); };
+    if (glb) {
+      fb.push().translate(0, -STILT_LEG, 0); put(c, glb); fb.pop();
+      const n = S.lamps.length; ghost(c, draw); S.lamps.length = n; lampAt(c, -1.26, 1.97, 4.72);
+    } else draw();
     // plank walk from the porch out to the high ground, with lanterns, then steps down
     let z1 = zf + 3; for (let z = zf + 1; z < zf + 22; z += 0.25) { z1 = z; if (gl(c, dx, z + 1.6) >= -(FLOOR - L.HIGH_GROUND) - 0.12) break; }
     plankWalk(c, rng, dx, zf, z1, 0, 1.6, 2, 2);
     place(c, dx, 0, z1, 0, () => { const zl = stairs(c, -gl(c, 0, 1.4), 1.5, true); void zl; });
     // side steps from the porch down to the low ground
-    place(c, hw + 0.35, 0, sideZ, HP, () => stairs(c, -gl(c, 0, 3.2) - 0.02, 1.3, true));
+    if (glb) {
+      const w0 = S.walk.length; place(c, hw + 0.35, 0, sideZ, HP, () => ghost(c, () => stairs(c, STILT_STAIR, 1.3, true)));
+      // keep only the treads that stand clear of the ground
+      for (let i = S.walk.length - 1; i >= w0; i--) { const r = S.walk[i]; if (r.y < groundAt((r.x0 + r.x1) / 2, (r.z0 + r.z1) / 2) + 0.06) S.walk.splice(i, 1); }
+    } else place(c, hw + 0.35, 0, sideZ, HP, () => stairs(c, -gl(c, 0, 3.2) - 0.02, 1.3, true));
     // bundles of palm leaves stacked under the house
     const px = 0.6, pz = -0.4, pg = gl(c, px, pz);
     place(c, px, pg, pz, 0.15, () => {
@@ -922,8 +927,9 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
     });
     anchor(c, 'palmStack', px, pg, pz + 1.9, Math.PI);
     anchor(c, 'stiltDoor', dx, 0, d / 2 + 0.7, Math.PI); anchor(c, 'stiltPorch', 1.2, 0, d / 2 + porch * 0.5, 0);
-    basket(fb, -hw + 0.9, 0, d / 2 + 0.5, 1.0, PAL.fruit); place(c, 0.4, 0, d / 2 + 0.3, 0, () => bench(c, 1.3, PAL.paintTeal));
-    paddle(c, [-hw - 0.05, 0.02, d / 2 + 0.3], [-hw + 0.1, 1.6, d / 2 + 0.12], PAL.paintTeal);
+    if (glb) place(c, 0.4, 0, d / 2 + 0.3, 0, () => ghost(c, () => bench(c, 1.3, PAL.paintTeal)));
+    else { basket(fb, -hw + 0.9, 0, d / 2 + 0.5, 1.0, PAL.fruit); place(c, 0.4, 0, d / 2 + 0.3, 0, () => bench(c, 1.3, PAL.paintTeal)); }
+    paddle(c, [-hw + 0.75, 0.02, d / 2 + 0.3], [-hw + 0.9, 1.6, d / 2 + 0.12], PAL.paintTeal);
   });
   // two smaller painted houses on short stilts
   const bX = L.STILT_HOUSE[0] + 3, bZ = L.STILT_HOUSE[1] - 6;
@@ -1013,7 +1019,7 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
     S.solids.push({ x: px, z: pz, r: 0.2, top: g + 1.4 });
     S.ropes.push({ fromFloat: i, lx, ly, lz, tx: px + dx * 0.08, ty: g + 1.05, tz: pz + dz * 0.08 });
   };
-  const HOME = addFloat(L.FLOAT_HOME[0], L.FLOAT_HOME[1], HP, 0.32, (fc) => { floatHouse(fc, 'home', {}, true); });
+  const HOME = addFloat(L.FLOAT_HOME[0], L.FLOAT_HOME[1], HP, 0.32, (fc) => { floatHouse(fc, 'home', {}, true, A.floatingHouse); });
   moor(HOME, 4.35, 0.75, 2.95, 1, -0.12, 10.2); moor(HOME, -4.35, 0.75, 2.95, 1, 0.12, 10.2);
   const GARDEN = addFloat(L.FLOAT_HOME[0] - 2.5, L.FLOAT_HOME[1] - 12.5, HP + 0.18, 0.3, (fc) => { soilBoxRaft(fc, R('garden')); });
   moor(GARDEN, -2.2, 0.9, -1.5, 0.98, -0.2, 10.2);

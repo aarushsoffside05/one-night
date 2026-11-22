@@ -100,6 +100,9 @@ export class Engine {
     setUI({ loading: { stage: 'Unpacking the Blender pieces', f: 0.1 } });
     const crafted = new Map<number, [KitMesh, KitMesh]>();
     await Promise.all(TREE_KINDS.map(async (name, k) => { const [a, b] = await Promise.all([loadKit(`tree_${name}_0`), loadKit(`tree_${name}_1`)]); if (a && b) crafted.set(k, [a, b]); }));
+    // kinds without their own Blender piece yet borrow the nearest crafted one, so no code-built shard trees remain among the broadleaves
+    const borrow: Record<string, string> = { vineTower: 'tallPale', weeper: 'roundCrown', pioneer: 'lowSpread' };
+    TREE_KINDS.forEach((name, k) => { const from = borrow[name]; if (from && !crafted.has(k)) { const src = crafted.get(TREE_KINDS.indexOf(from as any)); if (src) crafted.set(k, src); } });
     this.canoeKit = await loadKit('canoe');
     this.build(cooked, crafted);
     if (params.water !== null) sim.water = sim.waterTarget = params.water;

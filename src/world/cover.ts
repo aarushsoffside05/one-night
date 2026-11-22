@@ -62,9 +62,9 @@ function buildMesh(kind: Kind): THREE.BufferGeometry {
   } else if (kind === 'flower') { // three small flowers on stems: spots of colour in the green
     const cols = [PAL.flowerPink, PAL.flowerYellow, PAL.flowerWhite, PAL.flowerPurple, PAL.flowerOrange];
     for (let i = 0; i < 3; i++) {
-      const x = (rng() - 0.5) * 0.9, z = (rng() - 0.5) * 0.9, h = 0.16 + rng() * 0.2;
+      const x = (rng() - 0.5) * 0.9, z = (rng() - 0.5) * 0.9, h = 0.12 + rng() * 0.14;
       b.set(PAL.fern, 0.6); b.push().translate(x, 0, z); b.frustum(3, 0.014, 0.012, h, false);
-      b.set(cols[Math.floor(rng() * cols.length)], 1); b.translate(0, h, 0); b.frustum(5, 0.02, 0.1, 0.05, true, true); b.set(PAL.flowerYellow, 1); b.translate(0, 0.045, 0); b.frustum(4, 0.035, 0.015, 0.03, true); b.pop();
+      b.set(cols[Math.floor(rng() * cols.length)], 1); b.translate(0, h, 0); b.frustum(6, 0.015, 0.065, 0.03, true, true); b.set(PAL.flowerYellow, 1); b.translate(0, 0.045, 0); b.frustum(4, 0.035, 0.015, 0.03, true); b.pop();
     }
   }
   else if (kind === 'litter') { // fallen leaves: a few flat tilted plates, and one root hump
