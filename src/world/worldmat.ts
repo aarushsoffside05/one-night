@@ -87,7 +87,7 @@ export function makeWorldMaterial(tx: WorldTextures, opts: WorldMatOpts = {}): T
     const wob = t.sin(wp.x.mul(1.7)).mul(t.sin(wp.z.mul(1.3))).mul(0.12);
     const below = t.step(wp.y, U.markY.add(wob));
     const lip = t.step(wp.y, U.markY.add(wob)).mul(t.step(U.markY.add(wob).sub(0.3), wp.y));
-    const stain = t.mix(1.0, 0.8, below).mul(t.mix(1.0, 0.6, lip));
+    const stain = t.mix(1.0, 0.86, below).mul(t.mix(1.0, 0.62, lip));
     col.mulAssign(t.mix(1.0, stain, t.max(isBark, isPost).mul(opts.rgb ? 0.0 : 1.0)));
     // wet band just above the water, then the drowned tint below it
     const wet = t.smoothstep(0.75, 0.0, d).mul(t.step(0.0, d));

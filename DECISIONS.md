@@ -40,3 +40,9 @@ TypeScript 5.9 rather than the new 7.0: the tools around it are proven on 5.x.
 - This bends two lines of the brief on purpose, because the references he chose do: the ground is not faceted (so "85% of world faces faceted" now holds for objects, not land), and colour is a little richer than "flat". Objects stay faceted and palette-coloured.
 - The river keeps a silty green-gold (the real place), the cut-off lake is clearer and greener.
 - Limits hit: the run's usage limit stopped three helpers mid-job (tree kit, buildings, plan writer). Tree kit was finished by the studio head; buildings and the plan are being restarted.
+
+## Aarush, 22 Nov (second round)
+- **First person.** He asked for it, so the camera is now the kid's eyes on foot and from the canoe seat (the brief said third person; his word wins). The third-person camera code stays behind `sim.firstPerson = false`.
+- **Blender for hero assets.** He asked for the brief's Blender route. `bpy` 5.0.1 is installed (Python 3.11, outside the repository); scripts live in `tools/blender/`, exported `.glb` files (vertex colours only) in `src/assets/`. The earlier "made by code, not Blender" decision is reversed for hero pieces.
+- **Meshlets.** The technique he pointed at is three.js r187's meshlet pipeline (`MeshletDrawingPipeline`, Nanite-style virtual geometry). It is wired behind `?meshlets=1` (WebGPU only). NOT verified: in this machine's software GPU the first frame did not finish within three minutes, so it is off by default until it is seen running on a real graphics card.
+- **Water** is now a smooth surface with fine ripple normals, glints and shore foam (the faceted water read as ugly triangles).

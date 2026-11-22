@@ -16,7 +16,7 @@ export function bindInput(el: HTMLElement) {
   const kd = (e: KeyboardEvent) => { keys.add(e.code); if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault(); };
   const ku = (e: KeyboardEvent) => keys.delete(e.code);
   let down = false;
-  const pd = (e: PointerEvent) => { down = true; el.setPointerCapture?.(e.pointerId); };
+  const pd = (e: PointerEvent) => { down = true; if (sim.firstPerson && sim.mode !== 'title' && e.pointerType === 'mouse' && document.pointerLockElement !== el) el.requestPointerLock?.(); else el.setPointerCapture?.(e.pointerId); };
   const pu = () => { down = false; };
   const pm = (e: PointerEvent) => { if (down || document.pointerLockElement === el) { dragDX += e.movementX; dragDY += e.movementY; } };
   const wh = (e: WheelEvent) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) dragDX -= e.deltaX * 0.6; else wheel += e.deltaY; e.preventDefault(); };
@@ -102,7 +102,7 @@ export class Player {
       }
     }
     // look: drag, two-finger swipe, or arrow keys
-    if (dragDX || dragDY) { this.camYaw -= dragDX * 0.0042; this.camPitch = Math.min(1.1, Math.max(-0.35, this.camPitch + dragDY * 0.003)); lastLook = sim.time; dragDX = dragDY = 0; }
+    if (dragDX || dragDY) { this.camYaw -= dragDX * 0.0042; this.camPitch = Math.min(1.1, Math.max(sim.firstPerson ? -1.0 : -0.35, this.camPitch + dragDY * 0.003)); lastLook = sim.time; dragDX = dragDY = 0; }
     if (wheel) { this.camDist = Math.min(9, Math.max(3.2, this.camDist + wheel * 0.004)); wheel = 0; }
     const wyHere = waterSurfaceAt(this.pos.x, this.pos.z, sim.water);
     const ground = w.groundAt(this.pos.x, this.pos.z);
@@ -167,7 +167,7 @@ export class Player {
       f.pos.set(this.pos.x - Math.sin(this.yaw) * 0.55, this.pos.y - 0.36, this.pos.z - Math.cos(this.yaw) * 0.55); f.yaw = this.yaw;
       // drift the camera behind the boat
       let d = this.canoeYaw - this.camYaw; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2;
-      if (sim.time - lastLook > 1.2) this.camYaw += d * Math.min(1, dt * 1.6);
+      if (sim.time - lastLook > (sim.firstPerson ? 2.5 : 1.2)) this.camYaw += d * Math.min(1, dt * (sim.firstPerson ? 0.8 : 1.6));
     }
     if (this.mode === 'foot' && this.speed > 0.5 && sim.time - lastLook > 2.0 && !bot) {
       let d = this.yaw - this.camYaw; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2;
@@ -185,6 +185,19 @@ export class Player {
       camera.position.lerp(this.camOverride.pos, Math.min(1, dt * 2.5)); this.target.lerp(this.camOverride.look, Math.min(1, dt * 3)); camera.lookAt(this.target);
       return;
     }
+    if (sim.firstPerson) {
+      // eyes of the kid: on foot at head height, in the canoe from the seat with the bow in view
+      const eye = this.mode === 'canoe' ? 0.62 : 1.42;
+      const bobY = this.mode === 'foot' && !sim.reduceMotion ? Math.sin(this.fig.phase * 2) * 0.025 * Math.min(1, this.speed / 3) : 0;
+      const back = this.mode === 'canoe' ? 0.7 : 0;
+      camera.position.set(this.pos.x - Math.sin(this.yaw) * back, this.pos.y + eye + bobY, this.pos.z - Math.cos(this.yaw) * back);
+      const pitch = Math.max(-1.2, Math.min(1.2, -this.camPitch + 0.12));
+      const cpp = Math.cos(pitch);
+      camera.lookAt(camera.position.x + Math.sin(this.camYaw) * cpp, camera.position.y + Math.sin(pitch), camera.position.z + Math.cos(this.camYaw) * cpp);
+      this.fig.visible = false;
+      return;
+    }
+    this.fig.visible = true;
     const head = this.mode === 'canoe' ? 0.95 : 1.32;
     this.want.set(this.pos.x, this.pos.y + head, this.pos.z);
     this.target.lerp(this.want, Math.min(1, dt * 12));

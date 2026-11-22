@@ -5,10 +5,10 @@
 export const SWATCHES = {
   // ground worked by water
   mudDark: '#5a3c26', mud: '#7c5432', mudLight: '#a87646', silt: '#cba268', siltPale: '#e4c690',
-  sand: '#eed49c', sandLight: '#f9e9ba', litterDark: '#6c4628', litter: '#93602f', litterWarm: '#bb7e38',
-  earth: '#ad733d', earthLight: '#d39d5a', mossGround: '#5f9336', grassGround: '#88c842',
+  sand: '#eed49c', sandLight: '#f9e9ba', litterDark: '#6e5230', litter: '#8f6e3c', litterWarm: '#aa8842',
+  earth: '#b98a52', earthLight: '#dcb87e', mossGround: '#5f9336', grassGround: '#88c842',
   // bark and wood in the forest
-  barkDark: '#4c382d', bark: '#725441', barkLight: '#9a7b5e', barkPale: '#d0c09e', barkRed: '#90553a',
+  barkDark: '#5c4638', bark: '#836450', barkLight: '#a88c6c', barkPale: '#d0c09e', barkRed: '#9c6a4c',
   rootDark: '#3f2e24', deadwood: '#a39480', vine: '#55802e',
   // leaves
   leafDeep: '#1c5c3c', leafDark: '#297c3e', leaf: '#45a33d', leafMid: '#6dbf3f', leafLight: '#9cdb4b',

@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three/webgpu';
 import { Engine } from '../world/engine';
 import { params, sim } from '../state';
+import { MeshletDrawingPipeline } from 'three/addons/pipelines/MeshletDrawingPipeline.js';
 
 extend(THREE as any);
 
@@ -47,6 +48,8 @@ export function Stage() {
       style={{ position: 'fixed', inset: 0 }}
       gl={async (props: any) => {
         const renderer = new THREE.WebGPURenderer({ canvas: props.canvas as HTMLCanvasElement, antialias: false, forceWebGL: params.forceWebGL, powerPreference: 'high-performance' } as any);
+        // Meshlets (virtual geometry): the GPU culls clusters and picks their detail. WebGPU only.
+        if (params.meshlets && (navigator as any).gpu && !params.forceWebGL) { try { (renderer as any).drawingPipeline = new (MeshletDrawingPipeline as any)({ occlusionCulling: false }); sim.meshlets = true; } catch (e) { console.warn('[one-night] meshlets unavailable', e); } }
         await renderer.init();
         const isGPU = (renderer.backend as any).isWebGPUBackend === true;
         sim.backend = isGPU ? 'webgpu' : 'webgl2';

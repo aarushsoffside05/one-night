@@ -12,6 +12,7 @@ export const params = {
   level: (q.get('level') as Level | null),
   freeze: q.get('freeze') === '1' || q.has('shot'),
   forceWebGL: q.get('webgl') === '1',
+  meshlets: q.get('meshlets') === '1',
   shot: q.has('shot'),
   auto: q.get('auto'),            // 'roam' | 'story' : skip the title (tests)
   water: q.has('water') ? Number(q.get('water')) : null,
@@ -37,6 +38,8 @@ export const sim = {
   activeLevel: 'high' as Exclude<Level, 'auto'>,
   renderScale: 0.7,
   ready: false,
+  firstPerson: true,
+  meshlets: false,       // Aarush, 22 Nov: first person
 };
 
 export interface Caption { who: string; text: string; id: number; }

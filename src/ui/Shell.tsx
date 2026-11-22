@@ -117,7 +117,7 @@ export function Shell() {
           {ui.prompt && <div className="prompt">{ui.prompt}</div>}
           {ui.caption && <div className="caption" key={ui.caption.id}>{ui.caption.who && <b>{ui.caption.who}</b>}{ui.caption.text}</div>}
           {ui.mode === 'roam' && <RoamBar />}
-          {ui.mode === 'roam' && <div className="keys">W A S D move · drag or two-finger swipe to look · Shift run · the canoe takes over in deep water</div>}
+          {ui.mode === 'roam' && <div className="keys">W A S D move · click, then move the mouse to look (Esc frees it) · two-finger swipe also looks · Shift run · the canoe takes over in deep water</div>}
           {ui.toast && <div className="toast">{ui.toast}</div>}
         </>
       )}
