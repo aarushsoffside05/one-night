@@ -21,6 +21,7 @@ import { People, type Look } from './people';
 import { Player, bindInput, type Solid } from './player';
 import { buildCanoe } from './props';
 import { Quality, markLoading } from './quality';
+import { Particles } from './particles';
 import { Bench } from './bench';
 import { bus } from '../state';
 import * as L from './layout';
@@ -44,6 +45,7 @@ export class Engine {
     const q = this.quality, d = q.def, k = q.detail;
     this.detail.lod0 = d.lod0; this.detail.lod1 = d.lod1 * (0.6 + 0.4 * k); this.detail.max = d.max * k; this.detail.density = d.density * k;
     if (this.cover) this.cover.density.value = d.cover * k;
+    if (this.particles) this.particles.amount.value = d.particles * k;
     sim.renderScale = q.scale; this.post?.setScale(q.scale);
     const shadows = d.shadow > 0;
     this.sun.shadow.intensity = shadows ? 1 : 0; this.sunShadowOn = shadows;
@@ -52,6 +54,7 @@ export class Engine {
   post!: Post;
   cover!: Cover;
   people!: People;
+  particles!: Particles;
   player!: Player;
   solids: Solid[] = [];
   lampSpot = new THREE.SpotLight(0xffc27a, 0, 26, 0.95, 0.6, 1.4);
@@ -96,6 +99,7 @@ export class Engine {
     this.updateEnv(0);
     setUI({ loading: { stage: 'Warming the light', f: 0.6 } });
     this.cover.update(r, this.camera); // run every compute pass once before play
+    this.particles.update(r, this.camera, 720);
     this.quality.onChange = () => this.applyQuality();
     this.quality.set(params.level ?? 'auto');
     this.bench = new Bench((x, z) => this.groundAt(x, z), () => this.counts, () => ({ postPasses: this.post.passes(this.quality.def.post), trees: this.cooked?.forest.count, coverInstances: this.cover.instances, coverOnGPU: this.cover.useCompute }));
@@ -117,13 +121,17 @@ export class Engine {
     const scene = this.scene;
     this.tex = makeWorldTextures(c.forest.open);
     this.worldMat = makeWorldMaterial(this.tex);
-    const ground = new THREE.Mesh(makeKitGeometry(c.terrain.mesh), this.worldMat);
+    const ground = new THREE.Mesh(makeKitGeometry(c.terrain.mesh), makeWorldMaterial(this.tex, { rgb: true }));
     ground.receiveShadow = true; ground.frustumCulled = false; ground.name = 'ground';
     scene.add(ground);
     this.forest = new Forest(c.forest, c.treeKit, this.worldMat);
     scene.add(this.forest.group);
     scene.add(makeFarRings(WORLD_SEED, this.worldMat));
-    this.cover = new Cover(this.tex, makeLandMaps(c.terrain.grid, c.terrain.zone), sim.backend === 'webgpu' && !params.off.includes('compute'));
+    const land = makeLandMaps(c.terrain.grid, c.terrain.zone);
+    const gpu = sim.backend === 'webgpu' && !params.off.includes('compute');
+    this.cover = new Cover(this.tex, land, gpu);
+    this.particles = new Particles(land, gpu);
+    if (!params.off.includes('particles')) scene.add(this.particles.group);
     if (!params.off.includes('cover')) scene.add(this.cover.group);
     this.water = makeWater(); scene.add(this.water);
     this.sky = makeSky(); scene.add(this.sky);
@@ -227,6 +235,7 @@ export class Engine {
     this.updateEnv(dt);
     this.forest.update(this.camera, this.focus, this.detail, U.shadowR.value as number);
     if (!params.off.includes('cover')) this.cover.update(r, this.camera);
+    if (!params.off.includes('particles')) this.particles.update(r, this.camera, r.domElement.height * sim.renderScale);
     r.info.reset();
     if (params.shot) {
       // Headless software WebGPU dies when the canvas texture is acquired, so with ?shot=1

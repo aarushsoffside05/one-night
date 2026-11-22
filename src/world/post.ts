@@ -11,8 +11,8 @@ import { U } from './uniforms';
 const t: any = T;
 
 export const P = {
-  bloomStrength: t.uniform(0.35),
-  saturation: t.uniform(1.06),
+  bloomStrength: t.uniform(0.5),
+  saturation: t.uniform(1.14),
   contrast: t.uniform(1.06),
   lift: t.uniform(new THREE.Color(0, 0, 0)),
   tint: t.uniform(new THREE.Color(1, 1, 1)),
@@ -39,7 +39,7 @@ export function makePost(renderer: THREE.WebGPURenderer, scene: THREE.Scene, cam
     const pipe = new THREE.RenderPipeline(renderer);
     const sp = t.pass(scene, camera, { samples: 0 });
     const col = sp.getTextureNode('output');
-    const bl = bloom(col, 1, 0.55, 0.92);
+    const bl = bloom(col, 1, 0.6, 0.85);
     let lit = col.rgb.add(bl.rgb.mul(P.bloomStrength));
     if (rays) {
       // light shafts: the sun's shadow map marched at half resolution

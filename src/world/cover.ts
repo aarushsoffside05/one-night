@@ -29,12 +29,13 @@ export function makeLandMaps(grid: Float32Array, zone: Uint8Array): LandMaps {
 }
 const landUV = (xz: any) => xz.add(L.GRID_HALF).div(L.GRID_HALF * 2).mul(L.GRID_N / (L.GRID_N + 1)).add(0.5 / (L.GRID_N + 1));
 
-type Kind = 'fern' | 'grass' | 'litter' | 'drift' | 'reed' | 'pad' | 'sprout';
+type Kind = 'fern' | 'grass' | 'litter' | 'drift' | 'reed' | 'pad' | 'sprout' | 'flower';
 interface KindDef { kind: Kind; cell: number; w: number; wGL: number; seed: number; }
 const KINDS: KindDef[] = [
   { kind: 'fern', cell: 2.1, w: 72, wGL: 40, seed: 11 },
-  { kind: 'sprout', cell: 1.7, w: 80, wGL: 40, seed: 23 },
-  { kind: 'grass', cell: 1.15, w: 104, wGL: 52, seed: 37 },
+  { kind: 'sprout', cell: 2.6, w: 56, wGL: 30, seed: 23 },
+  { kind: 'grass', cell: 0.85, w: 128, wGL: 56, seed: 37 },
+  { kind: 'flower', cell: 2.3, w: 64, wGL: 32, seed: 91 },
   { kind: 'litter', cell: 1.9, w: 72, wGL: 40, seed: 41 },
   { kind: 'drift', cell: 3.4, w: 48, wGL: 28, seed: 53 },
   { kind: 'reed', cell: 1.3, w: 96, wGL: 48, seed: 67 },
@@ -48,7 +49,16 @@ function buildMesh(kind: Kind): THREE.BufferGeometry {
   else if (kind === 'sprout') { // a seedling: thin stem, two or three big leaves
     b.set(PAL.vine, 0.5); b.frustum(3, 0.045, 0.04, 0.55, false);
     for (let i = 0; i < 3; i++) { b.push().translate(0, 0.5, 0); blade(i * 2.1 + rng(), -0.25 + rng() * 0.3, 0.5 + rng() * 0.2, 0.3, i ? PAL.seedling : PAL.leafLight, 0.25); b.pop(); }
-  } else if (kind === 'grass') { for (let i = 0; i < 4; i++) { b.push().translate((rng() - 0.5) * 0.3, 0, (rng() - 0.5) * 0.3); blade(rng() * 6.28, -1.25 + rng() * 0.3, 0.5 + rng() * 0.35, 0.13, i % 2 ? PAL.grassGround : PAL.leafYellow, 0.2); b.pop(); } }
+  } else if (kind === 'grass') { // a soft tuft: a fan of blades, lighter at the tips
+    for (let i = 0; i < 10; i++) { b.push().translate((rng() - 0.5) * 0.7, 0, (rng() - 0.5) * 0.7).rotY(rng() * 6.28).rotX(-1.4 + rng() * 0.5); b.set([PAL.grassGround, PAL.leafLight, PAL.leafMid, PAL.leafYellow][i % 4], 1, rng()); const l = 0.22 + rng() * 0.3, w = 0.07; b.tri([-w, 0, 0], [w, 0, 0], [0, 0.02, l]); b.pop(); }
+  } else if (kind === 'flower') { // three small flowers on stems: spots of colour in the green
+    const cols = [PAL.flowerPink, PAL.flowerYellow, PAL.flowerWhite, PAL.flowerPurple, PAL.flowerOrange];
+    for (let i = 0; i < 3; i++) {
+      const x = (rng() - 0.5) * 0.9, z = (rng() - 0.5) * 0.9, h = 0.16 + rng() * 0.2;
+      b.set(PAL.fern, 0.6); b.push().translate(x, 0, z); b.frustum(3, 0.014, 0.012, h, false);
+      b.set(cols[Math.floor(rng() * cols.length)], 1); b.translate(0, h, 0); b.frustum(5, 0.02, 0.1, 0.05, true, true); b.set(PAL.flowerYellow, 1); b.translate(0, 0.045, 0); b.frustum(4, 0.035, 0.015, 0.03, true); b.pop();
+    }
+  }
   else if (kind === 'litter') { // fallen leaves: a few flat tilted plates, and one root hump
     for (let i = 0; i < 4; i++) { b.push().translate((rng() - 0.5) * 1.1, 0.03 + rng() * 0.03, (rng() - 0.5) * 1.1).rotY(rng() * 6.28).rotX((rng() - 0.5) * 0.3); b.set([PAL.litterWarm, PAL.fruit, PAL.litter, PAL.barkRed][i], 0); b.tri([0, 0, -0.2], [0, 0, 0.22], [0.14, 0, 0]); b.tri([0, 0, -0.2], [-0.14, 0, 0], [0, 0, 0.22]); b.pop(); }
     b.set(PAL.rootDark, 0); b.push().translate(0.2, -0.05, 0).rotY(rng() * 3); b.limb([-0.6, 0, 0], [0.6, 0.02, 0.1], 0.1, 0.07, 4, true); b.pop();
@@ -101,7 +111,8 @@ export class Cover {
         let ok: any, y: any = h, sc: any = size.mul(0.7).add(0.65);
         if (def.kind === 'fern') ok = dry.mul(offTrail).mul(t.step(zn.g, 0.3)).mul(t.step(zn.b, 0.25)).mul(t.step(zn.a, 0.2)).mul(t.step(pick, t.mix(0.75, 0.3, open)));
         else if (def.kind === 'sprout') ok = dry.mul(offTrail).mul(t.step(zn.b, 0.35)).mul(t.step(zn.a, 0.2)).mul(t.step(pick, t.mix(0.6, 0.2, zn.g)));
-        else if (def.kind === 'grass') ok = dry.mul(offTrail).mul(t.step(zn.a, 0.3)).mul(t.step(pick, t.max(zn.g.mul(0.75), open.mul(0.75)).mul(t.float(1.0).sub(zn.b.mul(0.8)))));
+        else if (def.kind === 'grass') ok = dry.mul(offTrail).mul(t.step(zn.a, 0.3)).mul(t.step(pick, t.max(zn.g.mul(0.92), open.mul(0.85).add(0.28)).mul(t.float(1.0).sub(zn.b.mul(0.8)))));
+        else if (def.kind === 'flower') ok = dry.mul(offTrail).mul(t.step(zn.a, 0.3)).mul(t.step(zn.b, 0.3)).mul(t.step(pick, t.max(zn.g.mul(0.6), open.mul(0.5).add(0.14))));
         else if (def.kind === 'litter') ok = dry.mul(t.step(zn.b, 0.3)).mul(t.step(zn.a, 0.2)).mul(t.step(zn.g, 0.5)).mul(t.step(pick, 0.7));
         else if (def.kind === 'drift') ok = dry.mul(t.step(0.08, zn.b)).mul(t.step(zn.b, 0.75)).mul(t.step(pick, 0.5)).add(dry.mul(t.step(zn.b, 0.08)).mul(t.step(pick, 0.07))).min(1.0);
         else if (def.kind === 'reed') { ok = t.step(h.sub(wy).abs(), 0.42).mul(t.step(zn.a, 0.5)).mul(offTrail).mul(t.step(pick, 0.8)); y = t.max(h, wy.sub(0.25)); sc = size.mul(0.6).add(0.8); }

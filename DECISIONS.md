@@ -33,3 +33,10 @@ TypeScript 5.9 rather than the new 7.0: the tools around it are proven on 5.x.
 
 ## Studio
 - Helpers used so far: Story and play (wrote `GAME-PLAN.md`, `UNSOURCED.md`); a reader that turned the pinned three.js release into an API cheat sheet (kept outside the repository).
+
+## Look reset (Aarush, 22 Nov)
+- Aarush looked at the build and said it was ugly and "nothing like the Eos low-poly references". He pointed at the Junior library's biome sheet as the target: lush, saturated, glowing, "magical, fun, not dead", while keeping the Amazon truth and the studio workflow.
+- What changed because of it: the ground is now smooth with softly blended colour (no per-triangle checker); crowns are leafy clusters with lighter tops and cool undersides; the palette is brighter; sun and sky light are stronger with coloured shade; grass tufts and flowers carpet the open ground; the sky has streak clouds and a sun halo; bloom is stronger.
+- This bends two lines of the brief on purpose, because the references he chose do: the ground is not faceted (so "85% of world faces faceted" now holds for objects, not land), and colour is a little richer than "flat". Objects stay faceted and palette-coloured.
+- The river keeps a silty green-gold (the real place), the cut-off lake is clearer and greener.
+- Limits hit: the run's usage limit stopped three helpers mid-job (tree kit, buildings, plan writer). Tree kit was finished by the studio head; buildings and the plan are being restarted.

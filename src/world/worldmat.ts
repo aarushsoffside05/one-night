@@ -37,6 +37,7 @@ export function writeAtlas(tx: WorldTextures, sat: number, tintAmt: number, tint
     d[i * 4 + 2] = Math.round(255 * toSRGB(Math.min(1, Math.max(0, bl)))); d[i * 4 + 3] = em ? 255 : 0;
   }
   tx.atlas.needsUpdate = true;
+  U.sat.value = sat; U.tintAmt.value = tintAmt; (U.tintCol.value as THREE.Color).setRGB(tint[0], tint[1], tint[2]);
 }
 
 // water surface height at a world xz (TSL): the lake keeps its own level when cut off
@@ -57,20 +58,27 @@ export const windOffset = (p: any, weight: any) => {
   return t.vec3(sx, sy, sz).mul(weight).mul(U.wind);
 };
 
-export interface WorldMatOpts { wind?: boolean; flood?: boolean; }
+export interface WorldMatOpts { wind?: boolean; flood?: boolean; rgb?: boolean; }
 
 export function makeWorldMaterial(tx: WorldTextures, opts: WorldMatOpts = {}): THREE.MeshLambertNodeMaterial {
   const m = new THREE.MeshLambertNodeMaterial();
   const dat = t.attribute('dat', 'vec3');
   const pal = dat.x.add(0.5).floor();
   const palUV = t.vec2(pal.mod(ATLAS_SIZE).add(0.5).div(ATLAS_SIZE), pal.div(ATLAS_SIZE).floor().add(0.5).div(ATLAS_SIZE));
-  const sw = t.texture(tx.atlas, palUV);
+  const swTex = t.texture(tx.atlas, palUV);
+  // the ground carries blended colour per vertex instead of a swatch id; it gets the same time-of-day tint
+  const lum = dat.dot(t.vec3(0.2126, 0.7152, 0.0722));
+  const rgbT = t.mix(t.mix(t.vec3(lum), dat, U.sat), U.tintCol.mul(lum), U.tintAmt);
+  const sw = opts.rgb ? t.vec4(rgbT, 0.0) : swTex;
   const wp = t.positionWorld;
 
-  if (opts.wind !== false) m.positionNode = t.positionLocal.add(windOffset(t.positionLocal, dat.y));
+  if (opts.wind !== false && !opts.rgb) m.positionNode = t.positionLocal.add(windOffset(t.positionLocal, dat.y));
 
   m.colorNode = t.Fn(() => {
     const col = sw.rgb.toVar();
+    // coloured facing: tops lean warm and light, undersides cool and deep (never black)
+    const ny = t.normalWorld.y;
+    col.mulAssign(t.mix(t.vec3(0.66, 0.76, 1.0), t.vec3(1.1, 1.05, 0.9), t.smoothstep(-0.7, 0.9, ny)));
     const wy = waterYAt(wp.xz);
     const d = wp.y.sub(wy);
     // last year's flood line on bark and posts: darker below, a crisp darker lip at the mark
@@ -80,7 +88,7 @@ export function makeWorldMaterial(tx: WorldTextures, opts: WorldMatOpts = {}): T
     const below = t.step(wp.y, U.markY.add(wob));
     const lip = t.step(wp.y, U.markY.add(wob)).mul(t.step(U.markY.add(wob).sub(0.3), wp.y));
     const stain = t.mix(1.0, 0.8, below).mul(t.mix(1.0, 0.6, lip));
-    col.mulAssign(t.mix(1.0, stain, t.max(isBark, isPost)));
+    col.mulAssign(t.mix(1.0, stain, t.max(isBark, isPost).mul(opts.rgb ? 0.0 : 1.0)));
     // wet band just above the water, then the drowned tint below it
     const wet = t.smoothstep(0.75, 0.0, d).mul(t.step(0.0, d));
     col.mulAssign(t.mix(1.0, 0.58, wet));
@@ -89,7 +97,8 @@ export function makeWorldMaterial(tx: WorldTextures, opts: WorldMatOpts = {}): T
     return col;
   })();
 
-  m.emissiveNode = sw.rgb.mul(sw.a).mul(U.glow);
+  // leaves let a little sun through: a soft lift on anything that sways
+  m.emissiveNode = sw.rgb.mul(sw.a).mul(U.glow).add(sw.rgb.mul(U.sunCol).mul(opts.rgb ? 0.0 : dat.y.min(1.0).mul(0.16)));
 
   // soft sky shade: a baked "how open is it here" map, fading out above the canopy
   const open = t.max(openAt(tx, wp.xz), t.smoothstep(9.0, 20.0, wp.y.sub(L.FOREST_FLOOR)));

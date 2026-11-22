@@ -150,6 +150,36 @@ export class MeshBuilder {
     }
     return this;
   }
+  // a leafy cluster: a jittered ball whose every face pushes out a small leaf point.
+  // Reads as a mass of leaves, with a broken, leafy edge instead of a smooth gem.
+  leafBall(rng: Rng, rx: number, ry: number, rz: number, detail: 0 | 1, spike: number, pals: [number, number, number], flatBottom = 0.3) {
+    const t = (1 + Math.sqrt(5)) / 2;
+    let verts: V3[] = [[-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0], [0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t], [t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]];
+    let faces: [number, number, number][] = [[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11], [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8], [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9], [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]];
+    verts = verts.map((v) => { const l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l] as V3; });
+    if (detail === 1) {
+      const cache = new Map<string, number>();
+      const midp = (a: number, b: number) => { const k = a < b ? a + '_' + b : b + '_' + a; let i = cache.get(k); if (i === undefined) { const q: V3 = [(verts[a][0] + verts[b][0]) / 2, (verts[a][1] + verts[b][1]) / 2, (verts[a][2] + verts[b][2]) / 2]; const l = Math.hypot(q[0], q[1], q[2]); verts.push([q[0] / l, q[1] / l, q[2] / l]); i = verts.length - 1; cache.set(k, i); } return i; };
+      const nf: [number, number, number][] = [];
+      for (const [a, b, c] of faces) { const ab = midp(a, b), bc = midp(b, c), ca = midp(c, a); nf.push([a, ab, ca], [b, bc, ab], [c, ca, bc], [ab, bc, ca]); }
+      faces = nf;
+    }
+    const unit = verts.map((v) => { const k = 1 + (rng() - 0.5) * 0.36; return [v[0] * k, v[1] * k, v[2] * k] as V3; });
+    const sc = (v: V3): V3 => [v[0] * rx, (v[1] < 0 ? v[1] * (1 - flatBottom) : v[1]) * ry, v[2] * rz];
+    for (const [a, b, c] of faces) {
+      const A = unit[a], B = unit[c], C = unit[b];
+      const cx = (A[0] + B[0] + C[0]) / 3, cy = (A[1] + B[1] + C[1]) / 3, cz = (A[2] + B[2] + C[2]) / 3;
+      const k = 1 + spike * (0.35 + rng() * 0.9) * (cy < -0.3 ? 0.4 : 1);
+      // the leaf point leans up and out a little, like leaves reaching for light
+      const apex: V3 = [cx * k + (rng() - 0.5) * 0.12, cy * k + spike * 0.25, cz * k + (rng() - 0.5) * 0.12];
+      const tone = cy > 0.35 ? 2 : cy < -0.25 ? 0 : 1;
+      const tones = [tone, Math.min(2, tone + (rng() < 0.4 ? 1 : 0)), Math.max(0, tone - (rng() < 0.3 ? 1 : 0))];
+      this.pal = pals[tones[0]]; this.tri(sc(A), sc(B), sc(apex));
+      this.pal = pals[tones[1]]; this.tri(sc(B), sc(C), sc(apex));
+      this.pal = pals[tones[2]]; this.tri(sc(C), sc(A), sc(apex));
+    }
+    return this;
+  }
   // a flat leaf/blade: a folded quad (two faces with a centre ridge) from base along +z, lifted
   blade(len: number, width: number, droop = 0.2, fold = 0.15) {
     const h = fold * width;

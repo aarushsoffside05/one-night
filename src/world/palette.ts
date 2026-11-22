@@ -4,16 +4,16 @@
 
 export const SWATCHES = {
   // ground worked by water
-  mudDark: '#4a3526', mud: '#6b4a33', mudLight: '#8a6444', silt: '#a98a63', siltPale: '#c2a67c',
-  sand: '#d9bd86', sandLight: '#ecd7a3', litterDark: '#4d3a22', litter: '#6e4f2a', litterWarm: '#8f6230',
-  earth: '#7c5636', earthLight: '#9c7248', mossGround: '#56652c', grassGround: '#6f8a34',
+  mudDark: '#5a3c26', mud: '#7c5432', mudLight: '#a87646', silt: '#cba268', siltPale: '#e4c690',
+  sand: '#eed49c', sandLight: '#f9e9ba', litterDark: '#6c4628', litter: '#93602f', litterWarm: '#bb7e38',
+  earth: '#ad733d', earthLight: '#d39d5a', mossGround: '#5f9336', grassGround: '#88c842',
   // bark and wood in the forest
-  barkDark: '#3d2f26', bark: '#5f4a3a', barkLight: '#84705a', barkPale: '#b9ab8f', barkRed: '#74452f',
-  rootDark: '#33261e', deadwood: '#8d7f6c', vine: '#4c5a27',
+  barkDark: '#4c382d', bark: '#725441', barkLight: '#9a7b5e', barkPale: '#d0c09e', barkRed: '#90553a',
+  rootDark: '#3f2e24', deadwood: '#a39480', vine: '#55802e',
   // leaves
-  leafDeep: '#1f4a2a', leafDark: '#2c6131', leaf: '#3f7d36', leafMid: '#58973a', leafLight: '#7fb442',
-  leafYellow: '#a8c24a', leafOlive: '#667a2e', leafBlue: '#2f6b55', palm: '#4a8a3c', palmLight: '#86b84c',
-  seedling: '#8fc653', fern: '#3d8242', lily: '#5fa04a', lilyLight: '#9ccf5e', flower: '#e86a8a', fruit: '#d9a23a',
+  leafDeep: '#1c5c3c', leafDark: '#297c3e', leaf: '#45a33d', leafMid: '#6dbf3f', leafLight: '#9cdb4b',
+  leafYellow: '#cbe257', leafOlive: '#7f9d35', leafBlue: '#27836b', palm: '#4dab45', palmLight: '#a3d95a',
+  seedling: '#b6ea5e', fern: '#3d9d4e', lily: '#5fb04e', lilyLight: '#a8de66', flower: '#e86a8a', fruit: '#d9a23a',
   // made things
   plankDark: '#5a4030', plank: '#8a6645', plankLight: '#b58a5c', plankGrey: '#93897a', plankPale: '#c9b48e',
   paintRed: '#b5483a', paintTeal: '#3f9a92', paintBlue: '#3d6fa8', paintCream: '#ead9b0', paintGreen: '#5f9a58',
@@ -27,6 +27,7 @@ export const SWATCHES = {
   fishBack: '#3b3f38', fishSide: '#6b6a55', fishRed: '#a8483a', birdWhite: '#f1eee4', birdDark: '#2f3338',
   birdBlue: '#3a78b8', birdYellow: '#e6b53a', birdRed: '#c9422e',
   // lights (emissive row)
+  flowerPink: '#ff7fb0', flowerYellow: '#ffd84a', flowerWhite: '#fff6e8', flowerPurple: '#a77bff', flowerOrange: '#ff9a3c',
   lampGlow: '#ffc56a', deviceGlow: '#7fe6d2', windowGlow: '#ffb45a', white: '#ffffff', black: '#111111',
 } as const;
 

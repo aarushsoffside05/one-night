@@ -53,7 +53,7 @@ export function makeWater(hooks: WaterHooks = {}): THREE.Mesh {
   m.normalNode = t.transformNormalToView(nW);
 
   const view = t.cameraPosition.sub(wp).normalize();
-  const fres = t.float(1.0).sub(view.dot(nW).max(0.0)).pow(4.0).mul(0.6).add(0.03);
+  const fres = t.float(1.0).sub(view.dot(nW).max(0.0)).pow(4.0).mul(0.45).add(0.02);
   // water thickness from the scene depth behind the surface
   const thick = t.viewportLinearDepth.sub(t.linearDepth()).mul(t.cameraFar.sub(t.cameraNear)).max(0.0);
   const inLake = t.step(wy, U.lakeY.sub(0.001)).mul(t.step(U.waterY.add(0.001), U.lakeY)); // lake cut off: clearer, darker water
