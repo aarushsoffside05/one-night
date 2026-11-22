@@ -281,9 +281,9 @@ export function buildForest(fc: ForestCook, group: THREE.Object3D): Forest {
   ], 60))
   const clumpM = [clumpMaterial(9999), clumpMaterial(9999), clumpMaterial(520)]
   fields.push(mk('clump', [
-    { geometry: G.leafClumpGeometry(190, 0.36, 0, 'clump-a'), material: clumpM[0], near: 0, far: 40 },
+    { geometry: G.leafClumpGeometry(150, 0.4, 0, 'clump-a'), material: clumpM[0], near: 0, far: 40 },
     { geometry: G.leafClumpGeometry(60, 0.6, 0, 'clump-a'), material: clumpM[1], near: 40, far: 140 },
-    { geometry: G.leafClumpGeometry(25, 0.85, 0, 'clump-a'), material: clumpM[2], near: 140, far: 520 },
+    { geometry: G.leafClumpGeometry(20, 0.92, 0, 'clump-a'), material: clumpM[2], near: 140, far: 520 },
   ]))
   fields.push(mk('spray', [
     { geometry: G.sprayGeometry(), material: plantMaterial(9999, 'spray'), near: 0, far: 60 },
