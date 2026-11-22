@@ -28,6 +28,7 @@ def _palette():
 
 PAL = _palette()
 PARTS = []
+AO_FLOOR = 0.58
 R = random.Random(1)
 
 def reset(seed=1):
@@ -266,7 +267,7 @@ def export(name, origin=(0, 0, 0), ao_dist=0.9, ao_strength=0.75, ground=None):
             n = Vector(l[ln]); key = (l.vert.index, round(n.x, 2), round(n.y, 2), round(n.z, 2))
             c = l[lc]
             if c[3] == 0.0: continue     # glow: full colour, alpha 0
-            k = max(0.3, 1 - ao_strength * acc[key] * c[3])
+            k = max(AO_FLOOR, 1 - ao_strength * acc[key] * c[3])   # never darker than this share of the colour: the engine adds its own shading
             # occluded corners go darker and a little warmer/saturated, not grey
             l[lc] = (c[0] * k, c[1] * k * (0.94 + 0.06 * k), c[2] * k * (0.86 + 0.14 * k), 1.0)
     for o in list(bpy.data.objects): bpy.data.objects.remove(o, do_unlink=True)

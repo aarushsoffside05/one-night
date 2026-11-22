@@ -9,7 +9,7 @@ from housekit import *
 BASE = 0.36
 
 def build(name='floating_house', seed=21, walls=(mix('birdBlue', 'white', 0.42), mix('birdBlue', 'white', 0.5), mix('paintBlue', 'white', 0.36)), trim='paintCream', door_col='flowerYellow',
-          shutter='paintCream', roof_cols=('paintRed', 'tinRust', 'paintRed', 'tinRust', 'tin'), cap='tinRust'):
+          shutter='paintCream', roof_cols=('paintRed', 'tinRust', 'paintRed', 'tinRust', 'tin'), cap='tinDark'):
     reset(seed)
     top = log_raft(10.0, 13)
     y = top + 0.1                       # deck top = 0.48 above the waterline
@@ -51,4 +51,8 @@ def build(name='floating_house', seed=21, walls=(mix('birdBlue', 'white', 0.42),
     export(name, origin=G(0, -BASE, 0), ao_dist=0.6, ao_strength=0.55)
 
 if __name__ == '__main__':
-    build()
+    which = sys.argv[1:] or ['a', 'b']
+    if 'a' in which: build()
+    # the second floating home, further up the channel: cream boards, green trim, a teal-and-tin roof
+    if 'b' in which: build('floating_house_b', 22, walls=('paintCream', 'paintCream', 'plastic'), trim='paintGreen', door_col='paintRed', shutter='paintGreen',
+                           roof_cols=('paintTeal', 'tin', 'paintTeal', 'tinDark'), cap='tinDark')

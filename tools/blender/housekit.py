@@ -29,20 +29,23 @@ def pick(cols):
 # ---------------------------------------------------------------- timber
 def post(x, z, y0, y1, r=0.1, col='plankDark', lean=0.07, n=8, **kw):
     """a hand-cut round post, leaning a little, slightly thicker at the foot"""
-    return gpole((x + jit(lean), y0, z + jit(lean)), (x, y1, z), r * 1.12, r * 0.92, n, col, 0.012, wobble=0.035, rings=1, **kw)
+    return gpole((x + jit(lean), y0, z + jit(lean)), (x, y1, z), r * 1.12, r * 0.92, n, col, 0.0, wobble=0.035, rings=1, **kw)
 
 def deck(x0, x1, z0, z1, y, cols=('plankLight', 'plank', 'plankPale', 'plankLight', 'plankGrey'), bw=0.36, th=0.07, along='x'):
     """deck boards with their top at y; boards run along x (or z), each with its own length, tilt and tone"""
     if along == 'x':
         n = max(1, round((z1 - z0) / bw)); w = (z1 - z0) / n
         for i in range(n):
-            gbox(pick(cols), (x0 + x1) / 2 + jit(0.05), y - th + jit(0.006), z0 + (i + 0.5) * w, x1 - x0 + jit(0.12), th, w - 0.014, 0.012, yaw=jit(0.004), vary=0.1, name='deckboard')
+            gbox(pick(cols), (x0 + x1) / 2 + jit(0.05), y - th + jit(0.006), z0 + (i + 0.5) * w, x1 - x0 + jit(0.12), th, w - 0.014, 0.0 if LIGHT else 0.012, yaw=jit(0.004), vary=0.1, name='deckboard')
     else:
         n = max(1, round((x1 - x0) / bw)); w = (x1 - x0) / n
         for i in range(n):
-            gbox(pick(cols), x0 + (i + 0.5) * w, y - th + jit(0.006), (z0 + z1) / 2 + jit(0.05), w - 0.014, th, z1 - z0 + jit(0.12), 0.012, yaw=jit(0.004), vary=0.1, name='deckboard')
+            gbox(pick(cols), x0 + (i + 0.5) * w, y - th + jit(0.006), (z0 + z1) / 2 + jit(0.05), w - 0.014, th, z1 - z0 + jit(0.12), 0.0 if LIGHT else 0.012, yaw=jit(0.004), vary=0.1, name='deckboard')
 
-def board_wall(a, b, y0, top, cols, cuts=(), bw=0.42, th=0.07, bevel=0.014):
+LIGHT = False   # set True in a script to drop the chamfers on wall and deck boards (background pieces: fewer triangles)
+
+def board_wall(a, b, y0, top, cols, cuts=(), bw=0.5, th=0.07, bevel=0.014):
+    if LIGHT: bevel = 0.0
     """vertical boards from a=(x,z) to b=(x,z); top(u) gives the height along the wall; boolean cuts make the openings"""
     dx, dz = b[0] - a[0], b[1] - a[1]; L = math.hypot(dx, dz); yaw = math.atan2(-dz, dx)
     n = max(1, round(L / bw)); w = L / n
@@ -109,17 +112,17 @@ def gable_roof(cx, ridge_y, cz, length, run_a, run_b, pitch, cols, axis='x', sag
             t0 = -length / 2 + i * w - 0.03; t1 = t0 + w + 0.06; ext = run + R.uniform(0, 0.16); lift = (i % 2) * 0.03 + jit(0.006); skew = jit(0.02)
             def fn(u, v, t0=t0, t1=t1, ext=ext, lift=lift, sd=sd, skew=skew):
                 return Wp(t0 + (t1 - t0) * v + skew * u, sd * (0.02 + (ext - 0.02) * u), lift + fold * (1 - abs(2 * v - 1)))
-            sheet(3, 2, fn, th, pick(cols), 0.0, 'roofsheet', offset=1.0 if (sd > 0) == (axis == 'x') else -1.0, vary=0.07, sharp=30)
+            sheet(2, 2, fn, th, pick(cols), 0.0, 'roofsheet', offset=1.0 if (sd > 0) == (axis == 'x') else -1.0, vary=0.07, sharp=30)
     # ridge cap following the sag
     seg = max(3, round(length / 1.4))
     def capfn(u, v):
-        t = -length / 2 + 0.02 + (length - 0.04) * u; r = (v - 0.5) * 0.72
-        return Wp(t, r, 0.05)
+        t = -length / 2 + 0.02 + (length - 0.04) * u; r = (v - 0.5) * 1.0
+        return Wp(t, r, 0.034 + 0.03)
     sheet(seg, 2, capfn, 0.04, cap, 0.0, 'ridgecap', offset=1.0 if axis == 'x' else -1.0, sharp=30)
     # barge boards on the gable ends, rafters under the sheets
     ts = [-length / 2 + 0.08, length / 2 - 0.08]
     if rafters:
-        m = max(1, round(length / 1.5))
+        m = max(1, round(length / 2.6))
         ts += [-length / 2 + 0.08 + (length - 0.16) * k / m for k in range(1, m)]
     for j, t in enumerate(ts):
         end = j < 2
@@ -162,11 +165,11 @@ def window(x0, x1, y0, y1, zf, trim, shutter, glow, style='leaves', flower_box=F
     if flower_box:
         bx(shutter, xc, y0 - 0.4, zf + 0.25, w + 0.16, 0.26, 0.28, 0.025, name='flowerbox')
         bx('mudDark', xc, y0 - 0.17, zf + 0.25, w + 0.04, 0.03, 0.18, 0.0, name='soil')
-        for i in range(4):
-            p = W(xc + (i - 1.5) * w * 0.27, y0 - 0.02, zf + 0.25 + jit(0.03))
+        for i in range(3):
+            p = W(xc + (i - 1) * w * 0.34, y0 - 0.02, zf + 0.25 + jit(0.03))
             blob(0.13, G(*p), (1, 1, 0.8), pick(['leaf', 'leafMid', 'leafLight']), 1, 0.2)
-            for k in range(2):
-                q = W(xc + (i - 1.5) * w * 0.27 + jit(0.09), y0 + 0.09 + jit(0.03), zf + 0.27 + jit(0.08))
+            for k in range(1):
+                q = W(xc + (i - 1) * w * 0.34 + jit(0.09), y0 + 0.09 + jit(0.03), zf + 0.27 + jit(0.08))
                 blob(0.055, G(*q), (1, 1, 0.8), pick(['flowerPink', 'flowerYellow', 'flowerWhite', 'flowerOrange', 'flowerPurple']), 0, 0.1, vary=0.03, ao=0.4)
 
 def door(xc, y0, zf, col, trim, w=1.12, h=1.98, wall_th=0.07, ajar=0.0):
@@ -262,7 +265,7 @@ def cleat(x, y, z, yaw=0.0):
     gbox('plankDark', x, y, z, 0.14, 0.2, 0.14, 0.02, yaw=yaw, name='cleat')
     gbox('plankDark', x, y + 0.16, z, 0.48, 0.09, 0.12, 0.025, yaw=yaw, name='cleat')
 
-def hammock(a, b, sag=0.55, cols=('paintRed', 'paintCream', 'flowerYellow', 'paintCream', 'paintRed')):
+def hammock(a, b, sag=0.55, cols=('paintRed', 'paintCream', 'flowerYellow', 'paintCream', 'paintRed'), nu=7, ropes=(-0.9, 0.0, 0.9)):
     """a striped cloth hammock between two hooks a and b (game coords), with fanned end ropes"""
     ax, ay, az = a; bx, by, bz = b; dx, dz = bx - ax, bz - az; L = math.hypot(dx, dz); px, pz = -dz / L, dx / L
     t0, t1 = 0.12, 0.88
@@ -274,9 +277,9 @@ def hammock(a, b, sag=0.55, cols=('paintRed', 'paintCream', 'flowerYellow', 'pai
     n = len(cols)
     for i, col in enumerate(cols):
         s0, s1 = -1 + 2 * i / n, -1 + 2 * (i + 1) / n
-        sheet(9, 1, lambda u, v, s0=s0, s1=s1: pt(u, s0 + (s1 - s0) * v), 0.022, col, 0.0, 'hammock', offset=0.0, vary=0.04, sharp=60)
+        sheet(nu, 1, lambda u, v, s0=s0, s1=s1: pt(u, s0 + (s1 - s0) * v), 0.022, col, 0.0, 'hammock', offset=0.0, vary=0.04, sharp=60)
     for end, hook in ((0.0, a), (1.0, b)):
-        for sx in (-0.9, 0.0, 0.9):
+        for sx in ropes:
             sweep([G(*hook), pt(end, sx)], 0.014, 'rope', 0, 'hammock_rope')
 
 def awning(xc, y, zf, w, d, drop, cols=('paintRed', 'paintCream'), yaw=0.0, origin=None):
@@ -299,9 +302,9 @@ def log_raft(length, n, r=0.27, y=-0.05, cols=('bark', 'barkLight', 'barkRed', '
     for i in range(n):
         z = (i - half) * pitch; l = length + jit(0.45); off = jit(0.25); rr = r * R.uniform(0.9, 1.1)
         yy = y + (r - rr)
-        cyl(rr, rr * R.uniform(0.84, 0.97), l, G(off, yy, z), (0, math.pi / 2 + jit(0.006), jit(0.006)), 9, pick(cols), 0.03, 'log', wobble=0.045, rings=2, vary=0.08)
+        cyl(rr, rr * R.uniform(0.84, 0.97), l, G(off, yy, z), (0, math.pi / 2 + jit(0.006), jit(0.006)), 8, pick(cols), 0.03, 'log', wobble=0.045, rings=2, vary=0.08)
         for sd in (-1, 1):   # pale sawn ends
-            cyl(rr * 0.74, rr * 0.72, 0.02, G(off + sd * (l / 2 + 0.002), yy, z), (0, math.pi / 2, 0), 9, 'barkPale', 0.0, 'log_end', vary=0.06, ao=0.5, sharp=89.5)
+            cyl(rr * 0.74, rr * 0.72, 0.02, G(off + sd * (l / 2 + 0.002), yy, z), (0, math.pi / 2, 0), 8, 'barkPale', 0.0, 'log_end', vary=0.06, ao=0.5, sharp=89.5)
     W = n * pitch; ns = max(2, round(length / 2.6))
     for i in range(ns):
         x = -length / 2 + 0.7 + (length - 1.4) * i / (ns - 1)

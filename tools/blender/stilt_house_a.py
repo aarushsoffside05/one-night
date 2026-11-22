@@ -22,7 +22,7 @@ def build(name='stilt_house_a', seed=31):
     for i in range(nx):
         for k in range(nz):
             x = -hw - 0.15 + (w + 0.3) * i / (nx - 1); z = -hd - 0.15 + (d + porch + 0.1) * k / (nz - 1)
-            post(x, z, -LEG, -0.1, 0.13, 'plankDark', 0.1, 8)
+            post(x, z, -LEG, -0.1, 0.13, 'plankDark', 0.1, 7)
             edge_x = i in (0, nx - 1); edge_z = k in (0, nz - 1)
             if edge_z and i > 0:
                 xp = -hw - 0.15 + (w + 0.3) * (i - 1) / (nx - 1); up = (i + k) % 2 == 0

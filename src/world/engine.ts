@@ -17,12 +17,12 @@ import { applyTimeOfDay } from './timeofday';
 import { FIXED_CAMS } from './cameras';
 import { makePost, type Post } from './post';
 import { Cover, makeLandMaps, COVER_ASSETS } from './cover';
-import { People, type Look } from './people';
+import { People, preloadParts, type Look } from './people';
 import { Player, bindInput, type Solid } from './player';
 import { buildCanoe } from './props';
 import { Quality, markLoading } from './quality';
 import { Particles } from './particles';
-import { Animals } from './animals';
+import { Animals, preloadCow } from './animals';
 import { addRipple } from './ripples';
 import { loadKit } from './assets';
 import { TREE_KINDS } from './trees';
@@ -66,6 +66,8 @@ export class Engine {
   canoeKit: KitMesh | null = null;
   coverKits: Record<string, KitMesh | null> = {};
   structs: Structures | null = null;
+  locals: { f: any; x: number; z: number; y: number; float: number }[] = [];
+  herd: { b: any; y: number; float: number }[] = [];
   floaters: { g: THREE.Group; x: number; z: number; yaw: number; draft: number }[] = [];
   player!: Player;
   solids: Solid[] = [];
@@ -124,6 +126,7 @@ export class Engine {
     await Promise.all(COVER_ASSETS.map(async (n) => { this.coverKits[n] = await loadKit(n); }));
     setUI({ loading: { stage: 'Raising the houses', f: 0.15 } });
     if (!params.off.includes('structs')) { try { this.structs = await buildStructures(WORLD_SEED, (x, z) => this.groundAt(x, z)); } catch (e) { console.warn('[one-night] structures failed', e); } }
+    await Promise.all([preloadParts(), preloadCow()]);
     this.build(cooked, crafted);
     if (params.water !== null) sim.water = sim.waterTarget = params.water;
     if (params.tod !== null) sim.tod = sim.todTarget = params.tod;
@@ -198,6 +201,20 @@ export class Engine {
     const kid = this.people.add(kidLook);
     const canoe = this.canoeKit ? new THREE.Mesh(makeKitGeometry(this.canoeKit), makeWorldMaterial(this.tex, { asset: true, wind: false })) : new THREE.Mesh(makeKitGeometry(buildCanoe()), this.worldMat);
     canoe.castShadow = true; canoe.receiveShadow = true; canoe.name = 'canoe'; scene.add(canoe);
+    if (this.structs) {
+      const A = this.structs.anchors, st = this.structs;
+      const at = (name: string, dx = 0, dz = 0) => { const a = A[name]; if (!a) return null; if (a.float !== undefined && a.float >= 0) { const f = st.floating[a.float], c = Math.cos(f.yaw), sn = Math.sin(f.yaw); return { x: f.x + (a.x + dx) * c + (a.z + dz) * sn, z: f.z - (a.x + dx) * sn + (a.z + dz) * c, y: a.y, float: a.float }; } return { x: a.x + dx, z: a.z + dz, y: a.y, float: -1 }; };
+      const folk: [string, number, number, Look, any, number][] = [
+        ['stiltPorch', 0.6, 0.4, { height: 1.56, skin: 'skinA', hair: 'hairGrey', shirt: 'shirtCream', shorts: 'shortsKhaki', shoe: 'rubber', sleeves: true, longLegs: true }, 'idle', 4.4],
+        ['yard', 2, 1, { height: 1.7, skin: 'skinB', hair: 'hair', shirt: 'shirtBlue', shorts: 'shortsDark', shoe: 'rubber', sleeves: true, longLegs: true, hat: 'rope' }, 'work', 1.0],
+        ['floatTable', 0.2, 0.9, { height: 1.62, skin: 'skinC', hair: 'hair', shirt: 'shirtRed', shorts: 'shortsKhaki', shoe: 'shoe', sleeves: true, longLegs: false }, 'work', 3.2],
+        ['floatDeck', -1.2, 0.4, { height: 1.66, skin: 'skinA', hair: 'hair', shirt: 'shirtGreen', shorts: 'shortsDark', shoe: 'rubber', sleeves: false, longLegs: true, hat: 'plankPale' }, 'point', 0.4],
+        ['kitchen', 0.8, 0.6, { height: 1.58, skin: 'skinB', hair: 'hair', shirt: 'shirtYellow', shorts: 'shortsKhaki', shoe: 'shoe', sleeves: true, longLegs: false }, 'carry', 2.0],
+      ];
+      for (const [anchor, dx, dz, look, pose, yaw] of folk) { const p = at(anchor, dx, dz); if (!p) continue; const f = this.people.add(look); f.pose = pose; f.yaw = yaw; f.pos.set(p.x, p.y, p.z); this.locals.push({ f, x: p.x, z: p.z, y: p.y, float: p.float }); }
+      const cr = at('corralRaft');
+      if (cr) { const cow = this.animals.addBeast(1, '#b08a64', '#e8dcc4'), calf = this.animals.addBeast(0.56, '#c9a884', '#f0e6d2'); cow.pos.set(cr.x - 0.6, 0, cr.z); cow.yaw = 1.2; cow.graze = 0.7; calf.pos.set(cr.x + 1.1, 0, cr.z + 0.6); calf.yaw = 2.6; this.herd.push({ b: cow, y: cr.y, float: cr.float }, { b: calf, y: cr.y, float: cr.float }); }
+    }
     this.player = new Player(kid, canoe, { groundAt: (x, z) => this.groundAt(x, z), floorAt: (x, z, y) => this.floorAt(x, z, y), forest: c.forest, solids: this.solids });
     this.player.place(L.BANK_TOP[0] + 8, L.BANK_TOP[1] + 12, 2.0);
     bindInput(this.renderer.domElement);
@@ -279,6 +296,7 @@ export class Engine {
     }
     this.camera.updateMatrixWorld();
     { const wy = sim.water * L.FLOOD_RANGE; for (const f of this.floaters) { const bob = sim.reduceMotion ? 0 : Math.sin(sim.time * 0.9 + f.x) * 0.02; f.g.position.set(f.x, Math.max(wy, this.groundAt(f.x, f.z) + f.draft) + bob, f.z); } }
+    { const st = this.structs; if (st) { const wy = sim.water * L.FLOOD_RANGE; const fy = (i: number) => { const f = st.floating[i]; return Math.max(wy, this.groundAt(f.x, f.z) + f.draft); }; for (const l of this.locals) l.f.pos.y = l.float >= 0 ? fy(l.float) + l.y : l.y; for (const h of this.herd) h.b.pos.y = h.float >= 0 ? fy(h.float) + h.y : h.y; } }
     this.people.update(sim.time);
     this.animals.update(this.focus, (x, z) => this.groundAt(x, z));
     // the canoe leaves rings behind it

@@ -1,5 +1,4 @@
 // Sky dome, faceted clouds and the far silhouette rings beyond the playable edge.
-import './structures';
 import * as THREE from 'three/webgpu';
 import * as T from 'three/tsl';
 import { U } from './uniforms';

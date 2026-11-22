@@ -7,16 +7,12 @@
 // Walk rectangles, solids, anchors and lamps are recorded through the same frame,
 // so a piece can be reused anywhere (keep walkable pieces at yaw multiples of 90 degrees).
 import * as THREE from 'three/webgpu';
-import * as T from 'three/tsl';
 import { MeshBuilder, type KitMesh } from './meshkit';
 import { PAL, SWATCHES, SWATCH_NAMES, hexToLinear } from './palette';
 import * as L from './layout';
-import { stream, WORLD_SEED, type Rng } from './rng';
-import { makeWorldMaterial } from './worldmat';
+import { stream, type Rng } from './rng';
 import { loadKit } from './assets';
 import type { Solid } from './player';
-import { makeKitGeometry } from './gfx';
-import { sim } from '../state';
 
 type V3 = [number, number, number];
 
@@ -51,18 +47,20 @@ export async function loadAsset(name: string): Promise<Asset | null> {
   const mk = (a: [number[], number[], number[]]): KitMesh => ({ pos: new Float32Array(a[0]), nrm: new Float32Array(a[1]), dat: new Float32Array(a[2]), tris: a[0].length / 9 });
   return { mesh: mk(out[0]), glow: out[1][0].length ? mk(out[1]) : null };
 }
-const ASSET_FILES = { canoe: 'canoe', paddle: 'paddle', floatingHouse: 'floating_house', stiltHouseA: 'stilt_house_a' } as const;
-type Assets = Record<keyof typeof ASSET_FILES, Asset | null>;
+// every Blender-made piece this module knows; a missing file just gives null and the code-built twin is drawn instead
+const ASSET_NAMES = ['canoe', 'canoe_lite', 'paddle', 'floating_house', 'floating_house_b', 'stilt_house_a', 'stilt_house_b', 'stilt_house_b2', 'corral_raft', 'float_corral', 'garden_raft',
+  'jetty', 'bank_steps_piece', 'plank_walk_piece', 'lantern', 'lantern_post', 'motor_canoe', 'aerial', 'riverboat',
+  'yard_tank', 'yard_clothesline', 'yard_bench', 'yard_drum', 'yard_basket', 'yard_pot_a', 'yard_pot_b', 'yard_pot_c', 'yard_table'] as const;
+type Assets = Record<string, Asset | null>;
 export async function loadAssets(): Promise<Assets> {
-  const keys = Object.keys(ASSET_FILES) as (keyof typeof ASSET_FILES)[];
-  const got = await Promise.all(keys.map((k) => loadAsset(ASSET_FILES[k])));
-  return Object.fromEntries(keys.map((k, i) => [k, got[i]])) as Assets;
+  const got = await Promise.all(ASSET_NAMES.map((k) => loadAsset(k)));
+  return Object.fromEntries(ASSET_NAMES.map((k, i) => [k, got[i]])) as Assets;
 }
 // draw an asset in the builder's current frame
 function put(c: Ctx, a: Asset | null) { if (!a) return; c.rb.m = c.b.m.slice(); c.rb.append(a.mesh); if (a.glow) { c.gb.m = c.b.m.slice(); c.gb.append(a.glow); } }
 const CANOE_SHEER = 0.43; // canoe.glb: keel at y = 0, gunwale about here
 // the canoe with its gunwale at the frame's y = 0 (the old kit convention)
-function putCanoe(c: Ctx, k = 1) { c.b.push().scale(k).translate(0, -CANOE_SHEER, 0); put(c, c.A.canoe); c.b.pop(); }
+function putCanoe(c: Ctx, k = 1, hero = false) { c.b.push().scale(k).translate(0, -CANOE_SHEER, 0); put(c, hero ? c.A.canoe : c.A.canoe_lite ?? c.A.canoe); c.b.pop(); }
 // swatch-id mesh -> rgb mesh (+ the glowing faces apart)
 const SW_LIN = SWATCH_NAMES.map((k) => hexToLinear(SWATCHES[k]));
 const SW_GLOW = new Set([PAL.lampGlow, PAL.windowGlow, PAL.deviceGlow]);
@@ -153,7 +151,8 @@ function bush(b: MeshBuilder, rng: Rng, x: number, y: number, z: number, r: numb
   if (fl) flowers(b, rng, x, y + r * 1.25, z, r * 0.8, fl);
 }
 function pot(c: Ctx, rng: Rng, x: number, y: number, z: number, s = 1, kind = Math.floor(rng() * 3)) {
-  const b = c.b;
+  const b = c.b, pa = [c.A.yard_pot_a, c.A.yard_pot_b, c.A.yard_pot_c][kind % 3];
+  if (pa) { b.push().translate(x, y, z).rotY(rng() * TAU).scale(s * (0.95 + rng() * 0.2)); put(c, pa); b.pop(); return; }
   b.push().translate(x, y, z).rotZ(jit(rng, 0.04)).scale(s);
   cyl(b, pick(rng, POTS), 0, 0, 0, 0.15, 0.21, 0.3, 7, true); cyl(b, PAL.mudDark, 0, 0.3, 0, 0.18, 0.18, 0.01, 7);
   if (kind === 0) rosette(b, rng, 0, 0.3, 0, 0.5, 6, [PAL.leafLight, PAL.leafMid, PAL.palmLight]);
@@ -161,18 +160,21 @@ function pot(c: Ctx, rng: Rng, x: number, y: number, z: number, s = 1, kind = Ma
   else { rosette(b, rng, 0, 0.3, 0, 0.34, 5, [PAL.leaf, PAL.leafMid]); cyl(b, PAL.leafDark, 0, 0.3, 0, 0.03, 0.03, 0.42, 4); flowers(b, rng, 0, 0.72, 0, 0.1, 3, pick(rng, FLOWERS)); }
   b.pop();
 }
+// a hanging lantern; (x, y, z) is the hook. lantern.glb hangs its glass 0.42 m below the hook.
 function lantern(c: Ctx, x: number, y: number, z: number, drop = 0.22) {
   const b = c.b;
+  if (c.A.lantern) { b.push().translate(x, y, z); put(c, c.A.lantern); b.pop(); lampAt(c, x, y - 0.42, z); return; }
   log(b, PAL.metal, [x, y, z], [x, y - drop, z], 0.025, 0.025, 4);
   const y0 = y - drop - 0.32;
   cyl(b, PAL.metal, x, y0, z, 0.1, 0.1, 0.05, 6, true); cyl(b, PAL.lampGlow, x, y0 + 0.05, z, 0.085, 0.1, 0.19, 6);
   cyl(b, PAL.metal, x, y0 + 0.24, z, 0.13, 0.03, 0.08, 6, true);
   lampAt(c, x, y0 + 0.14, z);
 }
-// a leaning post with a short arm and a hanging lantern; arm points along local +x
+// a leaning post with a short arm and a hanging lantern; arm points along local +x (lantern_post.glb is 2.5 m tall)
 function lanternPost(c: Ctx, rng: Rng, x: number, z: number, h = 2.5, armYaw = 0, yBase?: number) {
   const b = c.b, y = yBase ?? gl(c, x, z);
   place(c, x, y, z, armYaw, () => {
+    if (c.A.lantern_post) { put(c, c.A.lantern_post); lampAt(c, 0.52, 1.944, 0); solid(c, 0, 0, 0.14, 2.5); return; }
     const lx = jit(rng, 0.1), lz = jit(rng, 0.1);
     log(b, PAL.plankDark, [0, -0.5, 0], [lx, h, lz], 0.1, 0.075, 6);
     beam(b, PAL.plank, [lx - 0.12, h - 0.18, lz], [lx + 0.62, h - 0.06, lz], 0.09, 0.1);
@@ -183,6 +185,7 @@ function lanternPost(c: Ctx, rng: Rng, x: number, z: number, h = 2.5, armYaw = 0
 }
 function bench(c: Ctx, len = 1.5, pal = PAL.plankLight) {
   const b = c.b;
+  if (c.A.yard_bench) { b.push().scale(len / 1.5, 1, 1); put(c, c.A.yard_bench); b.pop(); solid(c, -len / 4, 0, 0.32, 0.46); solid(c, len / 4, 0, 0.32, 0.46); return; }
   bx(b, pal, 0, 0.38, 0, len, 0.08, 0.36);
   for (const s of [-1, 1]) { bx(b, PAL.plank, s * (len / 2 - 0.2), 0, 0, 0.1, 0.38, 0.3); }
   bx(b, PAL.plank, 0, 0.16, 0, len - 0.4, 0.07, 0.08);
@@ -190,17 +193,21 @@ function bench(c: Ctx, len = 1.5, pal = PAL.plankLight) {
 }
 function table(c: Ctx, len = 1.7, wid = 0.85, h = 0.72, top = PAL.plankPale) {
   const b = c.b;
+  if (c.A.yard_table) { b.push().scale(len / 1.7, h / 0.72, wid / 0.85); put(c, c.A.yard_table); b.pop(); solid(c, -len / 4, 0, wid / 2, h); solid(c, len / 4, 0, wid / 2, h); return; }
   for (let i = 0; i < 3; i++) bx(b, i === 1 ? PAL.plankLight : top, 0, h - 0.08, (i - 1) * wid / 3, len, 0.08, wid / 3 - 0.015);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) log(b, PAL.plank, [sx * (len / 2 - 0.1), 0, sz * (wid / 2 - 0.06)], [sx * (len / 2 - 0.16), h - 0.08, sz * (wid / 2 - 0.1)], 0.055, 0.055, 4);
   bx(b, PAL.plank, 0, 0.2, 0, len - 0.3, 0.06, 0.1);
   solid(c, -len / 4, 0, wid / 2, h); solid(c, len / 4, 0, wid / 2, h);
 }
-function basket(b: MeshBuilder, x: number, y: number, z: number, s = 1, fill = -1) {
+function basket(c: Ctx, x: number, y: number, z: number, s = 1, fill = -1) {
+  const b = c.b;
+  if (c.A.yard_basket) { b.push().translate(x, y, z).scale(s); put(c, c.A.yard_basket); b.pop(); if (fill >= 0) cyl(b, fill, x, y + 0.36 * s, z, 0.26 * s, 0.1 * s, 0.1 * s, 8); return; }
   cyl(b, PAL.rope, x, y, z, 0.2 * s, 0.3 * s, 0.34 * s, 8, true); cyl(b, PAL.litterWarm, x, y + 0.34 * s, z, 0.33 * s, 0.31 * s, 0.05 * s, 8);
   cyl(b, fill >= 0 ? fill : PAL.litterDark, x, y + 0.39 * s, z, 0.27 * s, fill >= 0 ? 0.12 * s : 0.27 * s, fill >= 0 ? 0.1 * s : 0.005, 8);
 }
 function drum(c: Ctx, x: number, z: number, pal: number, y = gl(c, x, z)) {
   const b = c.b;
+  if (c.A.yard_drum && pal === PAL.paintBlue) { b.push().translate(x, y, z); put(c, c.A.yard_drum); b.pop(); solid(c, x, z, 0.32, y + 0.95); return; }
   cyl(b, pal, x, y, z, 0.3, 0.3, 0.9, 9, true);
   for (const h of [0.02, 0.3, 0.6, 0.86]) cyl(b, PAL.tinDark, x, y + h, z, 0.325, 0.325, 0.05, 9, true);
   solid(c, x, z, 0.32, y + 0.95);
@@ -466,7 +473,16 @@ function house(c: Ctx, o: HouseOpt) {
 }
 
 // a raised plank walk along local z from z0 to z1 at height y (local), on leaning posts down to the ground
-function plankWalk(c: Ctx, rng: Rng, x: number, z0: number, z1: number, y: number, width = 1.5, railSide = 0, lanternEvery = 0) {
+function plankWalk(c: Ctx, rng: Rng, x: number, z0: number, z1: number, y: number, width = 1.5, railSide = 0, lanternEvery = 0, useAsset = true) {
+  const piece = useAsset ? c.A.plank_walk_piece : null;
+  if (piece) {
+    // plank_walk_piece.glb: 2.2 m long, 1.6 m wide, rails both sides; stretched a little to fill the run exactly
+    const L0 = z1 - z0, n = Math.max(1, Math.round(L0 / 2.2)), seg = L0 / n;
+    for (let i = 0; i < n; i++) { c.b.push().translate(x, y, z0 + i * seg).scale(width / 1.6, 1, seg / 2.2); put(c, piece); c.b.pop(); }
+    ghost(c, () => plankWalk(c, rng, x, z0, z1, y, width, railSide, 0, false));
+    if (lanternEvery) for (let i = 1; i < n; i += lanternEvery) { const s = i % 2 ? 1 : -1; lanternPost(c, rng, x + s * (width / 2 + 0.16), z0 + i * seg, 2.5, s > 0 ? Math.PI : 0, y - 0.1); }
+    return;
+  }
   const b = c.b, len = z1 - z0, n = Math.max(1, Math.round(len / 0.42)), bw = len / n;
   for (let i = 0; i < n; i++) bx(b, pick(rng, DECK), x + jit(rng, 0.05), y - 0.1 + jit(rng, 0.012), z0 + (i + 0.5) * bw, width + jit(rng, 0.12), 0.1, bw - 0.025);
   for (const s of [-1, 1]) bx(b, PAL.plankDark, x + s * (width / 2 - 0.2), y - 0.26, (z0 + z1) / 2, 0.14, 0.17, len);
@@ -491,6 +507,7 @@ function plankWalk(c: Ctx, rng: Rng, x: number, z0: number, z1: number, y: numbe
 // ---------------------------------------------------------------- yard things
 function aerial(c: Ctx, rng: Rng) {
   const b = c.b, H = 10.5;
+  if (c.A.aerial) { put(c, c.A.aerial); solid(c, 0, 0, 0.3, H); return; }
   log(b, PAL.plankDark, [0, -0.8, 0], [0.12, H * 0.55, 0.05], 0.17, 0.12, 7); log(b, PAL.plank, [0.12, H * 0.5, 0.05], [0.16, H, 0.02], 0.1, 0.07, 6);
   bx(b, PAL.rope, 0.11, H * 0.5, 0.05, 0.3, 0.14, 0.3);
   for (let i = 0; i < 3; i++) {
@@ -508,6 +525,7 @@ function aerial(c: Ctx, rng: Rng) {
 }
 function clothesLine(c: Ctx, rng: Rng, len = 6.5) {
   const b = c.b, h = 2.0;
+  if (c.A.yard_clothesline) { const g = gl(c, 0, 0); b.push().translate(0, g, 0); put(c, c.A.yard_clothesline); b.pop(); for (const sd of [-1, 1]) solid(c, sd * len / 2, 0, 0.14, g + h); return; }
   for (const s of [-1, 1]) { const x = s * len / 2; log(b, PAL.plankDark, [x + s * 0.12, gl(c, x, 0) - 0.5, 0], [x - s * 0.06, gl(c, x, 0) + h + 0.15, 0], 0.09, 0.07, 6); beam(b, PAL.plank, [x - s * 0.05, gl(c, x, 0) + h, -0.3], [x - s * 0.05, gl(c, x, 0) + h, 0.3], 0.08, 0.08); solid(c, x, 0, 0.14, gl(c, x, 0) + h); }
   const y0 = gl(c, 0, 0) + h, sagAt = (x: number) => y0 - 0.22 * (1 - Math.pow(2 * x / len, 2));
   rope(b, [-len / 2, y0, 0], [len / 2, y0, 0], 0.22, 0.035, 8);
@@ -524,6 +542,7 @@ function clothesLine(c: Ctx, rng: Rng, len = 6.5) {
 }
 function waterTank(c: Ctx) {
   const b = c.b, g = gl(c, 0, 0), h = 1.7;
+  if (c.A.yard_tank) { b.push().translate(0, g, 0); put(c, c.A.yard_tank); b.pop(); solid(c, 0, 0, 1.15, g + h + 1.6); return; }
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) { log(b, PAL.plankDark, [sx * 0.85, g - 0.4, sz * 0.85], [sx * 0.7, g + h, sz * 0.7], 0.1, 0.09, 6); }
   for (const s of [-1, 1]) { log(b, PAL.plank, [s * 0.8, g + 0.2, -0.8], [s * 0.72, g + h - 0.2, 0.72], 0.05, 0.05, 4); log(b, PAL.plank, [-0.8, g + 0.2, s * 0.8], [0.72, g + h - 0.2, s * 0.72], 0.05, 0.05, 4); }
   for (let i = 0; i < 5; i++) bx(b, DECK[i % 5], 0, g + h, (i - 2) * 0.36, 1.9, 0.1, 0.34);
@@ -576,7 +595,7 @@ function netRack(c: Ctx, rng: Rng, len = 4.2) {
     b.set(0, 0);
     cyl(b, i % 2 ? PAL.paintRed : PAL.plastic, xa + w / 2, g + h - dr - 0.02, 0.58, 0.07, 0.07, 0.12, 5, true);
   }
-  basket(b, len / 2 + 0.7, gl(c, len / 2 + 0.7, 0.4), 0.4, 1.1); void rng;
+  basket(c, len / 2 + 0.7, gl(c, len / 2 + 0.7, 0.4), 0.4, 1.1); void rng;
 }
 function outboard(b: MeshBuilder) {
   // clamp at origin (transom top); shaft goes down -y, head above
@@ -628,13 +647,13 @@ function kitchen(c: Ctx, rng: Rng) {
     cyl(b, PAL.tin, 0.42, 0.98, 0.05, 0.12, 0.1, 0.2, 6, true);
     solid(c, -0.3, 0, 0.5, 1.3); solid(c, 0.3, 0, 0.5, 1.3);
   });
-  place(c, 0.9, y, -0.3, 0.06, () => { table(c, 1.7, 0.85); basket(b, -0.4, 0.72, 0, 0.8, PAL.fruit); cyl(b, PAL.paintTeal, 0.3, 0.72, 0.1, 0.13, 0.16, 0.14, 7, true); cyl(b, PAL.paintCream, 0.55, 0.72, -0.2, 0.08, 0.09, 0.12, 6, true); });
+  place(c, 0.9, y, -0.3, 0.06, () => { table(c, 1.7, 0.85); basket(c, -0.4, 0.72, 0, 0.8, PAL.fruit); cyl(b, PAL.paintTeal, 0.3, 0.72, 0.1, 0.13, 0.16, 0.14, 7, true); cyl(b, PAL.paintCream, 0.55, 0.72, -0.2, 0.08, 0.09, 0.12, 6, true); });
   place(c, 0.9, y, 0.75, 0, () => bench(c, 1.6));
   // shelf on the back posts, with jars; a hanging lantern
   bx(b, PAL.plankLight, 1.1, y + 1.25, -d / 2 + 0.1, 2.1, 0.07, 0.3);
   for (let i = 0; i < 4; i++) cyl(b, pick(rng, POTS), 0.3 + i * 0.5, y + 1.32, -d / 2 + 0.1, 0.09, 0.11, 0.2, 6, true);
   lantern(c, 0, y + hF - 0.15, d / 2 - 0.3);
-  basket(b, -1.9, g(-1.9, 1.3), 1.3, 1.2, PAL.leafYellow); basket(b, -1.3, g(-1.3, 1.6), 1.6, 0.9);
+  basket(c, -1.9, g(-1.9, 1.3), 1.3, 1.2, PAL.leafYellow); basket(c, -1.3, g(-1.3, 1.6), 1.6, 0.9);
   pot(c, rng, w / 2 + 0.4, g(w / 2 + 0.4, d / 2), d / 2, 1.2, 1); pot(c, rng, -w / 2 - 0.4, g(-w / 2 - 0.4, d / 2), d / 2 + 0.2, 1.1, 0);
   anchor(c, 'kitchen', 0.6, y, d / 2 + 1.4, Math.PI);
 }
@@ -648,7 +667,7 @@ function thatchShelter(c: Ctx, rng: Rng, w = 4.2, d = 3.2) {
   place(c, 0, y, -d / 2 + 0.45, 0, () => bench(c, 2.4));
   place(c, w / 2 - 0.7, y, 0.5, 0.3, () => { cyl(b, PAL.plank, 0, 0, 0, 0.3, 0.27, 0.45, 8, true); });
   lantern(c, -w / 2 + 0.5, y + h, d / 2 - 0.1);
-  basket(b, -w / 2 + 0.5, y, -d / 2 + 1.1, 1);
+  basket(c, -w / 2 + 0.5, y, -d / 2 + 1.1, 1);
   return y;
 }
 // two canoes on a two-level pole rack
@@ -687,54 +706,46 @@ function ridgeShelter(c: Ctx, rng: Rng) {
   rail(c, rng, [-1.2, 3.4], [w / 2 + 0.8, 3.4], Math.min(fy(-1.2, 3.4), fy(w / 2 + 0.8, 3.4)) + 0.05, 1.05, PAL.plankDark, PAL.plankLight);
   anchor(c, 'ridge', 0, y, 1.4, Math.PI);
 }
-// bank steps: log risers and mud treads following the ground from top to foot
+// bank steps: a walkable stair of log steps following the ground from the bank top down to the landing deck.
+// Built from bank_steps_piece.glb (4 steps, 1 m run, 1 m drop), each piece stretched to the ground it sits on.
 function bankSteps(c: Ctx, rng: Rng, top: L.P2, foot: L.P2, stopY: number) {
   const b = c.b, dx = foot[0] - top[0], dz = foot[1] - top[1], len = Math.hypot(dx, dz), ux = dx / len, uz = dz / len, yaw = Math.atan2(ux, uz);
-  let last = c.g(top[0], top[1]), prev = 0, k = 0;
-  const tops: V3[][] = [[], []];
-  const railPost = (s: number, y: number) => {
-    for (const sd of [0, 1]) { const o = sd ? 1.3 : -1.3, x = top[0] + ux * s - uz * o, z = top[1] + uz * s + ux * o, g = c.g(x, z), t: V3 = [x + jit(rng, 0.07), Math.max(g, y) + 1.05, z + jit(rng, 0.07)]; log(b, PAL.plankDark, [x, g - 0.6, z], t, 0.09, 0.07, 6); tops[sd].push(t); c.S.solids.push({ x, z, r: 0.14, top: t[1] }); }
-  };
-  railPost(len * 0.28, last);
-  for (let s = 0.05; s < len + 4; s += 0.05) {
-    const x = top[0] + ux * s, z = top[1] + uz * s, y = c.g(x, z);
-    if (y < stopY) break;
-    if (last - y >= 0.24) {
-      last -= 0.24; const run = Math.min(0.7, s - prev); prev = s;
-      place(c, x, last, z, yaw, () => {
-        log(b, PAL.plankDark, [-1.1 + jit(rng, 0.08), 0.0, 0.02], [1.1 + jit(rng, 0.08), 0.0, 0.02 + jit(rng, 0.04)], 0.115, 0.105, 6);
-        bx(b, k % 2 ? PAL.mudLight : PAL.earth, 0, -0.14, -run / 2, 2.0, 0.14, run);
-        if (k % 3 === 0) for (const sx of [-1, 1]) log(b, PAL.plank, [sx * 0.95, -0.4, 0.14], [sx * 0.95, 0.14, 0.14], 0.05, 0.045, 4);
-      });
-      if (k % 6 === 2) railPost(s, last);
-      k++;
-    }
+  const gs = (s: number) => c.g(top[0] + ux * s, top[1] + uz * s);
+  let s0 = 0, y0 = gs(0), count = 0;
+  for (let s = 0.1; s < len + 6 && y0 > stopY + 0.05; s += 0.05) {
+    const y = Math.max(gs(s), stopY), drop = y0 - y, run = s - s0;
+    if (drop < 1.0 && !(y <= stopY && drop > 0.2) && !(run >= 2.6 && drop > 0.45)) { if (run >= 2.6) { s0 = s; y0 = Math.max(y0 - drop, stopY); } continue; }
+    // one piece from (s0, y0) to (s, y0 - drop)
+    place(c, top[0] + ux * s0, y0, top[1] + uz * s0, yaw, () => {
+      if (c.A.bank_steps_piece) { b.push().scale(1, drop, run); put(c, c.A.bank_steps_piece); b.pop(); }
+      else for (let k = 0; k < 4; k++) { log(b, PAL.plankDark, [-1.1, -k * drop / 4 - 0.1, (k + 1) * run / 4 - 0.07], [1.1, -k * drop / 4 - 0.1, (k + 1) * run / 4 - 0.07], 0.105, 0.1, 6); bx(b, k % 2 ? PAL.mudLight : PAL.earth, 0, -k * drop / 4 - 0.5, (k + 0.5) * run / 4 - 0.1, 1.9, 0.49, run / 4 + 0.1); }
+      for (let k = 0; k < 4; k++) walk(c, -1.0, k * run / 4 - 0.02, 1.0, (k + 1) * run / 4 + 0.02, -k * drop / 4);
+      for (const sd of [-1, 1]) solid(c, sd * 1.22, 0.05, 0.14, 1.05);
+    });
+    s0 = s; y0 -= drop; count++;
   }
-  for (const t of tops) for (let i = 0; i < t.length - 1; i++) { log(b, PAL.plankLight, t[i], t[i + 1], 0.05, 0.05, 5); log(b, PAL.rope, [t[i][0], t[i][1] - 0.45, t[i][2]], [t[i + 1][0], t[i + 1][1] - 0.45, t[i + 1][2]], 0.04, 0.04, 4); }
-  return k;
+  void rng;
+  return { s: s0, y: y0, x: top[0] + ux * s0, z: top[1] + uz * s0, count };
 }
+// the landing at the foot of the steps. Local frame: origin at LANDING, +x east (the bank).
+// Platform x -1..2, z -7..1.4; finger out into the pool x -6.5..-1, z -7..-5.2 (clear of the canoe start at local (-4, 0)).
 function jetty(c: Ctx, rng: Rng, deckY: number) {
-  // local frame: origin at LANDING, +x east. Platform at the foot of the steps, a finger out into the pool (west).
-  const b = c.b;
-  const deck = (x0: number, x1: number, z0: number, z1: number) => {
-    const n = Math.round((x1 - x0) / 0.42), w = (x1 - x0) / n;
-    for (let i = 0; i < n; i++) bx(b, pick(rng, DECK), x0 + (i + 0.5) * w, deckY - 0.11 + jit(rng, 0.012), (z0 + z1) / 2 + jit(rng, 0.05), w - 0.025, 0.11, z1 - z0 + jit(rng, 0.1));
-    for (const z of [z0 + 0.2, z1 - 0.2]) bx(b, PAL.plankDark, (x0 + x1) / 2, deckY - 0.3, z, x1 - x0, 0.19, 0.16);
-    walk(c, x0, z0, x1, z1, deckY);
+  const b = c.b, asset = c.A.jetty;
+  const build = () => {
+    const bb = c.b;
+    const deck = (x0: number, x1: number, z0: number, z1: number) => {
+      const n = Math.round((x1 - x0) / 0.42), w = (x1 - x0) / n;
+      for (let i = 0; i < n; i++) bx(bb, pick(rng, DECK), x0 + (i + 0.5) * w, deckY - 0.11 + jit(rng, 0.012), (z0 + z1) / 2 + jit(rng, 0.05), w - 0.025, 0.11, z1 - z0 + jit(rng, 0.1));
+      walk(c, x0, z0, x1, z1, deckY);
+    };
+    const posts = (x: number, z: number, up: number) => { const g = gl(c, x, z); if (g < deckY - 0.2) log(bb, PAL.plankDark, [x + jit(rng, 0.1), g - 0.8, z + jit(rng, 0.1)], [x, deckY + up, z], 0.14, 0.12, 6); if (up > 0.2) solid(c, x, z, 0.18, deckY + up); };
+    deck(-1.0, 2.0, -7.0, 1.4); deck(-6.5, -1.0, -7.0, -5.2);
+    for (const q of [[-1.0, 1.3, 0.95], [1.95, 1.3, -0.1], [-1.0, -3.0, 0.85], [1.95, -3.0, -0.1], [2.0, -6.9, -0.1], [-1.0, -6.9, -0.1], [-6.4, -5.3, 1.05], [-6.4, -6.9, 0.9], [-3.7, -5.3, -0.1], [-3.7, -6.9, 0.8], [-1.0, -5.1, -0.1]]) posts(q[0], q[1], q[2]);
+    solid(c, 1.35, -6.2, 0.5, deckY + 0.5); solid(c, 0.45, -6.35, 0.36, deckY + 0.45);
   };
-  const posts = (x: number, z: number, up: number) => { const g = gl(c, x, z); if (g < deckY - 0.2) { log(b, PAL.plankDark, [x + jit(rng, 0.1), g - 0.8, z + jit(rng, 0.1)], [x, deckY + up, z], 0.14, 0.12, 6); if (up > 0.2) { cyl(b, PAL.paintCream, x, deckY + up - 0.02, z, 0.125, 0.09, 0.1, 6); solid(c, x, z, 0.18, deckY + up); } } };
-  deck(-1.6, 1.7, -4.4, 1.0); deck(-7.0, -1.6, -4.4, -2.6);
-  for (const x of [-1.5, 1.5]) for (const z of [-4.3, -1.7, 0.9]) posts(x, z, z > 0 && x < 0 ? 0.9 : -0.1);
-  for (const x of [-6.9, -4.3]) for (const z of [-4.3, -2.7]) posts(x, z, x < -6 ? 1.0 : (z < -4 ? 0.8 : -0.1));
-  rope(b, [-6.9, deckY + 0.8, -4.3], [-4.3, deckY + 0.65, -4.3], 0.3, 0.04, 5);
-  // lantern posts on the platform and at the jetty end
-  lanternPost(c, rng, 1.5, -4.2, 2.4, Math.PI, deckY); lanternPost(c, rng, -6.9, -2.7, 2.3, HP, deckY);
-  // things on the landing
-  basket(b, 1.0, deckY, -3.4, 1.1); cyl(b, PAL.paintBlue, 0.3, deckY, -3.9, 0.22, 0.24, 0.42, 8, true);
-  bx(b, PAL.plankLight, -0.9, deckY, -3.7, 0.7, 0.4, 0.5, 0.05); bx(b, PAL.plank, -0.9, deckY + 0.4, -3.7, 0.74, 0.05, 0.54);
-  cleat(b, -6.2, deckY, -2.8); cleat(b, -3.0, deckY, -4.2);
-  tyre(b, -5.0, deckY - 0.3, -2.52); tyre(b, -2.6, deckY - 0.3, -2.52);
-  anchor(c, 'landing', 0, deckY, -1.6, -HP); anchor(c, 'jettyEnd', -6.3, deckY, -3.5, -HP);
+  if (asset) { b.push().translate(0, deckY - 4.0, 0); put(c, asset); b.pop(); ghost(c, build); } else build();
+  lanternPost(c, rng, 1.75, -3.6, 2.5, Math.PI, deckY); lanternPost(c, rng, -6.25, -6.1, 2.5, HP, deckY);
+  anchor(c, 'landing', 0.5, deckY, 0, -HP); anchor(c, 'jettyEnd', -5.6, deckY, -6.1, -HP);
 }
 // a plank bridge along local z between z0 and z1 at local height 0, on trestles, with steps at both ends
 function plankBridge(c: Ctx, rng: Rng, z0: number, z1: number, width = 1.7) {
@@ -769,11 +780,13 @@ function deckBoards(c: Ctx, rng: Rng, x0: number, x1: number, z0: number, z1: nu
 }
 // run fn with the drawing thrown away: keeps its solids, walk rects, lamps and anchors (used when a Blender asset replaces the code-built look)
 function ghost(c: Ctx, fn: () => void) { const real = c.b, tmp = new MeshBuilder(); tmp.m = real.m.slice(); c.b = tmp; try { fn(); } finally { c.b = real; } }
-const FLOAT_HOUSE_BASE = 0.36;   // floating_house.glb: the waterline is this far above the pivot
+const RAFT_BASE = 0.36, RAFT_DECK = 0.48;   // every raft glb: the waterline is 0.36 above the pivot, the deck top 0.48 above the waterline
+// draw a raft asset (true) or report that the code-built twin must be drawn (false)
+function putRaft(c: Ctx, a: Asset | null | undefined): boolean { if (!a) return false; c.b.push().translate(0, -RAFT_BASE, 0); put(c, a); c.b.pop(); return true; }
 function floatHouse(c: Ctx, name: string, o: Partial<HouseOpt>, main: boolean, asset: Asset | null = null) {
   if (asset) {
     // the Blender-made house; the code-built twin below supplies the same solids / walk / anchors (same layout numbers)
-    c.b.push().translate(0, -FLOAT_HOUSE_BASE, 0); put(c, asset); c.b.pop();
+    putRaft(c, asset);
     const n = c.S.lamps.length; let y = 0;
     ghost(c, () => { y = floatHouse(c, name, o, main, null); });
     c.S.lamps.length = n; lampAt(c, -0.3, 1.85, 2.1);
@@ -793,7 +806,7 @@ function floatHouse(c: Ctx, name: string, o: Partial<HouseOpt>, main: boolean, a
   place(c, -1.2, y, 1.15, 0, () => bench(c, 1.5, PAL.plankLight));
   place(c, 3.6, y, -2.75, 0, () => bench(c, 1.4, PAL.paintTeal));
   pot(c, rng, 0.7, y, 1.05, 1.15, 1); pot(c, rng, 1.25, y, 0.7, 0.9, 0); pot(c, rng, -3.9, y, 1.1, 1.1, 2); pot(c, rng, 4.2, y, 2.8, 1.2, 1); pot(c, rng, 1.5, y, -2.8, 1.0, 2); pot(c, rng, 3.5, y, 2.9, 0.9, 0);
-  basket(b, 2.0, y, 2.6, 1.0); drum(c, 4.1, -2.0, PAL.paintTeal, y);
+  basket(c, 2.0, y, 2.6, 1.0); drum(c, 4.1, -2.0, PAL.paintTeal, y);
   for (const p of [[4.35, 2.95], [-4.35, 2.95], [4.35, -2.95], [-4.35, -2.95]]) cleat(b, p[0], y, p[1]);
   for (const x of [-3.2, -0.2, 2.9]) { tyre(b, x, 0.12, 3.62); rope(b, [x, 0.4, 3.62], [x, y, 3.25], 0, 0.035, 1); }
   tyre(b, 1.0, 0.12, -3.62); b.push().translate(5.12, 0.12, 1.2).rotY(HP); tyre(b, 0, 0, 0); b.pop();
@@ -806,8 +819,9 @@ function floatHouse(c: Ctx, name: string, o: Partial<HouseOpt>, main: boolean, a
   }
   return y;
 }
-function soilBoxRaft(c: Ctx, rng: Rng) {
-  const b = c.b, top = logRaft(b, rng, 5.2, 7, 0.25), y = top + 0.1;
+function soilBoxRaft(c: Ctx, rng: Rng, useAsset = true): number {
+  if (useAsset && putRaft(c, c.A.garden_raft)) { let y = 0; ghost(c, () => { y = soilBoxRaft(c, rng, false); }); return y; }
+  const b = c.b, y = RAFT_DECK; logRaft(b, rng, 5.2, 7, 0.25);
   deckBoards(c, rng, -2.3, 2.3, -1.65, 1.65, y);
   place(c, -0.9, y, -0.95, 0, () => gardenBox(c, rng, 2.4, 0.95, 0.25, 0));
   place(c, 0.9, y, 0.95, 0, () => gardenBox(c, rng, 2.4, 0.95, 0.25, 0));
@@ -821,8 +835,8 @@ function soilBoxRaft(c: Ctx, rng: Rng) {
   return y;
 }
 // post-and-rail pen in local coords, x0..x1, z0..z1, gate on the +x end
-function pen(c: Ctx, rng: Rng, x0: number, x1: number, z0: number, z1: number, y: number, h: number, post = PAL.plankDark, bar = PAL.plankLight) {
-  const b = c.b, gz0 = (z0 + z1) / 2 - 0.75, gz1 = gz0 + 1.5;
+function pen(c: Ctx, rng: Rng, x0: number, x1: number, z0: number, z1: number, y: number, h: number, post = PAL.plankDark, bar = PAL.plankLight, gw = 1.5) {
+  const b = c.b, gz0 = (z0 + z1) / 2 - gw / 2, gz1 = gz0 + gw;
   rail(c, rng, [x0, z1], [x1, z1], y, h, post, bar, [], 3); rail(c, rng, [x1, z0], [x0, z0], y, h, post, bar, [], 3); rail(c, rng, [x0, z0], [x0, z1], y, h, post, bar, [], 3);
   rail(c, rng, [x1, z1], [x1, z0], y, h, post, bar, [[z1 - gz1, z1 - gz0]], 3);
   // the gate: a framed leaf with a diagonal, a little ajar
@@ -832,31 +846,41 @@ function pen(c: Ctx, rng: Rng, x0: number, x1: number, z0: number, z1: number, y
   beam(b, PAL.paintCream, [0.03, 0.2, 0.1], [0.03, h - 0.1, 1.36], 0.06, 0.09);
   b.pop();
 }
-function corralRaft(c: Ctx, rng: Rng) {
-  const b = c.b, top = logRaft(b, rng, 7.0, 11), y = top + 0.1;
-  deckBoards(c, rng, -3.1, 3.1, -2.6, 2.6, y);
-  pen(c, rng, -2.6, 2.4, -2.0, 2.0, y, 1.25);
-  hayPile(b, rng, -1.7, y, -1.2, 0.8);
-  // a feed trough and a water tub
-  place(c, -0.2, y, 1.55, 0, () => { bx(b, PAL.plank, 0, 0.25, 0, 1.6, 0.08, 0.4); for (const s of [-1, 1]) { bx(b, PAL.plankLight, 0, 0.25, s * 0.2, 1.6, 0.3, 0.07); bx(b, PAL.plankDark, s * 0.7, 0, 0, 0.1, 0.3, 0.4); } bx(b, PAL.leafYellow, 0, 0.33, 0, 1.4, 0.12, 0.3); });
-  cyl(b, PAL.paintBlue, 1.7, y, -1.5, 0.3, 0.34, 0.36, 8, true); cyl(b, PAL.tinDark, 1.7, y + 0.3, -1.5, 0.3, 0.3, 0.02, 8);
-  for (const p of [[2.9, 2.4], [-2.9, 2.4], [2.9, -2.4], [-2.9, -2.4]]) cleat(b, p[0], y, p[1]);
-  tyre(b, -1.5, 0.12, 3.05); tyre(b, 1.5, 0.12, -3.05);
-  lanternPost(c, rng, 2.75, -2.25, 2.3, Math.PI, y);
-  anchor(c, 'corralRaft', 0, y, 0, HP);
+function corralRaft(c: Ctx, rng: Rng, useAsset = true): number {
+  if (useAsset && putRaft(c, c.A.corral_raft)) { let y = 0; ghost(c, () => { y = corralRaft(c, rng, false); }); return y; }
+  const b = c.b, y = RAFT_DECK; logRaft(b, rng, 7.6, 11);
+  deckBoards(c, rng, -3.4, 3.4, -2.85, 2.85, y);
+  pen(c, rng, -2.75, 2.75, -2.25, 2.25, y, 1.25);
+  hayPile(b, rng, -0.9, y, -1.35, 0.72);
+  // leaf rack along the -x end, a feed trough, a water tub, a boarding plank off the +z side
+  for (const z of [-1.5, 1.2]) log(b, PAL.plankDark, [-2.2, y, z], [-2.2, y + 1.38, z], 0.05, 0.045, 5);
+  log(b, PAL.plank, [-2.2, y + 1.35, -1.75], [-2.2, y + 1.36, 1.45], 0.045, 0.04, 5);
+  for (let i = 0; i < 6; i++) { b.set(pick(rng, [PAL.palm, PAL.palmLight, PAL.leafOlive]), 0.03); const z = -1.4 + i * 0.5; for (const s of [-1, 1]) quad2(b, [-2.2, y + 1.4, z], [-2.2, y + 1.4, z + 0.4], [-2.2 + s * 0.35, y + 0.6, z + 0.4], [-2.2 + s * 0.35, y + 0.6, z]); }
+  b.set(0, 0);
+  solidLine(c, -2.2, -1.5, -2.2, 1.2, y + 1.4, 0.35);
+  place(c, 0.6, y, 1.82, 0, () => { bx(b, PAL.plank, 0, 0.25, 0, 1.7, 0.08, 0.4); for (const s of [-1, 1]) { bx(b, PAL.plankLight, 0, 0.25, s * 0.2, 1.7, 0.3, 0.07); bx(b, PAL.plankDark, s * 0.72, 0, 0, 0.1, 0.5, 0.46); } bx(b, PAL.leafYellow, 0, 0.33, 0, 1.5, 0.12, 0.3); });
+  cyl(b, PAL.paintBlue, 1.9, y, -1.6, 0.27, 0.34, 0.36, 8, true); cyl(b, PAL.tinDark, 1.9, y + 0.3, -1.6, 0.31, 0.31, 0.02, 8);
+  solid(c, 1.9, -1.6, 0.36, y + 0.4);
+  beam(b, PAL.plankLight, [1.5, y + 0.02, 2.6], [1.5, y - 0.44, 5.05], 0.55, 0.06);
+  for (let i = 0; i < 3; i++) walk(c, 1.22, 2.85 + i * 0.72, 1.78, 2.85 + (i + 1) * 0.72, y - 0.07 - i * 0.14);
+  for (const p of [[3.15, 2.6], [-3.15, 2.6], [3.15, -2.6], [-3.15, -2.6]]) cleat(b, p[0], y, p[1]);
+  tyre(b, -1.5, 0.12, 3.2); tyre(b, 1.6, 0.12, -3.2);
+  lanternPost(c, rng, 3.05, -2.5, 2.5, Math.PI, y);
+  anchor(c, 'corralRaft', 0, y, 0, HP); anchor(c, 'corralGate', 3.2, y, 0, -HP); anchor(c, 'corralPlank', 1.5, y, 2.6, Math.PI);
   return y;
 }
-function floatCorral(c: Ctx, rng: Rng) {
-  const b = c.b, top = logRaft(b, rng, 5.4, 8), y = top + 0.1;
+function floatCorral(c: Ctx, rng: Rng, useAsset = true): number {
+  if (useAsset && putRaft(c, c.A.float_corral)) { let y = 0; ghost(c, () => { y = floatCorral(c, rng, false); }); return y; }
+  const b = c.b, y = RAFT_DECK; logRaft(b, rng, 5.4, 8);
   deckBoards(c, rng, -2.4, 2.4, -2.0, 2.0, y);
-  pen(c, rng, -1.9, 1.7, -1.5, 1.5, y, 1.15, PAL.plankDark, PAL.paintCream);
+  pen(c, rng, -1.9, 1.7, -1.5, 1.5, y, 1.15, PAL.plankDark, PAL.paintCream, 1.3);
   // roof on four corner posts
   const h = 2.25, pitch = 0.5;
   for (const x of [-1.9, 1.7]) for (const z of [-1.5, 1.5]) log(b, PAL.plankDark, [x, y, z], [x + jit(rng, 0.06), y + h, z + jit(rng, 0.06)], 0.1, 0.085, 6);
   for (const z of [-1.5, 1.5]) beam(b, PAL.plank, [-2.2, y + h + 0.05, z], [2.0, y + h + 0.05, z], 0.12, 0.12);
   place(c, -0.1, y + h + 0.14 + 1.5 * Math.tan(pitch), 0, 0, () => gableRoof(c, rng, 4.8, 2.1, 2.1, pitch, THATCH, 0.12, PAL.plankDark, 0.16, 0.6));
-  hayPile(b, rng, -1.1, y, -0.7, 0.6);
-  cyl(b, PAL.paintRed, 1.1, y, 1.0, 0.24, 0.28, 0.32, 8, true);
+  hayPile(b, rng, -1.05, y, -0.7, 0.58);
+  cyl(b, PAL.paintRed, 1.1, y, 0.95, 0.24, 0.28, 0.32, 8, true);
   for (const p of [[2.2, 1.8], [-2.2, 1.8], [2.2, -1.8], [-2.2, -1.8]]) cleat(b, p[0], y, p[1]);
   tyre(b, 0.3, 0.12, 2.25);
   anchor(c, 'floatCorral', 0, y, 0, HP);
@@ -893,6 +917,8 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
   const c: Ctx = { b: fb, rb: new MeshBuilder(), gb: new MeshBuilder(), f: -1, S, seed, g: groundAt, A };
   const R = (n: string) => stream(seed, 'struct:' + n);
   const FLOOR = L.FLOOD_RANGE + 0.6; // 11.2: just above the top flood level
+  const Y0 = (x: number, z: number) => Math.max(groundAt(x, z), L.FLOOD_RANGE - 0.2);   // small houses: floor 0.8 m over the high ground
+  const LAMP_B: V3 = [-0.9, 1.72, 3.32], LAMP_B2: V3 = [-0.79, 1.87, 3.32];   // lantern glass in the two glb files
 
   // ---- 1. the community
   // main stilt house: where the levee falls away east of STILT_HOUSE, so the legs stand 2-3 m tall
@@ -901,7 +927,7 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
   place(c, mx, FLOOR, mz, -HP, () => {
     const rng = R('main'), w = 7, d = 5, porch = 2.4, hw = w / 2, zf = d / 2 + porch, dx = w * 0.32 - hw;
     const sideZ = d / 2 + porch / 2;
-    const glb = A.stiltHouseA, STILT_LEG = 3.6, STILT_STAIR = 2.8;   // stilt_house_a.glb: floor 3.6 m above its pivot, side steps 2.8 m down
+    const glb = A.stilt_house_a, STILT_LEG = 3.6, STILT_STAIR = 2.8;   // stilt_house_a.glb: floor 3.6 m above its pivot, side steps 2.8 m down
     const draw = () => { house(c, { name: 'main', w, d, wallH: 2.5, porch, roof: 'front', pitch: 0.5, walls: [PAL.plankLight, PAL.plankPale, PAL.plankLight, PAL.plank], trim: PAL.paintTeal, door: PAL.paintRed, shutter: PAL.paintCream, roofPals: TIN, glow: true, legs: true, platform: true, sag: 0.16, hammock: true, lanternFront: true, awning: [YELLOW, PAL.paintCream],
       railGaps: { front: [[dx + hw + 0.25 - 0.8, dx + hw + 0.25 + 0.8]], right: [[porch / 2 - 0.75, porch / 2 + 0.75]] } }); };
     if (glb) {
@@ -928,33 +954,30 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
     anchor(c, 'palmStack', px, pg, pz + 1.9, Math.PI);
     anchor(c, 'stiltDoor', dx, 0, d / 2 + 0.7, Math.PI); anchor(c, 'stiltPorch', 1.2, 0, d / 2 + porch * 0.5, 0);
     if (glb) place(c, 0.4, 0, d / 2 + 0.3, 0, () => ghost(c, () => bench(c, 1.3, PAL.paintTeal)));
-    else { basket(fb, -hw + 0.9, 0, d / 2 + 0.5, 1.0, PAL.fruit); place(c, 0.4, 0, d / 2 + 0.3, 0, () => bench(c, 1.3, PAL.paintTeal)); }
+    else { basket(c, -hw + 0.9, 0, d / 2 + 0.5, 1.0, PAL.fruit); place(c, 0.4, 0, d / 2 + 0.3, 0, () => bench(c, 1.3, PAL.paintTeal)); }
     paddle(c, [-hw + 0.75, 0.02, d / 2 + 0.3], [-hw + 0.9, 1.6, d / 2 + 0.12], PAL.paintTeal);
   });
-  // two smaller painted houses on short stilts
+  // two smaller painted houses on short stilts (stilt_house_b.glb / stilt_house_b2.glb: floor 1.5 m above the pivot, front steps 0.8 m down)
+  const smallHouse = (asset: Asset | null, lamp: V3, o: HouseOpt) => {
+    const hw = o.w / 2, dx = o.w * 0.32 - hw;
+    o.railGaps = { front: [[dx + hw + 0.25 - 0.75, dx + hw + 0.25 + 0.75]] };
+    const steps = () => place(c, dx, 0, o.d / 2 + o.porch, 0, () => stairs(c, asset ? 0.8 : -gl(c, 0, 1.2), 1.4, true));
+    if (asset) {
+      fb.push().translate(0, -1.5, 0); put(c, asset); fb.pop();
+      const n = S.lamps.length; ghost(c, () => { house(c, o); steps(); }); S.lamps.length = n; lampAt(c, lamp[0], lamp[1], lamp[2]);
+    } else { house(c, o); steps(); }
+  };
   const bX = L.STILT_HOUSE[0] + 3, bZ = L.STILT_HOUSE[1] - 6;
-  place(c, bX, FLOOR - 0.05, bZ, -HP, () => {
-    const rng = R('houseB'), w = 5, d = 4, porch = 1.5, hw = w / 2, dx = w * 0.32 - hw;
-    house(c, { name: 'houseB', w, d, wallH: 2.6, porch, roof: 'side', pitch: 0.4, walls: [PAL.paintRed, PAL.paintRed, PAL.shirtRed], trim: PAL.paintCream, door: PAL.paintTeal, shutter: YELLOW, roofPals: TIN, glow: true, legs: true, platform: true, lanternFront: true,
-      railGaps: { front: [[dx + hw + 0.25 - 0.75, dx + hw + 0.25 + 0.75]] } });
-    place(c, dx, 0, d / 2 + porch, 0, () => stairs(c, -gl(c, 0, 1.2), 1.4, true));
-    paddle(c, [hw - 0.4, 0.02, d / 2 + 0.3], [hw - 0.5, 1.6, d / 2 + 0.1], YELLOW);
-    void rng;
-  });
+  place(c, bX, Y0(bX, bZ) + 0.78, bZ, -HP, () => smallHouse(A.stilt_house_b, LAMP_B, { name: 'houseB', w: 5, d: 4, wallH: 2.8, porch: 1.5, roof: 'side', pitch: 0.34, walls: [PAL.paintRed, PAL.paintRed, PAL.shirtRed], trim: PAL.paintCream, door: PAL.paintTeal, shutter: YELLOW, roofPals: TIN, glow: true, legs: true, platform: true, lanternFront: true }));
   const cX = L.COMMUNITY[0] - 2, cZ = L.COMMUNITY[1] + 21;
-  place(c, cX, FLOOR, cZ, 0, () => {
-    const w = 4.4, d = 3.6, porch = 1.7, hw = w / 2, dx = w * 0.32 - hw;
-    house(c, { name: 'houseC', w, d, wallH: 2.4, porch, roof: 'front', pitch: 0.56, walls: [PAL.paintTeal, PAL.paintTeal, PAL.shirtTeal], trim: PAL.paintCream, door: PAL.paintBlue, shutter: PAL.flowerOrange, roofPals: [PAL.tinRust, PAL.tin, PAL.tinRust, PAL.paintRed], glow: true, legs: true, platform: true, sag: 0.1, lanternFront: true,
-      railGaps: { front: [[dx + hw + 0.25 - 0.75, dx + hw + 0.25 + 0.75]] } });
-    place(c, dx, 0, d / 2 + porch, 0, () => stairs(c, -gl(c, 0, 1.2), 1.4, true));
-  });
+  place(c, cX, Y0(cX, cZ) + 0.8, cZ, 0, () => smallHouse(A.stilt_house_b2, LAMP_B2, { name: 'houseC', w: 4.4, d: 3.6, wallH: 2.4, porch: 1.7, roof: 'front', pitch: 0.56, walls: [PAL.paintTeal, PAL.paintTeal, PAL.shirtTeal], trim: PAL.paintCream, door: PAL.paintBlue, shutter: PAL.flowerOrange, roofPals: [PAL.tinRust, PAL.tin, PAL.tinRust, PAL.paintRed], glow: true, legs: true, platform: true, sag: 0.1, lanternFront: true }));
   place(c, L.STILT_HOUSE[0] + 10, 0, L.STILT_HOUSE[1] + 7, -HP, () => kitchen(c, R('kitchen')));
 
   // the yard
   const Y = (x: number, z: number) => groundAt(x, z);
   place(c, L.AERIAL[0], Y(L.AERIAL[0], L.AERIAL[1]), L.AERIAL[1], 0.4, () => { aerial(c, R('aerial')); anchor(c, 'aerialFoot', 0.2, 0, 1.3, Math.PI); });
   place(c, 63.5, 0, -77.5, 0.25, () => clothesLine(c, R('line')));
-  place(c, bX + 0.4, 0, bZ + 5.2, 0, () => waterTank(c));
+  place(c, bX + 0.4, 0, bZ + 5.4, 0, () => waterTank(c));
   place(c, 50, 0, -98.5, 0.5, () => canoeOnTrestles(c));
   place(c, 54, 0, -101.5, -0.7, () => motorOnStand(c));
   place(c, 45, 0, -102, 1.25, () => netRack(c, R('net')));
@@ -963,20 +986,19 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
   { const rng = R('yard');
     drum(c, 83.4, -89.4, PAL.paintBlue); drum(c, 84.2, -88.6, PAL.tinRust); drum(c, 83.3, -88.3, PAL.paintTeal);
     for (const p of [[64.3, -93.0, 1.2], [66.9, -94.2, 1.0], [57.0, -67.5, 1.3], [63.2, -58.0, 1.1], [42.2, -92.3, 1.3], [69.0, -91.6, 1.2], [68.4, -102.4, 1.1], [52.5, -95.8, 1.0]]) pot(c, rng, p[0], Y(p[0], p[1]), p[1], p[2]);
-    basket(fb, 51.8, Y(51.8, -100), -100, 1.1); basket(fb, 61.5, Y(61.5, -80.5), -80.5, 1.2, PAL.cloth);
+    basket(c, 51.8, Y(51.8, -100), -100, 1.1); basket(c, 61.5, Y(61.5, -80.5), -80.5, 1.2, PAL.cloth);
     lanternPost(c, rng, 42.0, -87.2, 2.6, 0.6); lanternPost(c, rng, 58.5, -86.0, 2.6, 2.2); lanternPost(c, rng, 77.5, -93.0, 2.6, -1.2); lanternPost(c, rng, 90.5, mz - 3.4, 2.6, 0.2);
-    // a canoe pulled up on the bank top
-    fb.push().translate(36.5, Y(36.5, -83) + 0.37, -83).rotY(1.9).rotZ(0.16); putCanoe(c); fb.pop(); solidLine(c, 35, -82.5, 38, -83.5, Y(36.5, -83) + 0.5, 0.45);
     anchor(c, 'yard', 58, Y(58, -88), -88, 0);
   }
   // bank steps and the landing
   const DECK_Y = 0.75;
-  bankSteps(c, R('steps'), L.BANK_TOP, L.LANDING, DECK_Y + 0.05);
+  const foot = bankSteps(c, R('steps'), L.BANK_TOP, [L.LANDING[0] - 0.4, L.LANDING[1]], DECK_Y);
+  void foot;
   anchor(c, 'bankTop', L.BANK_TOP[0], Y(L.BANK_TOP[0], L.BANK_TOP[1]), L.BANK_TOP[1], -HP);
   place(c, L.LANDING[0], 0, L.LANDING[1], 0, () => jetty(c, R('jetty'), DECK_Y));
   { const rng = R('moor');
-    for (const p of [[14.2, -95.5, 4.6], [13.6, -90.2, 5.2], [17.5, -102.5, 4.2], [2.5, -104.5, 4.8], [11.5, -84.0, 5.0]]) place(c, p[0], 0, p[1], 0, () => mooringPost(c, rng, p[2]));
-    lanternPost(c, rng, 26.3, -93.6, 2.4, -HP);
+    for (const p of [[14.6, -100.2, 4.6], [14.4, -96.0, 5.2], [19.5, -103.5, 4.2], [2.5, -104.5, 4.8], [11.5, -84.0, 5.0]]) place(c, p[0], 0, p[1], 0, () => mooringPost(c, rng, p[2]));
+    lanternPost(c, rng, 27.0, -93.2, 2.5, -HP); lanternPost(c, rng, 33.2, -89.2, 2.5, HP);
   }
 
   // ---- 5. along the routes
@@ -985,7 +1007,6 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
     const bx0 = 114, bzc = 40, deckY = Math.max(groundAt(bx0, bzc - 9), groundAt(bx0, bzc + 9)) + 0.55;
     let z0 = -6, z1 = 6; while (z0 > -14 && groundAt(bx0, bzc + z0 - 1.0) < deckY - 0.7) z0 -= 0.5; while (z1 < 14 && groundAt(bx0, bzc + z1 + 1.0) < deckY - 0.7) z1 += 0.5;
     place(c, bx0, deckY, bzc, 0, () => plankBridge(c, rng, z0, z1));
-    fb.push().translate(bx0 + 4.5, groundAt(bx0 + 4.5, bzc + z1 + 2.5) + 0.36, bzc + z1 + 2.5).rotY(0.7).rotZ(-0.12); putCanoe(c, 0.87); fb.pop();
     for (const t of [0.14, 0.33, 0.78]) { const p = L.pointOnLine(L.TRAIL, t), x = p[0] - p[3] * 2.4, z = p[1] + p[2] * 2.4; place(c, x, 0, z, t * 9, () => trailMarker(c, rng, t > 0.5 ? YELLOW : PAL.paintRed)); }
     // lake shore: shelter and canoe rack on the first ground that stays dry at low lake level
     let sx = 150, sz = 150, best = 1e9;
@@ -1019,22 +1040,38 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
     S.solids.push({ x: px, z: pz, r: 0.2, top: g + 1.4 });
     S.ropes.push({ fromFloat: i, lx, ly, lz, tx: px + dx * 0.08, ty: g + 1.05, tz: pz + dz * 0.08 });
   };
-  const HOME = addFloat(L.FLOAT_HOME[0], L.FLOAT_HOME[1], HP, 0.32, (fc) => { floatHouse(fc, 'home', {}, true, A.floatingHouse); });
+  const HOME = addFloat(L.FLOAT_HOME[0], L.FLOAT_HOME[1], HP, 0.32, (fc) => { floatHouse(fc, 'home', {}, true, A.floating_house); });
   moor(HOME, 4.35, 0.75, 2.95, 1, -0.12, 10.2); moor(HOME, -4.35, 0.75, 2.95, 1, 0.12, 10.2);
   const GARDEN = addFloat(L.FLOAT_HOME[0] - 2.5, L.FLOAT_HOME[1] - 12.5, HP + 0.18, 0.3, (fc) => { soilBoxRaft(fc, R('garden')); });
   moor(GARDEN, -2.2, 0.9, -1.5, 0.98, -0.2, 10.2);
   const FCOR = addFloat(L.FLOAT_HOME[0] - 1.3, L.FLOAT_HOME[1] + 9.6, HP - 0.06, 0.3, (fc) => { floatCorral(fc, R('fcorral')); });
-  S.ropes.push({ fromFloat: FCOR, lx: 2.2, ly: 0.7, lz: 1.8, tx: 13.6, ty: 4.6, tz: -90.2 });
+  S.ropes.push({ fromFloat: FCOR, lx: 2.2, ly: 0.7, lz: 1.8, tx: 11.5, ty: 4.4, tz: -84.0 });
   const CRAFT = addFloat(L.FLOAT_HOME[0] - 9, L.FLOAT_HOME[1] + 23, 1.9, 0.32, (fc) => { corralRaft(fc, R('craft')); });
   moor(CRAFT, 2.9, 0.7, 2.4, 0.97, 0.25, 9.6);
-  addFloat(L.LANDING[0] - 4.2, L.LANDING[1] - 6.4, HP + 0.12, 0.2, (fc) => { fc.b.push().translate(0, -0.16, 0); motorBoat(fc); fc.b.pop(); solidLine(fc, 0, -1.6, 0, 1.6, 0.5, 0.6); });
-  addFloat(L.FLOAT_HOME[0] - 4.5, L.FLOAT_HOME[1] - 1.5, 0.06, 0.2, (fc) => { fc.b.push().translate(0, 0.2, 0); putCanoe(fc); fc.b.pop(); paddle(fc, [0.1, 0.1, 0.9], [-0.1, 0.16, -0.7], PAL.paintRed); });
+  addFloat(L.LANDING[0] - 3.6, L.LANDING[1] - 9.3, HP + 0.12, 0.2, (fc) => { if (A.motor_canoe) { fc.b.push().translate(0, -0.2, 0); put(fc, A.motor_canoe); fc.b.pop(); solidLine(fc, 0, -2.8, 0, 2.8, 0.5, 0.55); } else { fc.b.push().translate(0, -0.16, 0); motorBoat(fc); fc.b.pop(); solidLine(fc, 0, -1.6, 0, 1.6, 0.5, 0.6); } fc.S.anchors['motorCanoe'] = { x: 0, y: 0.2, z: -1.5, yaw: 0, float: fc.f }; });
+  addFloat(L.FLOAT_HOME[0] - 4.5, L.FLOAT_HOME[1] - 1.5, 0.06, 0.2, (fc) => { fc.b.push().translate(0, 0.2, 0); putCanoe(fc, 1, true); fc.b.pop(); paddle(fc, [0.1, 0.1, 0.9], [-0.1, 0.16, -0.7], PAL.paintRed); });
+  // the passenger river boat, moored in the deep channel north of the landing (riverboat.glb: keel 0.95 below the waterline, bow +z)
+  if (A.riverboat) {
+    const rb = addFloat(L.FLOAT_HOME[0] + 3.5, L.FLOAT_HOME[1] - 27, Math.PI - 0.06, 0.95, (fc) => {
+      fc.b.push().translate(0, -0.95, 0); put(fc, A.riverboat); fc.b.pop();
+      walk(fc, -2.3, -10.0, 2.3, 9.0, 1.0); walk(fc, -2.45, -10.2, 2.45, 5.2, 3.4);
+      for (let i = 0; i < 10; i++) walk(fc, 0.9, -9.0 + i * 0.34 - 0.17, 1.7, -9.0 + i * 0.34 + 0.17, 3.4 - (i + 1) * 2.4 / 11);   // stairs between the decks
+      for (let i = 0; i < 4; i++) walk(fc, 2.3 + i * 0.75, -0.85, 2.3 + (i + 1) * 0.75, -0.05, 0.95 - i * 0.17);                   // boarding plank
+      solidLine(fc, -1.75, -8.4, -1.75, 2.8, 3.3, 0.3); solidLine(fc, 1.75, -8.4, 1.75, 2.8, 3.3, 0.3); solidLine(fc, -1.75, -8.4, 1.75, -8.4, 3.3, 0.3); solidLine(fc, -1.75, 2.8, -0.7, 2.8, 3.3, 0.3); solidLine(fc, 0.7, 2.8, 1.75, 2.8, 3.3, 0.3);
+      // the hull, for the canoe: stern, sides and the pointed bow
+      const hull: [number, number][] = [[-2.1, -11], [2.1, -11], [2.65, -8], [2.65, 3.5], [2.2, 7], [1.2, 9.5], [0, 11], [-1.2, 9.5], [-2.2, 7], [-2.65, 3.5], [-2.65, -8], [-2.1, -11]];
+      for (let i = 0; i < hull.length - 1; i++) { if (i === 2) { solidLine(fc, 2.65, -8, 2.65, -1.3, 2, 0.22); solidLine(fc, 2.65, 0.4, 2.65, 3.5, 2, 0.22); } else solidLine(fc, hull[i][0], hull[i][1], hull[i + 1][0], hull[i + 1][1], 2, 0.22); }
+      lampAt(fc, 0, 6.05, 4.98); lampAt(fc, 0, 7.3, 3.05);
+      anchor(fc, 'riverboat', 3.6, 0.7, -0.45, -HP); anchor(fc, 'riverboatDeck', 0, 1.0, 5.5, 0); anchor(fc, 'riverboatUpper', 0, 3.4, -3, 0);
+    });
+    moor(rb, 2.3, 1.3, 9.0, 0.97, -0.24, 10.2); moor(rb, 2.2, 1.3, -10.0, 0.97, 0.24, 10.2);
+  }
   // a second, smaller floating home further up the channel (if there is water enough at low level)
   { let bt = -1, bg = -1.3;
     for (let t = 0.4; t <= 0.5; t += 0.005) { const p = L.pointOnLine(L.CHANNEL, t); const g = Math.max(groundAt(p[0], p[1]), groundAt(p[0] - p[3] * 4, p[1] + p[2] * 4), groundAt(p[0] + p[3] * 4, p[1] - p[2] * 4)); if (g < bg) { bg = g; bt = t; } }
     if (bt > 0) {
       const p = L.pointOnLine(L.CHANNEL, bt), yaw = Math.atan2(-p[3], p[2]);
-      const i2 = addFloat(p[0], p[1], yaw, 0.32, (fc) => { floatHouse(fc, 'upriver', { walls: [PAL.paintCream, PAL.paintCream, PAL.plastic], trim: PAL.paintGreen, door: PAL.paintRed, shutter: PAL.paintGreen, roofPals: [PAL.paintTeal, PAL.tin, PAL.paintTeal, PAL.tinDark], glow: true }, false); fc.S.anchors['floatHome2'] = { x: 2.4, y: 0.6, z: 1.6, float: fc.f }; });
+      const i2 = addFloat(p[0], p[1], yaw, 0.32, (fc) => { floatHouse(fc, 'upriver', { walls: [PAL.paintCream, PAL.paintCream, PAL.plastic], trim: PAL.paintGreen, door: PAL.paintRed, shutter: PAL.paintGreen, roofPals: [PAL.paintTeal, PAL.tin, PAL.paintTeal, PAL.tinDark], glow: true }, false, A.floating_house_b); fc.S.anchors['floatHome2'] = { x: 2.4, y: RAFT_DECK, z: 1.6, yaw: HP, float: fc.f }; });
       // tie to whichever bank is nearer
       const [wx, wz] = f2w(i2, 0, 4), nx = (wx - p[0]) / 4, nz = (wz - p[1]) / 4;
       const reach = (s: number) => { for (let q = 2; q < 46; q += 0.5) if (groundAt(p[0] + nx * s * q, p[1] + nz * s * q) >= 7.0) return q; return 99; };
@@ -1043,35 +1080,4 @@ export async function buildStructures(seed: number, groundAt: (x: number, z: num
   }
   { const bk = bake(c); S.fixed = bk.mesh; S.fixedGlow = bk.glow ?? new MeshBuilder().build(); }
   return S;
-}
-
-// dev preview: ?structs=1 adds the structures to the running world (remove when the engine wires them in)
-if (typeof window !== 'undefined' && typeof location !== 'undefined' && location.search.includes('structs=1')) {
-  const tick = async () => {
-    const e = (window as any).__engine;
-    if (!e?.cooked || !e.worldMat || !e.scene || !e.tex) { setTimeout(tick, 25); return; }
-    const t0 = performance.now();
-    const s = await buildStructures(WORLD_SEED, (x, z) => e.groundAt(x, z));
-    const mat = makeWorldMaterial(e.tex, { rgb: true });
-    const gmat = new THREE.MeshBasicNodeMaterial(); gmat.colorNode = (T as any).attribute('dat', 'vec3').mul(1.5);
-    const add = (k: KitMesh, m: THREE.Material, parent: THREE.Object3D) => { const o = new THREE.Mesh(makeKitGeometry(k), m); o.castShadow = o.receiveShadow = m === mat; o.frustumCulled = false; parent.add(o); return o; };
-    add(s.fixed, mat, e.scene); if (s.fixedGlow.tris) add(s.fixedGlow, gmat, e.scene);
-    const fl = s.floating.map((f) => { const g = new THREE.Group(); g.rotation.y = f.yaw; add(f.mesh, mat, g); if (f.glow) add(f.glow, gmat, g); e.scene.add(g); return g; });
-    const upd = () => s.floating.forEach((f, i) => fl[i].position.set(f.x, Math.max(sim.water * L.FLOOD_RANGE, e.groundAt(f.x, f.z) + f.draft), f.z));
-    upd(); setInterval(upd, 30);
-    // preview ropes as sagging chunky lines (the engine should redraw them as the water moves)
-    const rc: Ctx = { b: new MeshBuilder(), rb: new MeshBuilder(), gb: new MeshBuilder(), f: -1, S: s, seed: 0, g: () => 0, A: null as unknown as Assets };
-    for (const r of s.ropes) { const f = s.floating[r.fromFloat], cs = Math.cos(f.yaw), sn = Math.sin(f.yaw); rope(rc.b, [f.x + r.lx * cs + r.lz * sn, sim.water * L.FLOOD_RANGE + r.ly, f.z - r.lx * sn + r.lz * cs], [r.tx, r.ty, r.tz], 0.6, 0.045, 8); }
-    add(bake(rc).mesh, mat, e.scene);
-    // preview camera: &scam=x,y,z,lx,ly,lz (world coordinates)
-    const sc = new URLSearchParams(location.search).get('scam');
-    if (sc && e.player) {
-      const v = sc.split(',').map(Number), pos = new THREE.Vector3(v[0], v[1], v[2]), look = new THREE.Vector3(v[3], v[4], v[5]);
-      const hold = () => { e.useFixedCam = false; e.player.camOverride = { pos, look }; e.camera.position.copy(pos); if (e.player.target) e.player.target.copy(look); e.camera.lookAt(look); };
-      hold(); setInterval(hold, 5);
-    }
-    (window as any).__structs = s;
-    console.log('[structs] fixed tris ' + s.fixed.tris + ' floating ' + s.floating.map((f) => f.mesh.tris).join(',') + ' solids ' + s.solids.length + '+' + s.floatSolids.length + ' walk ' + s.walk.length + ' lamps ' + s.lamps.length + ' ropes ' + s.ropes.length + ' ms ' + (performance.now() - t0).toFixed(0));
-  };
-  tick();
 }

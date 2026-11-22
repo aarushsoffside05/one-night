@@ -5,7 +5,8 @@
 // e.g. head = skin + hair, upper arm = sleeve + skin.
 import * as THREE from 'three/webgpu';
 import * as T from 'three/tsl';
-import { MeshBuilder } from './meshkit';
+import { MeshBuilder, type KitMesh } from './meshkit';
+import { loadKit } from './assets';
 import { makeKitGeometry } from './gfx';
 import { makeWorldMaterial, type WorldTextures } from './worldmat';
 import { PAL, SWATCHES, type Swatch } from './palette';
@@ -16,7 +17,36 @@ const PARTS = ['head', 'torso', 'armU', 'armL', 'legU', 'legL', 'pack', 'hat', '
 type Part = (typeof PARTS)[number];
 const MAX = 96;
 
-function partMesh(p: Part): THREE.BufferGeometry {
+// Blender-made parts (tools/blender/people.py -> src/assets/part_*.glb). Vertex colour rgb = shade (white x baked
+// occlusion on tinted faces, the real colour on "keep" faces); alpha = 0 first tint, 0.5 second tint, 1 keep, 0.75 keep + glow.
+// The geometry keeps dat = (palette id, wind, aux) like the code-built parts and adds a per-vertex 'shade' colour.
+export function craftedGeometry(k: KitMesh): THREE.BufferGeometry {
+  const n = k.pos.length / 3, dat = new Float32Array(n * 3), shade = new Float32Array(n * 3), al = k.wnd;
+  for (let i = 0; i < n; i++) {
+    const a = al ? al[i] : 0, glow = a >= 0.625 && a < 0.875;
+    dat[i * 3] = glow ? PAL.lampGlow : PAL.white; dat[i * 3 + 2] = a < 0.25 ? 0 : a < 0.625 ? 1 : 2;
+    shade[i * 3] = glow ? 1 : k.dat[i * 3]; shade[i * 3 + 1] = glow ? 1 : k.dat[i * 3 + 1]; shade[i * 3 + 2] = glow ? 1 : k.dat[i * 3 + 2];
+  }
+  const g = makeKitGeometry({ pos: k.pos, nrm: k.nrm, dat, tris: k.tris });
+  g.setAttribute('shade', new THREE.BufferAttribute(shade, 3));
+  return g;
+}
+// code-built geometry gets a white 'shade', so one material serves both paths
+export function plainShade(g: THREE.BufferGeometry): THREE.BufferGeometry {
+  g.setAttribute('shade', new THREE.BufferAttribute(new Float32Array(g.getAttribute('position').count * 3).fill(1), 3));
+  return g;
+}
+export async function loadCrafted(names: readonly string[], into: Map<string, KitMesh>): Promise<void> {
+  await Promise.all(names.map(async (n) => { try { const k = await loadKit('part_' + n); if (k && k.tris > 0) into.set(n, k); } catch (e) { console.warn('[one-night] part ' + n + ' failed', e); } }));
+}
+type PartStyle = Part | 'head2' | 'hat2';   // head2 = long hair with a pony tail, hat2 = a cap
+const partKits = new Map<string, KitMesh>();
+export async function preloadParts(): Promise<void> { await loadCrafted([...PARTS, 'head2', 'hat2'], partKits); }
+
+function partMesh(ps: PartStyle): THREE.BufferGeometry {
+  const kit = partKits.get(ps);
+  if (kit) return craftedGeometry(kit);
+  const p: Part = ps === 'head2' ? 'head' : ps === 'hat2' ? 'hat' : ps;
   const b = new MeshBuilder(), rng = stream(77, 'part:' + p);
   const W = PAL.white;
   // aux 0 = first tint, aux 1 = second tint, aux 2 = keep the swatch colour
@@ -45,7 +75,7 @@ function partMesh(p: Part): THREE.BufferGeometry {
     b.set(PAL.metal, 0, 2); b.box(0.12, 0.03, 0.12); b.push().translate(0, 0.19, 0); b.frustum(4, 0.07, 0.02, 0.05, true, true); b.pop();
     b.set(PAL.lampGlow, 0, 2); b.push().translate(0, 0.03, 0); b.frustum(5, 0.045, 0.05, 0.16, true); b.pop();
   }
-  return makeKitGeometry(b.build());
+  return plainShade(makeKitGeometry(b.build()));
 }
 
 export interface Look { height: number; skin: Swatch; hair: Swatch; shirt: Swatch; shorts: Swatch; shoe: Swatch; sleeves: boolean; longLegs: boolean; pack?: Swatch; hat?: Swatch; build?: number; }
@@ -85,7 +115,7 @@ export class People {
       geo.setAttribute('tint1', c1); this.col1.set(p, c1);
       const tint1 = t.attribute('tint1', 'vec3');
       const tint = t.mix(t.mix(tint1, tint2, t.step(0.5, aux)), t.vec3(1.0), t.step(1.5, aux));
-      mat.colorNode = base.mul(tint);
+      mat.colorNode = base.mul(tint).mul(t.attribute('shade', 'vec3'));
       const mesh = new THREE.InstancedMesh(geo, mat, MAX);
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       mesh.frustumCulled = false; mesh.castShadow = p !== 'lamp'; mesh.receiveShadow = true; mesh.count = 0; mesh.name = 'people_' + p;

@@ -3,7 +3,8 @@
 // cow and her calf. All moved by simple code paths; wings and tails flex in the vertex stage.
 import * as THREE from 'three/webgpu';
 import * as T from 'three/tsl';
-import { MeshBuilder } from './meshkit';
+import { MeshBuilder, type KitMesh } from './meshkit';
+import { craftedGeometry, plainShade, loadCrafted } from './people';
 import { makeKitGeometry } from './gfx';
 import { makeWorldMaterial, type WorldTextures } from './worldmat';
 import { PAL } from './palette';
@@ -44,12 +45,16 @@ function giantMesh(): THREE.BufferGeometry {
   return makeKitGeometry(b.build());
 }
 type CowPart = 'body' | 'head' | 'leg';
+const cowKits = new Map<string, KitMesh>();
+export async function preloadCow(): Promise<void> { await loadCrafted(['cow_body', 'cow_head', 'cow_leg'], cowKits); }
 function cowMesh(p: CowPart): THREE.BufferGeometry {
+  const kit = cowKits.get('cow_' + p);
+  if (kit) return craftedGeometry(kit);   // Blender-made (tools/blender/people.py); the code below is the fallback
   const b = new MeshBuilder(), rng = stream(9, 'cow' + p), W = PAL.white;
   if (p === 'body') { b.set(W, 0, 0); b.push().translate(0, 0, 0); b.blob(rng, 0.36, 0.34, 0.78, 0, 0.06); b.pop(); b.set(W, 0, 1); b.push().translate(0.08, 0.12, 0.2); b.blob(rng, 0.3, 0.2, 0.3, 0, 0.1); b.pop(); b.set(W, 0, 0); b.limb([0, 0.1, -0.72], [0, -0.45, -0.84], 0.035, 0.03, 4, true); }
   else if (p === 'head') { b.set(W, 0, 0); b.push().translate(0, 0, 0.16); b.box(0.26, 0.26, 0.4, 0.05); b.pop(); b.set(W, 0, 1); b.push().translate(0, 0.02, 0.36); b.box(0.2, 0.16, 0.14, 0.03); b.pop(); b.set(W, 0, 0); for (const s of [-1, 1]) { b.push().translate(s * 0.17, 0.2, 0.06).rotZ(s * -1.2); b.frustum(3, 0.06, 0.02, 0.16, false); b.pop(); } b.set(PAL.black, 0, 2); for (const s of [-1, 1]) { b.push().translate(s * 0.132, 0.14, 0.26); b.box(0.02, 0.04, 0.04); b.pop(); } }
   else { b.set(W, 0, 0); b.push().rotX(Math.PI); b.frustum(5, 0.085, 0.06, 0.62, true, true); b.pop(); b.set(PAL.black, 0, 2); b.push().translate(0, -0.68, 0); b.box(0.13, 0.07, 0.14); b.pop(); }
-  return makeKitGeometry(b.build());
+  return plainShade(makeKitGeometry(b.build()));
 }
 
 export interface Beast { pos: THREE.Vector3; yaw: number; scale: number; a: THREE.Color; b: THREE.Color; graze: number; walk: number; visible: boolean; }
@@ -76,7 +81,7 @@ export class Animals {
       const c1 = new THREE.InstancedBufferAttribute(new Float32Array(MAXC * 3).fill(1), 3), c2 = new THREE.InstancedBufferAttribute(new Float32Array(MAXC * 3).fill(1), 3);
       geo.setAttribute('tint1', c1); geo.setAttribute('tint2', c2);
       const aux = t.attribute('dat', 'vec3').z;
-      mat.colorNode = (mat.colorNode as any).mul(t.mix(t.mix(t.attribute('tint1', 'vec3'), t.attribute('tint2', 'vec3'), t.step(0.5, aux)), t.vec3(1.0), t.step(1.5, aux)));
+      mat.colorNode = (mat.colorNode as any).mul(t.mix(t.mix(t.attribute('tint1', 'vec3'), t.attribute('tint2', 'vec3'), t.step(0.5, aux)), t.vec3(1.0), t.step(1.5, aux))).mul(t.attribute('shade', 'vec3'));
       const mesh = new THREE.InstancedMesh(geo, mat, MAXC); mesh.frustumCulled = false; mesh.castShadow = true; mesh.receiveShadow = true; mesh.count = 0; mesh.name = 'cow_' + p;
       this.cow.set(p, { mesh, c1, c2 }); this.group.add(mesh);
     }
