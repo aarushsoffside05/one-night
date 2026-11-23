@@ -12,13 +12,15 @@ import { U } from './uniforms';
 const t: any = T;
 
 export const P = {
-  bloomStrength: t.uniform(0.38),
-  saturation: t.uniform(1.03),
-  contrast: t.uniform(1.06),
+  bloomStrength: t.uniform(0.7),
+  saturation: t.uniform(1.12),
+  contrast: t.uniform(1.16),
   lift: t.uniform(new THREE.Color(0, 0, 0)),
   tint: t.uniform(new THREE.Color(1, 1, 1)),
-  vignette: t.uniform(0.22),
-  rays: t.uniform(0.5),
+  vignette: t.uniform(0.3),
+  shadeTint: t.uniform(new THREE.Color(0.78, 0.9, 1.18)),
+  lightTint: t.uniform(new THREE.Color(1.04, 1.01, 0.94)),
+  rays: t.uniform(1.1),
   ao: t.uniform(1.0),
 };
 
@@ -31,6 +33,9 @@ function grade(c: any) {
   const l = col.dot(t.vec3(0.2126, 0.7152, 0.0722));
   col = t.mix(t.vec3(l), col, P.saturation);
   col = col.sub(0.18).mul(P.contrast).add(0.18).max(0.0).add(P.lift);
+  // split tone: cool violet-teal in the shade, warm gold in the light
+  const lum2 = col.dot(t.vec3(0.2126, 0.7152, 0.0722));
+  col = col.mul(t.mix(P.shadeTint, P.lightTint, t.smoothstep(0.03, 0.55, lum2)));
   const uv = t.screenUV.sub(0.5);
   const vig = t.float(1.0).sub(uv.dot(uv).mul(P.vignette).mul(2.2));
   return col.mul(vig).mul(U.fade);
@@ -41,7 +46,7 @@ export function makePost(renderer: THREE.WebGPURenderer, scene: THREE.Scene, cam
     const pipe = new THREE.RenderPipeline(renderer);
     const sp = t.pass(scene, camera, { samples: 0 });
     const col = sp.getTextureNode('output');
-    const bl = bloom(col, 1, 0.6, 0.85);
+    const bl = bloom(col, 1, 0.7, 0.72);
     // soft contact shade where things meet (half resolution), tinted cool so shade is never dead black
     let base = col.rgb;
     if (rays) { const aoPass: any = ao(sp.getTextureNode('depth'), null as any, camera as any); aoPass.resolutionScale = 0.5; aoPass.radius.value = 0.9; aoPass.thickness.value = 1.2; const occ = aoPass.getTextureNode().r; base = base.mul(t.mix(t.vec3(0.36, 0.34, 0.5), t.vec3(1.0), occ.pow(P.ao.mul(1.6)))); }
@@ -49,7 +54,7 @@ export function makePost(renderer: THREE.WebGPURenderer, scene: THREE.Scene, cam
     if (rays) {
       // light shafts: the sun's shadow map marched at half resolution
       const gr: any = godrays(sp.getTextureNode('depth'), camera as any, sun as any);
-      gr.raymarchSteps.value = 28; gr.density.value = 0.55; gr.maxDensity.value = 0.6; gr.distanceAttenuation.value = 1.2;
+      gr.raymarchSteps.value = 28; gr.density.value = 0.8; gr.maxDensity.value = 0.75; gr.distanceAttenuation.value = 1.2;
       lit = lit.add(U.fogSunCol.mul(gr.getTextureNode().r).mul(P.rays));
     }
     (pipe as any).outputColorTransform = false;

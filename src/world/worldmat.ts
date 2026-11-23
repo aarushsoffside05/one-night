@@ -100,7 +100,13 @@ export function makeWorldMaterial(tx: WorldTextures, opts: WorldMatOpts = {}): T
   })();
 
   // leaves let a little sun through: a soft lift on anything that sways
-  m.emissiveNode = sw.rgb.mul(sw.a).mul(U.glow).add(sw.rgb.mul(U.sunCol).mul(opts.rgb ? 0.0 : wnd.min(1.0).mul(0.16)));
+  // rim light: edges turned away from the eye catch the sky; leaves let the sun through
+  const vdir = t.cameraPosition.sub(wp).normalize();
+  const rim = t.float(1.0).sub(t.normalWorld.dot(vdir).abs()).pow(3.0);
+  const toSunV = vdir.negate().dot(U.sunDir).max(0.0);
+  m.emissiveNode = sw.rgb.mul(sw.a).mul(U.glow)
+    .add(sw.rgb.mul(U.sunCol).mul(opts.rgb ? 0.0 : wnd.min(1.0).mul(t.float(0.2).add(toSunV.pow(2.0).mul(0.55)))))
+    .add(t.mix(U.skyHorizon, U.sunCol, toSunV.pow(3.0)).mul(rim).mul(U.rim));
 
   // soft sky shade: a baked "how open is it here" map, fading out above the canopy
   const open = t.max(openAt(tx, wp.xz), t.smoothstep(9.0, 20.0, wp.y.sub(L.FOREST_FLOOR)));

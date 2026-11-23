@@ -58,7 +58,7 @@ export class Particles {
       const y = moteY.mul(isMote).add(flyY.mul(isFly)).add(mistY.mul(isMist)).add(rainY.mul(isRain));
       const blink = t.sin(U.time.mul(1.6).add(d.mul(60.0))).mul(0.5).add(0.5).pow(3.0);
       const onWater = t.step(gh, wy.sub(0.05));
-      let size = t.float(0.035).mul(isMote).mul(day.mul(0.85).add(0.15))
+      let size = t.float(0.055).mul(isMote).mul(day.mul(0.85).add(0.15))
         .add(t.float(0.07).mul(isFly).mul(U.night).mul(blink.mul(0.8).add(0.2)))
         .add(t.float(1.6).mul(isMist).mul(this.mist).mul(onWater))
         .add(t.float(0.03).mul(isRain).mul(this.rain));
@@ -68,7 +68,7 @@ export class Particles {
       const minSize = dist.mul(this.pixel).mul(1.2);
       const grow = t.max(size, minSize);
       const dim = t.select(size.greaterThan(0.0001), size.div(grow).pow(2.0), 0.0);   // grow and dim, never shimmer
-      const col = U.fogSunCol.mul(0.9).mul(isMote).add(t.vec3(0.85, 1.0, 0.35).mul(3.0).mul(isFly)).add(U.fogCol.mul(0.11).mul(isMist)).add(U.skyHorizon.mul(0.5).mul(isRain));
+      const col = U.fogSunCol.mul(2.2).mul(isMote).add(t.vec3(0.85, 1.0, 0.35).mul(3.0).mul(isFly)).add(U.fogCol.mul(0.11).mul(isMist)).add(U.skyHorizon.mul(0.5).mul(isRain));
       return { a: t.vec4(p, t.select(size.greaterThan(0.0001), grow, 0.0)), b: t.vec4(col.mul(dim), isRain) };
     };
     // ---- leaves ----

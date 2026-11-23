@@ -31,6 +31,7 @@ export const U = {
   seeing: uniform(0),                 // device "Seeing" overlay strength
   fade: uniform(1),
   sat: uniform(1),
+  rim: uniform(0.22),
   tintAmt: uniform(0),
   tintCol: uniform(new THREE.Color(1, 1, 1)),
 };
