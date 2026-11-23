@@ -1,0 +1,48 @@
+name: pages-junior
+on:
+  push:
+    branches: [claude/laughing-tesla-fgo0d4]
+concurrency:
+  group: pages-junior
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:all
+      - name: Publish to gh-pages/junior (only that folder)
+        env:
+          REPO: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+        run: |
+          set -e
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for try in 1 2 3 4 5; do
+            rm -rf /tmp/pages
+            if git clone --depth 1 --branch gh-pages "$REPO" /tmp/pages 2>/dev/null; then
+              echo "cloned gh-pages"
+            else
+              mkdir -p /tmp/pages && cd /tmp/pages && git init -q && git checkout -q --orphan gh-pages && git remote add origin "$REPO" && touch .nojekyll && cd -
+            fi
+            rm -rf /tmp/pages/junior
+            mkdir -p /tmp/pages/junior
+            cp -r dist/. /tmp/pages/junior/
+            cp single/one-night-junior.html /tmp/pages/junior/one-night-junior.html
+            touch /tmp/pages/.nojekyll
+            cd /tmp/pages
+            git add -A junior .nojekyll
+            if git diff --cached --quiet; then echo "nothing to publish"; exit 0; fi
+            git commit -q -m "junior: publish ${GITHUB_SHA::7}"
+            if git push origin gh-pages; then echo "published"; exit 0; fi
+            cd -
+            echo "push refused, retry $try"; sleep $((try * 3))
+          done
+          echo "could not publish after 5 tries"; exit 1
